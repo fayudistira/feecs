@@ -27,15 +27,19 @@ app/
 │   │       └── apply_success.php
 │   ├── Dashboard/
 │   │   ├── Config/
-│   │   │   └── Routes.php
+│   │   │   ├── Routes.php
+│   │   │   └── Menu.php
 │   │   ├── Controllers/
 │   │   │   └── DashboardController.php
+│   │   ├── Helpers/
+│   │   │   └── menu_helper.php
 │   │   └── Views/
 │   │       ├── layout.php
 │   │       └── index.php
 │   └── Admission/
 │       ├── Config/
-│       │   └── Routes.php
+│       │   ├── Routes.php
+│       │   └── Menu.php
 │       ├── Controllers/
 │       │   ├── AdmissionController.php
 │       │   └── Api/
@@ -267,35 +271,147 @@ class DashboardController extends BaseController
     {
         $user = auth()->user();
         
-        // Get available modules based on Shield permissions
-        $availableModules = $this->getAvailableModules($user);
+        // Get menu items from all modules
+        $menuItems = $this->loadModuleMenus();
         
         return view('Modules\Dashboard\Views\index', [
             'user' => $user,
-            'modules' => $availableModules
+            'menuItems' => $menuItems
         ]);
     }
     
-    private function getAvailableModules($user): array
+    /**
+     * Load and filter menu items from all modules
+     */
+    private function loadModuleMenus(): array
     {
-        $modules = [];
+        $menuItems = [];
+        $modulesPath = APPPATH . 'Modules/';
         
-        // Check permissions using Shield's built-in can() method
-        if ($user->can('admission.manage')) {
-            $modules[] = [
-                'name' => 'Admission',
-                'url' => '/admission',
-                'icon' => 'users',
-                'description' => 'Manage student admissions'
-            ];
+        if (!is_dir($modulesPath)) {
+            return $menuItems;
         }
         
-        // Add more modules based on permissions
-        // Example: if ($user->can('courses.manage')) { ... }
+        foreach (scandir($modulesPath) as $module) {
+            if ($module === '.' || $module === '..') {
+                continue;
+            }
+            
+            $menuFile = $modulesPath . $module . '/Config/Menu.php';
+            
+            if (file_exists($menuFile)) {
+                $menuConfig = include $menuFile;
+                
+                if (is_array($menuConfig)) {
+                    foreach ($menuConfig as $item) {
+                        // Check if user has required permission
+                        if ($this->hasMenuPermission($item)) {
+                            $menuItems[] = $item;
+                        }
+                    }
+                }
+            }
+        }
         
-        return $modules;
+        // Sort by order
+        usort($menuItems, function($a, $b) {
+            return ($a['order'] ?? 999) <=> ($b['order'] ?? 999);
+        });
+        
+        return $menuItems;
+    }
+    
+    /**
+     * Check if user has permission for menu item
+     */
+    private function hasMenuPermission(array $item): bool
+    {
+        $user = auth()->user();
+        
+        // If no permission required, show to all authenticated users
+        if (empty($item['permission'])) {
+            return true;
+        }
+        
+        // Check single permission
+        if (is_string($item['permission'])) {
+            return $user->can($item['permission']);
+        }
+        
+        // Check multiple permissions (any)
+        if (is_array($item['permission'])) {
+            foreach ($item['permission'] as $permission) {
+                if ($user->can($permission)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
+```
+
+#### Helpers
+- `menu_helper.php`: Helper functions for menu rendering
+
+```php
+if (!function_exists('render_menu')) {
+    /**
+     * Render menu items as HTML
+     */
+    function render_menu(array $menuItems, string $currentUrl = ''): string
+    {
+        if (empty($menuItems)) {
+            return '';
+        }
+        
+        $html = '<ul class="nav flex-column">';
+        
+        foreach ($menuItems as $item) {
+            $active = ($currentUrl === $item['url']) ? 'active' : '';
+            $icon = $item['icon'] ?? 'circle';
+            
+            $html .= '<li class="nav-item">';
+            $html .= '<a class="nav-link ' . $active . '" href="' . base_url($item['url']) . '">';
+            $html .= '<i class="icon-' . esc($icon) . '"></i> ';
+            $html .= esc($item['title']);
+            $html .= '</a>';
+            $html .= '</li>';
+        }
+        
+        $html .= '</ul>';
+        
+        return $html;
+    }
+}
+
+if (!function_exists('is_active_menu')) {
+    /**
+     * Check if menu item is active
+     */
+    function is_active_menu(string $menuUrl): bool
+    {
+        $currentUrl = uri_string();
+        return str_starts_with($currentUrl, trim($menuUrl, '/'));
+    }
+}
+```
+
+#### Menu Configuration
+Each module provides a `Config/Menu.php` file:
+
+```php
+// Modules/Dashboard/Config/Menu.php
+return [
+    [
+        'title' => 'Dashboard',
+        'url' => 'dashboard',
+        'icon' => 'home',
+        'permission' => 'dashboard.access',
+        'order' => 1
+    ]
+];
 ```
 
 #### Routes
@@ -762,6 +878,27 @@ $routes->group('admission', ['filter' => 'permission:admission.manage'], functio
 - **Admission Module**: Staff management interface (`/admission`) - staff review, edit, approve/reject applications
 - **API Module**: RESTful API (`/api/admissions`) - programmatic access for mobile apps and external systems
 - All use the same `AdmissionModel` but serve different purposes
+
+#### Menu Configuration
+```php
+// Modules/Admission/Config/Menu.php
+return [
+    [
+        'title' => 'Admissions',
+        'url' => 'admission',
+        'icon' => 'users',
+        'permission' => 'admission.manage',
+        'order' => 10
+    ]
+];
+```
+
+**Menu Item Structure**:
+- `title`: Display name in sidebar
+- `url`: Route path (without leading slash)
+- `icon`: Icon identifier (for icon library)
+- `permission`: Required permission (string or array)
+- `order`: Sort order (lower numbers appear first)
 
 ### 2.4 API Module (Admission API)
 
@@ -1556,7 +1693,8 @@ php spark make:module Student
 ```
 app/Modules/Student/
 ├── Config/
-│   └── Routes.php
+│   ├── Routes.php
+│   └── Menu.php
 ├── Controllers/
 │   └── StudentController.php
 ├── Models/
@@ -1571,6 +1709,21 @@ app/Modules/Student/
 └── Database/
     ├── Migrations/
     └── Seeds/
+```
+
+**Menu.php Template**:
+```php
+<?php
+// Modules/Student/Config/Menu.php
+return [
+    [
+        'title' => 'Students',
+        'url' => 'student',
+        'icon' => 'users',
+        'permission' => 'student.manage', // or null for no permission required
+        'order' => 10
+    ]
+];
 ```
 
 **Auto-Registration**:

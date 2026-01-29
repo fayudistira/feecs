@@ -7,6 +7,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+service('auth')->routes($routes);
+
 //Auto-Load Modules' Routes
 $modulesPath = APPPATH . 'Modules/';
 if (is_dir($modulesPath)) {

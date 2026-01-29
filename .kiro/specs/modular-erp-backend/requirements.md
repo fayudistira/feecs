@@ -69,9 +69,13 @@ I want to access a dashboard that shows only the features I'm authorized to see 
 
 **Acceptance Criteria:**
 - Dashboard module requires authentication
-- Dashboard displays menu items filtered by user's auth_group or permissions
+- Dashboard displays a sidebar menu with module links filtered by user's auth_group or permissions
+- Each module can register its own menu items with required permissions
+- Menu items are automatically shown/hidden based on user permissions
 - Unauthorized users cannot access restricted dashboard features
 - Dashboard shows user information and available modules
+- Active menu item is highlighted
+- Menu structure supports nested items (optional)
 
 ### 2.5 As a mobile/external application developer
 I want to access admission data through RESTful API endpoints so that I can integrate with mobile apps or external systems.
@@ -118,13 +122,17 @@ Each module must follow this structure:
 ```
 app/Modules/{ModuleName}/
 ├── Config/
-│   └── Routes.php
+│   ├── Routes.php
+│   └── Menu.php (optional - for dashboard menu registration)
 ├── Controllers/
 ├── Models/
 └── Views/
 ```
 
 **Note:** Migrations are centralized in `app/Database/Migrations/`, not within individual modules.
+
+**Menu Registration:**
+Each module can optionally provide a `Menu.php` config file to register menu items in the dashboard sidebar. Menu items are automatically filtered based on user permissions.
 
 ### 3.2 Authentication & Authorization
 - Use CodeIgniter Shield for authentication
