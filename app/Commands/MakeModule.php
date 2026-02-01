@@ -73,6 +73,13 @@ class MakeModule extends BaseCommand
             $this->routes($lower, $uc, $controller, $withCrud)
         );
 
+        /* ================= MENU ================= */
+
+        file_put_contents(
+            "{$basePath}/Config/Menu.php",
+            $this->menu($uc, $lower)
+        );
+
         /* ================= CONTROLLER ================= */
 
         file_put_contents(
@@ -146,6 +153,32 @@ PHP;
         }
 
         return $code . "\n});";
+    }
+
+    /* =====================================================
+     * MENU
+     * =================================================== */
+
+    private function menu(string $uc, string $lower): string
+    {
+        return <<<PHP
+<?php
+
+/**
+ * Menu configuration for {$uc} module
+ * This file registers menu items that will appear in the dashboard sidebar
+ */
+
+return [
+    [
+        'title' => '{$uc}',
+        'url' => '{$lower}',
+        'icon' => 'circle',
+        'permission' => null, // Set permission if needed (e.g., '{$lower}.manage')
+        'order' => 10
+    ]
+];
+PHP;
     }
 
     /* =====================================================

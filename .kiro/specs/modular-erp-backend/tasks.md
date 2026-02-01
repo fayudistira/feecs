@@ -1,29 +1,29 @@
 # Tasks: Modular ERP Backend
 
 ## 1. Database Setup
-- [ ] 1.1 Create admissions table migration
-- [ ] 1.2 Run migrations
-- [ ] 1.3 Create upload directories (writable/uploads/admissions/photos and documents)
-- [ ] 1.4 Update MakeModule command to generate Menu.php config file
+- [x] 1.1 Create admissions table migration
+- [x] 1.2 Run migrations
+- [x] 1.3 Create upload directories (writable/uploads/admissions/photos and documents)
+- [x] 1.4 Update MakeModule command to generate Menu.php config file
 
 ## 2. Frontend Module
-- [ ] 2.1 Create Frontend module structure using make:module command
-- [ ] 2.2 Create PageController
-  - [ ] 2.2.1 Implement home() method
-  - [ ] 2.2.2 Implement about() method
-  - [ ] 2.2.3 Implement contact() method
-  - [ ] 2.2.4 Implement apply() method
-  - [ ] 2.2.5 Implement submitApplication() method with file upload handling
-  - [ ] 2.2.6 Implement applySuccess() method
-- [ ] 2.3 Create Frontend views
-  - [ ] 2.3.1 Create layout.php (shared layout)
-  - [ ] 2.3.2 Create home.php
-  - [ ] 2.3.3 Create about.php
-  - [ ] 2.3.4 Create contact.php
-  - [ ] 2.3.5 Create apply.php (admission form with all fields and file uploads)
-  - [ ] 2.3.6 Create apply_success.php (show registration number)
-- [ ] 2.4 Configure Frontend routes
-- [ ] 2.5 Test Frontend module functionality
+- [x] 2.1 Create Frontend module structure using make:module command
+- [x] 2.2 Create PageController
+  - [x] 2.2.1 Implement home() method
+  - [x] 2.2.2 Implement about() method
+  - [x] 2.2.3 Implement contact() method
+  - [x] 2.2.4 Implement apply() method
+  - [x] 2.2.5 Implement submitApplication() method with file upload handling
+  - [x] 2.2.6 Implement applySuccess() method
+- [x] 2.3 Create Frontend views
+  - [x] 2.3.1 Create layout.php (shared layout)
+  - [x] 2.3.2 Create home.php
+  - [x] 2.3.3 Create about.php
+  - [x] 2.3.4 Create contact.php
+  - [x] 2.3.5 Create apply.php (admission form with all fields and file uploads)
+  - [x] 2.3.6 Create apply_success.php (show registration number)
+- [x] 2.4 Configure Frontend routes
+- [x] 2.5 Test Frontend module functionality
 
 ## 3. Dashboard Module
 - [ ] 3.1 Create Dashboard module structure using make:module command
