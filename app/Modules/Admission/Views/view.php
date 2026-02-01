@@ -1,221 +1,253 @@
 <?= $this->extend('Modules\Dashboard\Views\layout') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col">
-            <a href="<?= base_url('admission') ?>" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Back to List
-            </a>
-            <a href="<?= base_url('admission/edit/' . $admission['id']) ?>" class="btn btn-warning">
-                <i class="bi bi-pencil"></i> Edit
-            </a>
-        </div>
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col">
+        <h4 class="fw-bold">Admission Details</h4>
+        <p class="text-muted mb-0">View complete admission application information</p>
     </div>
+    <div class="col-auto">
+        <a href="<?= base_url('admission') ?>" class="btn btn-outline-dark-red">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a href="<?= base_url('admission/edit/' . $admission['id']) ?>" class="btn btn-dark-red">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+    </div>
+</div>
 
-    <div class="row">
+<div class="row g-3">
+    <!-- Main Information Column -->
+    <div class="col-lg-8">
         <!-- Personal Information -->
-        <div class="col-md-8">
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Personal Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Registration Number:</strong><br>
-                            <span class="badge bg-primary fs-6"><?= esc($admission['registration_number']) ?></span>
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i>Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded" style="background-color: var(--light-red);">
+                            <div class="stat-label">Registration Number</div>
+                            <div class="stat-number fs-5"><?= esc($admission['registration_number']) ?></div>
                         </div>
-                        <div class="col-md-6">
-                            <strong>Status:</strong><br>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded" style="background-color: var(--light-red);">
+                            <div class="stat-label">Status</div>
                             <?php
                             $badgeClass = match($admission['status']) {
-                                'pending' => 'bg-warning',
-                                'approved' => 'bg-success',
-                                'rejected' => 'bg-danger',
-                                default => 'bg-secondary'
+                                'pending' => 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25',
+                                'approved' => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25',
+                                'rejected' => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
+                                default => 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25'
                             };
                             ?>
                             <span class="badge <?= $badgeClass ?> fs-6"><?= ucfirst($admission['status']) ?></span>
                         </div>
                     </div>
-                    <hr>
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Full Name:</strong><br>
-                            <?= esc($admission['full_name']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Nickname:</strong><br>
-                            <?= esc($admission['nickname'] ?? '-') ?>
-                        </div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="stat-label">Full Name</label>
+                        <div class="fw-medium"><?= esc($admission['full_name']) ?></div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Gender:</strong><br>
-                            <?= esc($admission['gender']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Date of Birth:</strong><br>
-                            <?= date('M d, Y', strtotime($admission['date_of_birth'])) ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Nickname</label>
+                        <div class="fw-medium"><?= esc($admission['nickname'] ?? '-') ?></div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Place of Birth:</strong><br>
-                            <?= esc($admission['place_of_birth']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Religion:</strong><br>
-                            <?= esc($admission['religion']) ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Gender</label>
+                        <div class="fw-medium"><?= esc($admission['gender']) ?></div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Citizen ID:</strong><br>
-                            <?= esc($admission['citizen_id'] ?? '-') ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Date of Birth</label>
+                        <div class="fw-medium"><?= date('M d, Y', strtotime($admission['date_of_birth'])) ?></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Contact Information -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Contact Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <strong>Phone:</strong><br>
-                            <?= esc($admission['phone']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Email:</strong><br>
-                            <?= esc($admission['email']) ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Place of Birth</label>
+                        <div class="fw-medium"><?= esc($admission['place_of_birth']) ?></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Address -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Address</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Street Address:</strong><br><?= esc($admission['street_address']) ?></p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>District:</strong> <?= esc($admission['district']) ?><br>
-                            <strong>Regency/City:</strong> <?= esc($admission['regency']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Province:</strong> <?= esc($admission['province']) ?><br>
-                            <strong>Postal Code:</strong> <?= esc($admission['postal_code'] ?? '-') ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Religion</label>
+                        <div class="fw-medium"><?= esc($admission['religion']) ?></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Emergency Contact -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Emergency Contact</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <strong>Name:</strong><br>
-                            <?= esc($admission['emergency_contact_name']) ?>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Phone:</strong><br>
-                            <?= esc($admission['emergency_contact_phone']) ?>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Relationship:</strong><br>
-                            <?= esc($admission['emergency_contact_relation']) ?>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Citizen ID</label>
+                        <div class="fw-medium"><?= esc($admission['citizen_id'] ?? '-') ?></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Family Information -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Family Information</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>Father's Name:</strong><br>
-                            <?= esc($admission['father_name']) ?>
-                        </div>
-                        <div class="col-md-6">
-                            <strong>Mother's Name:</strong><br>
-                            <?= esc($admission['mother_name']) ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Course & Notes -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Course & Additional Information</h5>
-                </div>
-                <div class="card-body">
-                    <p><strong>Desired Course:</strong><br><?= esc($admission['course']) ?></p>
-                    <p><strong>Application Date:</strong><br><?= date('M d, Y', strtotime($admission['application_date'])) ?></p>
-                    <?php if (!empty($admission['notes'])): ?>
-                        <p><strong>Additional Notes:</strong><br><?= nl2br(esc($admission['notes'])) ?></p>
-                    <?php endif ?>
                 </div>
             </div>
         </div>
 
-        <!-- Photo and Documents -->
-        <div class="col-md-4">
-            <!-- Profile Photo -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Profile Photo</h5>
-                </div>
-                <div class="card-body text-center">
-                    <?php if (!empty($admission['photo'])): ?>
-                        <img src="<?= base_url('writable/uploads/admissions/photos/' . $admission['photo']) ?>" 
-                             alt="Profile Photo" 
-                             class="img-fluid rounded"
-                             style="max-height: 300px;">
-                    <?php else: ?>
-                        <p class="text-muted">No photo uploaded</p>
-                    <?php endif ?>
+        <!-- Contact Information -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-telephone me-2"></i>Contact Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="stat-label">Phone</label>
+                        <div class="fw-medium"><?= esc($admission['phone']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Email</label>
+                        <div class="fw-medium"><?= esc($admission['email']) ?></div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Supporting Documents -->
-            <div class="card mb-3">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Supporting Documents</h5>
+        <!-- Address -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-geo-alt me-2"></i>Address
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="stat-label">Street Address</label>
+                    <div class="fw-medium"><?= esc($admission['street_address']) ?></div>
                 </div>
-                <div class="card-body">
-                    <?php if (!empty($admission['documents'])): ?>
-                        <ul class="list-group">
-                            <?php foreach ($admission['documents'] as $index => $doc): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="stat-label">District</label>
+                        <div class="fw-medium"><?= esc($admission['district']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Regency/City</label>
+                        <div class="fw-medium"><?= esc($admission['regency']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Province</label>
+                        <div class="fw-medium"><?= esc($admission['province']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Postal Code</label>
+                        <div class="fw-medium"><?= esc($admission['postal_code'] ?? '-') ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-exclamation-triangle me-2"></i>Emergency Contact
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="stat-label">Name</label>
+                        <div class="fw-medium"><?= esc($admission['emergency_contact_name']) ?></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="stat-label">Phone</label>
+                        <div class="fw-medium"><?= esc($admission['emergency_contact_phone']) ?></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="stat-label">Relationship</label>
+                        <div class="fw-medium"><?= esc($admission['emergency_contact_relation']) ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Family Information -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-people me-2"></i>Family Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="stat-label">Father's Name</label>
+                        <div class="fw-medium"><?= esc($admission['father_name']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Mother's Name</label>
+                        <div class="fw-medium"><?= esc($admission['mother_name']) ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course & Notes -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-mortarboard me-2"></i>Course & Additional Information
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="stat-label">Desired Course</label>
+                        <div class="fw-medium"><?= esc($admission['course']) ?></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="stat-label">Application Date</label>
+                        <div class="fw-medium"><?= date('M d, Y', strtotime($admission['application_date'])) ?></div>
+                    </div>
+                </div>
+                <?php if (!empty($admission['notes'])): ?>
+                    <div class="mt-3">
+                        <label class="stat-label">Additional Notes</label>
+                        <div class="fw-medium"><?= nl2br(esc($admission['notes'])) ?></div>
+                    </div>
+                <?php endif ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Profile Photo -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-image me-2"></i>Profile Photo
+            </div>
+            <div class="card-body text-center">
+                <?php if (!empty($admission['photo'])): ?>
+                    <img src="<?= base_url('writable/uploads/admissions/photos/' . $admission['photo']) ?>" 
+                         alt="Profile Photo" 
+                         class="img-fluid rounded"
+                         style="max-height: 300px; border: 2px solid var(--border-color);">
+                <?php else: ?>
+                    <div class="p-5 border rounded" style="background-color: var(--light-red);">
+                        <i class="bi bi-person-circle" style="font-size: 4rem; color: var(--dark-red);"></i>
+                        <p class="text-muted mt-2 mb-0">No photo uploaded</p>
+                    </div>
+                <?php endif ?>
+            </div>
+        </div>
+
+        <!-- Supporting Documents -->
+        <div class="dashboard-card mb-3">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-text me-2"></i>Supporting Documents
+            </div>
+            <div class="card-body">
+                <?php if (!empty($admission['documents'])): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($admission['documents'] as $index => $doc): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <span class="fs-sm">
+                                    <i class="bi bi-file-pdf text-danger me-2"></i>
                                     Document <?= $index + 1 ?>
-                                    <a href="<?= base_url('admission/download/' . $admission['id'] . '/' . $doc) ?>" 
-                                       class="btn btn-sm btn-primary">
-                                        <i class="bi bi-download"></i> Download
-                                    </a>
-                                </li>
-                            <?php endforeach ?>
-                        </ul>
-                    <?php else: ?>
-                        <p class="text-muted">No documents uploaded</p>
-                    <?php endif ?>
-                </div>
+                                </span>
+                                <a href="<?= base_url('admission/download/' . $admission['id'] . '/' . $doc) ?>" 
+                                   class="btn btn-outline-dark-red btn-sm">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </div>
+                        <?php endforeach ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center p-4" style="background-color: var(--light-red); border-radius: 8px;">
+                        <i class="bi bi-file-earmark-x" style="font-size: 2rem; color: var(--dark-red);"></i>
+                        <p class="text-muted mt-2 mb-0 fs-sm">No documents uploaded</p>
+                    </div>
+                <?php endif ?>
             </div>
         </div>
     </div>

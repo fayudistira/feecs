@@ -1,43 +1,61 @@
 <?= $this->extend('Modules\Frontend\Views\layout') ?>
 
 <?= $this->section('content') ?>
+<!-- Success Section -->
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card text-center">
-                <div class="card-body py-5">
+        <div class="col-lg-8">
+            <div class="card-custom card text-center">
+                <div class="card-body p-5">
                     <div class="mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-check-circle text-success" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
-                        </svg>
+                        <div class="feature-icon mx-auto" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
                     </div>
                     
-                    <h1 class="text-success mb-3">Application Submitted Successfully!</h1>
+                    <h1 class="fw-bold mb-3" style="color: var(--dark-red);">Application Submitted Successfully!</h1>
+                    <p class="lead text-muted mb-4">Thank you for applying to our institution. Your application has been received and is being processed.</p>
                     
-                    <?php if (session('success')): ?>
-                        <div class="alert alert-success">
-                            <?= session('success') ?>
+                    <?php if (isset($registrationNumber)): ?>
+                        <div class="alert alert-info mb-4">
+                            <h5 class="mb-2"><i class="bi bi-info-circle me-2"></i>Your Registration Number</h5>
+                            <h3 class="fw-bold mb-0" style="color: var(--dark-red);"><?= esc($registrationNumber) ?></h3>
+                            <p class="mb-0 mt-2"><small>Please save this number for future reference</small></p>
                         </div>
                     <?php endif ?>
                     
-                    <?php if (session('registration_number')): ?>
-                        <div class="card bg-light mb-4">
-                            <div class="card-body">
-                                <h4>Your Registration Number</h4>
-                                <h2 class="text-primary fw-bold"><?= esc(session('registration_number')) ?></h2>
-                                <p class="text-muted mb-0">Please save this number for future reference</p>
-                            </div>
+                    <div class="card-custom card mb-4">
+                        <div class="card-body text-start">
+                            <h5 class="fw-bold mb-3" style="color: var(--dark-red);"><i class="bi bi-list-check me-2"></i>What Happens Next?</h5>
+                            <ol class="mb-0">
+                                <li class="mb-2">Our admissions team will review your application within 3-5 business days.</li>
+                                <li class="mb-2">You will receive an email notification regarding the status of your application.</li>
+                                <li class="mb-2">If approved, you will receive further instructions for enrollment.</li>
+                                <li>For any questions, please contact our admissions office.</li>
+                            </ol>
                         </div>
-                    <?php endif ?>
+                    </div>
                     
-                    <p class="lead">Thank you for applying to our institution. We have received your application and will review it shortly.</p>
-                    <p>You will receive an email confirmation at the address you provided. Our admissions team will contact you regarding the next steps in the admission process.</p>
-                    
-                    <div class="mt-4">
-                        <a href="<?= base_url('/') ?>" class="btn btn-primary">Return to Home</a>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="<?= base_url('/') ?>" class="btn btn-dark-red btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="<?= base_url('contact') ?>" class="btn btn-outline-dark-red btn-lg w-100">
+                                <i class="bi bi-envelope me-2"></i>Contact Us
+                            </a>
+                        </div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Need help? Contact us at <a href="mailto:admissions@erpsystem.edu" style="color: var(--dark-red);">admissions@erpsystem.edu</a>
+                </p>
             </div>
         </div>
     </div>

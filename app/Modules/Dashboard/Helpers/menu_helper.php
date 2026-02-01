@@ -22,8 +22,8 @@ if (!function_exists('render_menu')) {
             
             $html .= '<li class="nav-item">';
             $html .= '<a class="nav-link ' . $active . '" href="' . base_url($item['url']) . '">';
-            $html .= '<i class="bi bi-' . esc($icon) . '"></i> ';
-            $html .= esc($item['title']);
+            $html .= '<i class="bi bi-' . esc($icon) . '"></i>';
+            $html .= '<span>' . esc($item['title']) . '</span>';
             $html .= '</a>';
             $html .= '</li>';
         }
