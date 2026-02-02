@@ -9,7 +9,14 @@ use CodeIgniter\Router\RouteCollection;
 // $routes->get('/', 'Home::index');
 
 // Register Shield routes except login and register (we'll override those)
-service('auth')->routes($routes, ['except' => ['login', 'register']]);
+// Wrap in try-catch to prevent errors if Shield service isn't ready
+try {
+    if (function_exists('service')) {
+        service('auth')->routes($routes, ['except' => ['login', 'register']]);
+    }
+} catch (\Throwable $e) {
+    // Shield routes will be loaded by auto-discovery instead
+}
 
 // Custom login and register routes with session handling
 $routes->get('login', '\App\Controllers\Auth\LoginController::loginView', ['as' => 'login']);
@@ -31,8 +38,8 @@ if (is_dir($modulesPath)) {
     }
 }
 
-// Route to serve uploaded files from writable/uploads (captures all nested paths)
-// IMPORTANT: This must be AFTER module routes to avoid being overridden
-$routes->get('writable/uploads/(:segment)/(:segment)/(:any)', 'FileController::serve/$1/$2/$3');
-$routes->get('writable/uploads/(:segment)/(:any)', 'FileController::serve/$1/$2');
-$routes->get('writable/uploads/(:any)', 'FileController::serve/$1');
+// Route to serve uploaded files - DISABLED (using junction/symlink instead for better performance)
+// Files are now accessible via public/uploads which is a junction to writable/uploads
+// $routes->get('writable/uploads/(:segment)/(:segment)/(:any)', 'FileController::serve/$1/$2/$3');
+// $routes->get('writable/uploads/(:segment)/(:any)', 'FileController::serve/$1/$2');
+// $routes->get('writable/uploads/(:any)', 'FileController::serve/$1');

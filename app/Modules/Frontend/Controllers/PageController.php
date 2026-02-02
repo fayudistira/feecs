@@ -37,14 +37,105 @@ class PageController extends BaseController
     
     public function apply(): string
     {
-        // Load programs for dropdown
-        $programModel = new \Modules\Program\Models\ProgramModel();
-        $programs = $programModel->getActivePrograms();
+        // Fetch programs from API
+        $programs = $this->fetchProgramsFromAPI();
         
         return view('Modules\Frontend\Views\apply', [
             'title' => 'Apply for Admission',
+            'programs' => $programs,
+            'selectedProgram' => null
+        ]);
+    }
+    
+    /**
+     * Display programs listing page
+     */
+    public function programs(): string
+    {
+        // Fetch active programs from API
+        $programs = $this->fetchProgramsFromAPI();
+        
+        return view('Modules\Frontend\Views\Programs\index', [
+            'title' => 'Our Programs',
             'programs' => $programs
         ]);
+    }
+    
+    /**
+     * Display program detail page
+     */
+    public function programDetail($id): string
+    {
+        // Fetch single program from API
+        $program = $this->fetchProgramFromAPI($id);
+        
+        if (!$program || $program['status'] !== 'active') {
+            return redirect()->to('/programs')
+                ->with('error', 'Program not found or not available.');
+        }
+        
+        // Calculate final price with discount
+        $finalPrice = $program['tuition_fee'] * (1 - $program['discount'] / 100);
+        
+        return view('Modules\Frontend\Views\Programs\detail', [
+            'title' => $program['title'],
+            'program' => $program,
+            'finalPrice' => $finalPrice
+        ]);
+    }
+    
+    /**
+     * Display apply form with pre-selected program
+     */
+    public function applyWithProgram($programId): string
+    {
+        // Fetch single program from API
+        $program = $this->fetchProgramFromAPI($programId);
+        
+        if (!$program || $program['status'] !== 'active') {
+            return redirect()->to('/programs')
+                ->with('error', 'Program not found or not available.');
+        }
+        
+        // Fetch all programs for dropdown
+        $programs = $this->fetchProgramsFromAPI();
+        
+        return view('Modules\Frontend\Views\apply', [
+            'title' => 'Apply for ' . $program['title'],
+            'programs' => $programs,
+            'selectedProgram' => $program
+        ]);
+    }
+    
+    /**
+     * Fetch programs from API (optimized - direct model access)
+     */
+    private function fetchProgramsFromAPI(): array
+    {
+        try {
+            // Direct model access instead of HTTP call for better performance
+            $programModel = new \Modules\Program\Models\ProgramModel();
+            return $programModel->getActivePrograms();
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to fetch programs: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Fetch single program from API (optimized - direct model access)
+     */
+    private function fetchProgramFromAPI($id): ?array
+    {
+        try {
+            // Direct model access instead of HTTP call for better performance
+            $programModel = new \Modules\Program\Models\ProgramModel();
+            $program = $programModel->find($id);
+            return $program ?: null;
+        } catch (\Exception $e) {
+            log_message('error', 'Failed to fetch program: ' . $e->getMessage());
+            return null;
+        }
     }
     
     public function submitApplication()

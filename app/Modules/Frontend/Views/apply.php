@@ -31,6 +31,37 @@
         </div>
     <?php endif ?>
     
+    <!-- Selected Program Banner -->
+    <?php if (isset($selectedProgram) && $selectedProgram): ?>
+        <div class="alert alert-info border-0 shadow-sm mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="alert-heading mb-2">
+                        <i class="bi bi-mortarboard me-2"></i>Applying for: <?= esc($selectedProgram['title']) ?>
+                    </h5>
+                    <p class="mb-0">
+                        <strong>Category:</strong> <?= esc($selectedProgram['category'] ?? 'N/A') ?> | 
+                        <strong>Tuition Fee:</strong> 
+                        <?php if ($selectedProgram['discount'] > 0): ?>
+                            <span class="text-decoration-line-through">Rp <?= number_format($selectedProgram['tuition_fee'], 0, ',', '.') ?></span>
+                            <span class="text-success fw-bold">
+                                Rp <?= number_format($selectedProgram['tuition_fee'] * (1 - $selectedProgram['discount'] / 100), 0, ',', '.') ?>
+                            </span>
+                            <span class="badge bg-success"><?= number_format($selectedProgram['discount'], 0) ?>% OFF</span>
+                        <?php else: ?>
+                            <span class="fw-bold">Rp <?= number_format($selectedProgram['tuition_fee'], 0, ',', '.') ?></span>
+                        <?php endif ?>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                    <a href="<?= base_url('programs/' . $selectedProgram['id']) ?>" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-info-circle me-1"></i>View Program Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
+    
     <form action="<?= base_url('apply/submit') ?>" method="post" enctype="multipart/form-data">
         <?= csrf_field() ?>
         
@@ -178,14 +209,33 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label for="course" class="form-label">Desired Course/Program <span class="text-danger">*</span></label>
-                    <select class="form-select" id="course" name="course" required>
-                        <option value="">Select a Program</option>
-                        <?php foreach ($programs as $program): ?>
-                            <option value="<?= esc($program['title']) ?>" <?= old('course') === $program['title'] ? 'selected' : '' ?>>
-                                <?= esc($program['title']) ?>
-                            </option>
-                        <?php endforeach ?>
-                    </select>
+                    <?php if (isset($selectedProgram) && $selectedProgram): ?>
+                        <!-- Pre-selected program (read-only) -->
+                        <input type="text" class="form-control" value="<?= esc($selectedProgram['title']) ?>" readonly style="background-color: #f8f9fa;">
+                        <input type="hidden" name="course" value="<?= esc($selectedProgram['title']) ?>">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            You are applying for this program. 
+                            <a href="<?= base_url('apply') ?>">Click here</a> to choose a different program.
+                        </small>
+                    <?php else: ?>
+                        <!-- Dropdown for program selection -->
+                        <select class="form-select" id="course" name="course" required>
+                            <option value="">Select a Program</option>
+                            <?php foreach ($programs as $program): ?>
+                                <option value="<?= esc($program['title']) ?>" <?= old('course') === $program['title'] ? 'selected' : '' ?>>
+                                    <?= esc($program['title']) ?>
+                                    <?php if ($program['discount'] > 0): ?>
+                                        (<?= number_format($program['discount'], 0) ?>% OFF)
+                                    <?php endif ?>
+                                </option>
+                            <?php endforeach ?>
+                        </select>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Not sure which program? <a href="<?= base_url('programs') ?>" target="_blank">Browse our programs</a>
+                        </small>
+                    <?php endif ?>
                 </div>
             </div>
         </div>
