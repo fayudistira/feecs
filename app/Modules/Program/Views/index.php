@@ -104,7 +104,7 @@
                                 </td>
                                 <td>
                                     <?php if (!empty($program['thumbnail'])): ?>
-                                        <img src="<?= base_url('writable/uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
+                                        <img src="<?= base_url('uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
                                              alt="Thumbnail" style="width: 50px; height: 50px; object-fit: cover;" 
                                              class="rounded">
                                     <?php else: ?>

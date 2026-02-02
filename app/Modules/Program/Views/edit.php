@@ -48,7 +48,7 @@
                         <label class="form-label">Thumbnail Image</label>
                         <?php if (!empty($program['thumbnail'])): ?>
                             <div class="mb-2">
-                                <img src="<?= base_url('writable/uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
+                                <img src="<?= base_url('uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
                                      alt="Current thumbnail" 
                                      class="img-thumbnail" 
                                      style="max-width: 200px; max-height: 150px; object-fit: cover;">

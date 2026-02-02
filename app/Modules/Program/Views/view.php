@@ -25,7 +25,7 @@
                 </div>
                 <div class="col-md-4 text-end">
                     <?php if (!empty($program['thumbnail'])): ?>
-                        <img src="<?= base_url('writable/uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
+                        <img src="<?= base_url('uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
                              alt="<?= esc($program['title']) ?>" 
                              class="img-thumbnail mb-2" 
                              style="max-width: 200px; max-height: 200px; object-fit: cover;">
