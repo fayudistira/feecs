@@ -106,7 +106,7 @@
                                         <small class="text-muted"><?= esc($invoice['registration_number']) ?></small>
                                     </td>
                                     <td><?= ucwords(str_replace('_', ' ', $invoice['invoice_type'])) ?></td>
-                                    <td>$<?= number_format($invoice['amount'], 2) ?></td>
+                                    <td>Rp <?= number_format($invoice['amount'], 0, ',', '.') ?></td>
                                     <td><?= date('M d, Y', strtotime($invoice['due_date'])) ?></td>
                                     <td>
                                         <span class="badge bg-<?= $invoice['status'] === 'paid' ? 'success' : ($invoice['status'] === 'unpaid' ? 'warning' : 'secondary') ?>">

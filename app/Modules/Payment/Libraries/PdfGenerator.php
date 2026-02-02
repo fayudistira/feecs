@@ -114,11 +114,11 @@ class PdfGenerator
                     <span class="label">Type:</span> ' . htmlspecialchars(ucwords(str_replace('_', ' ', $invoiceData['invoice_type']))) . '
                 </div>
                 <div class="info-row">
-                    <span class="label">Amount:</span> $' . number_format($invoiceData['amount'], 2) . '
+                    <span class="label">Amount:</span> Rp ' . number_format($invoiceData['amount'], 0, ',', '.') . '
                 </div>
                 
                 <div class="total">
-                    Total Amount: $' . number_format($invoiceData['amount'], 2) . '
+                    Total Amount: Rp ' . number_format($invoiceData['amount'], 0, ',', '.') . '
                 </div>
             </div>
         ';
@@ -178,7 +178,7 @@ class PdfGenerator
                 
                 <h3 style="color: #8B0000; margin-top: 20px;">Payment Details</h3>
                 <div class="info-row">
-                    <span class="label">Amount:</span> $' . number_format($paymentData['amount'], 2) . '
+                    <span class="label">Amount:</span> Rp ' . number_format($paymentData['amount'], 0, ',', '.') . '
                 </div>
                 <div class="info-row">
                     <span class="label">Payment Method:</span> ' . htmlspecialchars(ucwords(str_replace('_', ' ', $paymentData['payment_method']))) . '
@@ -193,7 +193,7 @@ class PdfGenerator
                 ' : '') . '
                 
                 <div class="total">
-                    Total Paid: $' . number_format($paymentData['amount'], 2) . '
+                    Total Paid: Rp ' . number_format($paymentData['amount'], 0, ',', '.') . '
                 </div>
             </div>
         ';

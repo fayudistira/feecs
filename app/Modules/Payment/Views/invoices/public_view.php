@@ -133,4 +133,143 @@
             border-radius: 8px;
             margin-top: 30px;
             text-align: center;
-            color
+            color: #666;
+            font-size: 0.9rem;
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .invoice-container {
+                box-shadow: none;
+                margin: 0;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1><i class="bi bi-receipt"></i> INVOICE</h1>
+                    <div class="invoice-number"><?= esc($invoice['invoice_number']) ?></div>
+                </div>
+                <div class="text-end no-print">
+                    <button onclick="window.print()" class="btn btn-light">
+                        <i class="bi bi-printer"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="invoice-body">
+            <!-- Invoice Details -->
+            <div class="info-section">
+                <h5><i class="bi bi-file-text"></i> Invoice Details</h5>
+                <div class="info-row">
+                    <div class="info-label">Invoice Type:</div>
+                    <div class="info-value"><?= ucwords(str_replace('_', ' ', $invoice['invoice_type'])) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Issue Date:</div>
+                    <div class="info-value"><?= date('F d, Y', strtotime($invoice['created_at'])) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Due Date:</div>
+                    <div class="info-value"><?= date('F d, Y', strtotime($invoice['due_date'])) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Status:</div>
+                    <div class="info-value">
+                        <span class="status-badge status-<?= $invoice['status'] ?>">
+                            <?= ucfirst($invoice['status']) ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Information -->
+            <div class="info-section">
+                <h5><i class="bi bi-person"></i> Student Information</h5>
+                <div class="info-row">
+                    <div class="info-label">Name:</div>
+                    <div class="info-value"><?= esc($invoice['student']['full_name'] ?? 'N/A') ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Registration Number:</div>
+                    <div class="info-value"><?= esc($invoice['registration_number']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value"><?= esc($invoice['student']['email'] ?? 'N/A') ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value"><?= esc($invoice['student']['phone'] ?? 'N/A') ?></div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <?php if (!empty($invoice['description'])): ?>
+            <div class="info-section">
+                <h5><i class="bi bi-card-text"></i> Description</h5>
+                <p class="mb-0"><?= nl2br(esc($invoice['description'])) ?></p>
+            </div>
+            <?php endif ?>
+
+            <!-- Amount -->
+            <div class="amount-box">
+                <div class="amount-label">Total Amount</div>
+                <div class="amount-value">Rp <?= number_format($invoice['amount'], 0, ',', '.') ?></div>
+            </div>
+
+            <!-- Payments -->
+            <?php if (!empty($invoice['payments'])): ?>
+            <div class="info-section">
+                <h5><i class="bi bi-credit-card"></i> Payment History</h5>
+                <div class="payments-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($invoice['payments'] as $payment): ?>
+                            <tr>
+                                <td><?= date('M d, Y', strtotime($payment['payment_date'])) ?></td>
+                                <td>Rp <?= number_format($payment['amount'], 0, ',', '.') ?></td>
+                                <td><?= ucwords(str_replace('_', ' ', $payment['payment_method'])) ?></td>
+                                <td>
+                                    <span class="status-badge status-<?= $payment['status'] ?>">
+                                        <?= ucfirst($payment['status']) ?>
+                                    </span>
+                                </td>
+                            </tr>
+                            <?php endforeach ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif ?>
+
+            <!-- Footer Note -->
+            <div class="footer-note">
+                <i class="bi bi-info-circle"></i> This is a computer-generated invoice. 
+                For any inquiries, please contact our administration office.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

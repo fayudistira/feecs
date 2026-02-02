@@ -117,7 +117,7 @@
                                         <?= esc($payment['student']['full_name'] ?? 'N/A') ?><br>
                                         <small class="text-muted"><?= esc($payment['registration_number']) ?></small>
                                     </td>
-                                    <td>$<?= number_format($payment['amount'], 2) ?></td>
+                                    <td>Rp <?= number_format($payment['amount'], 0, ',', '.') ?></td>
                                     <td><?= ucwords(str_replace('_', ' ', $payment['payment_method'])) ?></td>
                                     <td><?= esc($payment['document_number']) ?></td>
                                     <td><?= date('M d, Y', strtotime($payment['payment_date'])) ?></td>

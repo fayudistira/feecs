@@ -62,7 +62,7 @@
                                 <option value="">No Invoice</option>
                                 <?php foreach ($invoices as $invoice): ?>
                                     <option value="<?= esc($invoice['id']) ?>">
-                                        <?= esc($invoice['invoice_number']) ?> - $<?= number_format($invoice['amount'], 2) ?>
+                                        <?= esc($invoice['invoice_number']) ?> - Rp <?= number_format($invoice['amount'], 0, ',', '.') ?>
                                     </option>
                                 <?php endforeach ?>
                             </select>
