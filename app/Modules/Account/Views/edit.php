@@ -182,7 +182,7 @@
                         <label class="form-label">Profile Photo</label>
                         <?php if ($profile['photo']): ?>
                             <div class="mb-2">
-                                <img src="<?= base_url('writable/uploads/' . $profile['photo']) ?>" 
+                                <img src="<?= base_url('uploads/' . $profile['photo']) ?>" 
                                      class="img-thumbnail" 
                                      style="max-width: 150px;" 
                                      alt="Current Photo">

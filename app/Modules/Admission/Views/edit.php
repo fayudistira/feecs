@@ -198,7 +198,7 @@
                     <label class="form-label">Profile Photo</label>
                     <?php if (!empty($admission['photo'])): ?>
                         <div class="mb-2">
-                            <img src="<?= base_url('writable/uploads/admissions/photos/' . $admission['photo']) ?>" 
+                            <img src="<?= base_url('uploads/admissions/photos/' . $admission['photo']) ?>" 
                                  alt="Current Photo" 
                                  class="img-thumbnail"
                                  style="max-height: 100px;">

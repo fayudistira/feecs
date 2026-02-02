@@ -67,7 +67,7 @@
                 <div class="card-body">
                     <?php 
                     $filePath = WRITEPATH . 'uploads/' . $payment['receipt_file'];
-                    $fileUrl = base_url('writable/uploads/' . $payment['receipt_file']);
+                    $fileUrl = base_url('uploads/' . $payment['receipt_file']);
                     $fileExt = strtolower(pathinfo($payment['receipt_file'], PATHINFO_EXTENSION));
                     ?>
                     

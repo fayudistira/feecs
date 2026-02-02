@@ -45,7 +45,7 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <?php if ($profile['photo']): ?>
-                            <img src="<?= base_url('writable/uploads/' . $profile['photo']) ?>" 
+                            <img src="<?= base_url('uploads/' . $profile['photo']) ?>" 
                                  class="rounded-circle mb-3" 
                                  style="width: 150px; height: 150px; object-fit: cover;" 
                                  alt="Profile Photo">

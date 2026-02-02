@@ -102,7 +102,7 @@
                             <label class="form-label">Receipt File</label>
                             <?php if (!empty($payment['receipt_file'])): ?>
                                 <div class="mb-2">
-                                    <a href="<?= base_url('writable/uploads/' . $payment['receipt_file']) ?>" 
+                                    <a href="<?= base_url('uploads/' . $payment['receipt_file']) ?>" 
                                        target="_blank" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-file-earmark"></i> View Current Receipt
                                     </a>

@@ -208,7 +208,7 @@
             </div>
             <div class="card-body text-center">
                 <?php if (!empty($admission['photo'])): ?>
-                    <img src="<?= base_url('writable/uploads/admissions/photos/' . $admission['photo']) ?>" 
+                    <img src="<?= base_url('uploads/admissions/photos/' . $admission['photo']) ?>" 
                          alt="Profile Photo" 
                          class="img-fluid rounded"
                          style="max-height: 300px; border: 2px solid var(--border-color);">
