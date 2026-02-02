@@ -17,9 +17,6 @@ $routes->post('login', '\App\Controllers\Auth\LoginController::loginAction');
 $routes->get('register', '\App\Controllers\Auth\RegisterController::registerView', ['as' => 'register']);
 $routes->post('register', '\App\Controllers\Auth\RegisterController::registerAction');
 
-// Route to serve uploaded files from writable/uploads (captures all nested paths)
-$routes->get('writable/uploads/(.+)', 'FileController::serve/$1');
-
 //Auto-Load Modules' Routes
 $modulesPath = APPPATH . 'Modules/';
 if (is_dir($modulesPath)) {
@@ -33,3 +30,9 @@ if (is_dir($modulesPath)) {
         }
     }
 }
+
+// Route to serve uploaded files from writable/uploads (captures all nested paths)
+// IMPORTANT: This must be AFTER module routes to avoid being overridden
+$routes->get('writable/uploads/(:segment)/(:segment)/(:any)', 'FileController::serve/$1/$2/$3');
+$routes->get('writable/uploads/(:segment)/(:any)', 'FileController::serve/$1/$2');
+$routes->get('writable/uploads/(:any)', 'FileController::serve/$1');
