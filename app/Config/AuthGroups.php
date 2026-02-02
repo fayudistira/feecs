@@ -49,16 +49,24 @@ class AuthGroups extends ShieldAuthGroups
             'title'       => 'Admin',
             'description' => 'Day to day administrators of the site.',
         ],
+        'frontline' => [
+            'title'       => 'Frontline Admin',
+            'description' => 'Manages admissions and programs.',
+        ],
+        'finance' => [
+            'title'       => 'Finance Admin',
+            'description' => 'Manages payments and invoices.',
+        ],
         'instructor' => [
-            'title'       => 'instructor',
-            'description' => 'Site programmers.',
+            'title'       => 'Instructor',
+            'description' => 'Site instructors.',
         ],
         'student' => [
-            'title'       => 'student',
+            'title'       => 'Student',
             'description' => 'General users of the site. Often customers.',
         ],
         'staff' => [
-            'title'       => 'staff',
+            'title'       => 'Staff',
             'description' => 'Has access to beta-level features.',
         ],
     ];
@@ -84,6 +92,10 @@ class AuthGroups extends ShieldAuthGroups
         'admission.view'      => 'Can view admissions (read-only)',
         'program.manage'      => 'Can manage programs (CRUD)',
         'program.view'        => 'Can view programs (read-only)',
+        'payment.manage'      => 'Can manage payments (CRUD)',
+        'payment.view'        => 'Can view payments (read-only)',
+        'invoice.manage'      => 'Can manage invoices (CRUD)',
+        'invoice.view'        => 'Can view invoices (read-only)',
     ];
 
     /**
@@ -102,6 +114,8 @@ class AuthGroups extends ShieldAuthGroups
             'dashboard.*',
             'admission.*',
             'program.*',
+            'payment.*',
+            'invoice.*',
         ],
         'admin' => [
             'admin.access',
@@ -112,11 +126,25 @@ class AuthGroups extends ShieldAuthGroups
             'dashboard.access',
             'admission.manage',
             'program.manage',
+            'payment.manage',
+            'invoice.manage',
+        ],
+        'frontline' => [
+            'dashboard.access',
+            'admission.manage',
+            'program.manage',
+        ],
+        'finance' => [
+            'dashboard.access',
+            'payment.manage',
+            'invoice.manage',
         ],
         'staff' => [
             'dashboard.access',
             'admission.view',
             'program.view',
+            'payment.view',
+            'invoice.view',
         ],
         'instructor' => [
             'dashboard.access',

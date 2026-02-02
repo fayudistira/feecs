@@ -32,17 +32,19 @@ class DashboardController extends BaseController
             $programStats = $programModel->getProgramsByCategory();
         }
         
-        // Get payment statistics
+        // Get payment statistics if user has permission
         $paymentStats = null;
-        try {
-            $paymentModel = new \Modules\Payment\Models\PaymentModel();
-            $startDate = date('Y-01-01');
-            $endDate = date('Y-m-d');
-            $paymentStats = $paymentModel->getDashboardStatistics($startDate, $endDate);
-            $paymentStats['revenue_by_method'] = $paymentModel->getRevenueByMethod();
-        } catch (\Exception $e) {
-            // Payment module might not be available
-            $paymentStats = null;
+        if ($user->can('payment.view') || $user->can('payment.manage') || $user->can('invoice.view') || $user->can('invoice.manage')) {
+            try {
+                $paymentModel = new \Modules\Payment\Models\PaymentModel();
+                $startDate = date('Y-01-01');
+                $endDate = date('Y-m-d');
+                $paymentStats = $paymentModel->getDashboardStatistics($startDate, $endDate);
+                $paymentStats['revenue_by_method'] = $paymentModel->getRevenueByMethod();
+            } catch (\Exception $e) {
+                // Payment module might not be available
+                $paymentStats = null;
+            }
         }
         
         return view('Modules\Dashboard\Views\index', [

@@ -10,6 +10,7 @@ return [
         'title' => 'Payments',
         'url' => 'payment',
         'icon' => 'cash-coin',
+        'permission' => 'payment.manage',
         'order' => 20,
         'submenu' => [
             [
@@ -28,6 +29,7 @@ return [
         'title' => 'Invoices',
         'url' => 'invoice',
         'icon' => 'receipt',
+        'permission' => 'invoice.manage',
         'order' => 21,
         'submenu' => [
             [
@@ -51,6 +53,7 @@ return [
         'title' => 'Reports',
         'url' => 'payment/reports/revenue',
         'icon' => 'graph-up',
+        'permission' => ['payment.manage', 'invoice.manage'],
         'order' => 22,
         'submenu' => [
             [

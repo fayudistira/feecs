@@ -6,6 +6,62 @@
     <title><?= esc($title ?? 'Dashboard') ?> - ERP System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <?php 
+    // Get current user
+    $user = auth()->user();
+    
+    // Load module menus
+    if (!isset($menuItems)) {
+        $menuItems = [];
+        $modulesPath = APPPATH . 'Modules/';
+        
+        if (is_dir($modulesPath)) {
+            foreach (scandir($modulesPath) as $module) {
+                if ($module === '.' || $module === '..') {
+                    continue;
+                }
+                
+                $menuFile = $modulesPath . $module . '/Config/Menu.php';
+                
+                if (file_exists($menuFile)) {
+                    $menuConfig = include $menuFile;
+                    
+                    if (is_array($menuConfig)) {
+                        foreach ($menuConfig as $item) {
+                            // Check if user has required permission
+                            $hasPermission = false;
+                            
+                            if (empty($item['permission'])) {
+                                // No permission required
+                                $hasPermission = true;
+                            } elseif (is_string($item['permission'])) {
+                                // Single permission
+                                $hasPermission = $user->can($item['permission']);
+                            } elseif (is_array($item['permission'])) {
+                                // Multiple permissions (any)
+                                foreach ($item['permission'] as $permission) {
+                                    if ($user->can($permission)) {
+                                        $hasPermission = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if ($hasPermission) {
+                                $menuItems[] = $item;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Sort by order
+            usort($menuItems, function($a, $b) {
+                return ($a['order'] ?? 999) <=> ($b['order'] ?? 999);
+            });
+        }
+    }
+    ?>
     <style>
         :root {
             --dark-red: #8B0000;

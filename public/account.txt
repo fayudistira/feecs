@@ -1,0 +1,15 @@
+Frontline Admin
+
+Email: frontline@example.com
+Password: frontline123
+Can access: Dashboard, Admissions, Programs
+Finance Admin
+
+Email: finance@example.com
+Password: finance123
+Can access: Dashboard, Payments, Invoices, Reports
+Combined Admin
+
+Email: combined@example.com
+Password: combined123
+Can access: Dashboard, Admissions, Programs, Payments, Invoices, Reports
