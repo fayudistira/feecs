@@ -12,6 +12,10 @@ $routes->group('program', ['namespace' => 'Modules\Program\Controllers', 'filter
     $routes->get('edit/(:segment)', 'ProgramController::edit/$1', ['filter' => 'permission:program.manage']);
     $routes->post('update/(:segment)', 'ProgramController::update/$1', ['filter' => 'permission:program.manage']);
     $routes->get('delete/(:segment)', 'ProgramController::delete/$1', ['filter' => 'permission:program.manage']);
+    
+    // Bulk upload routes
+    $routes->get('download-template', 'ProgramController::downloadTemplate');
+    $routes->post('bulk-upload', 'ProgramController::bulkUpload', ['filter' => 'permission:program.manage']);
 });
 
 // Program API Routes

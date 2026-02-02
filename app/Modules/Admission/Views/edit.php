@@ -177,7 +177,14 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Course <span class="text-danger">*</span></label>
-                    <input type="text" name="course" class="form-control form-control-sm" value="<?= old('course', $admission['course']) ?>" required>
+                    <select name="course" class="form-select form-select-sm" required>
+                        <option value="">Select Program</option>
+                        <?php foreach ($programs as $program): ?>
+                            <option value="<?= esc($program['title']) ?>" <?= old('course', $admission['course']) === $program['title'] ? 'selected' : '' ?>>
+                                <?= esc($program['title']) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Status <span class="text-danger">*</span></label>

@@ -178,7 +178,14 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label for="course" class="form-label">Desired Course/Program <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="course" name="course" value="<?= old('course') ?>" required>
+                    <select class="form-select" id="course" name="course" required>
+                        <option value="">Select a Program</option>
+                        <?php foreach ($programs as $program): ?>
+                            <option value="<?= esc($program['title']) ?>" <?= old('course') === $program['title'] ? 'selected' : '' ?>>
+                                <?= esc($program['title']) ?>
+                            </option>
+                        <?php endforeach ?>
+                    </select>
                 </div>
             </div>
         </div>

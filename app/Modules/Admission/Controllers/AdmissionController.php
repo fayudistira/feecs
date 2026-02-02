@@ -62,8 +62,13 @@ class AdmissionController extends BaseController
      */
     public function create(): string
     {
+        // Load active programs for course selection
+        $programModel = new \Modules\Program\Models\ProgramModel();
+        $programs = $programModel->where('status', 'active')->findAll();
+        
         return view('Modules\Admission\Views\create', [
             'title' => 'Create Admission',
+            'programs' => $programs,
             'menuItems' => $this->loadModuleMenus(),
             'user' => auth()->user()
         ]);
@@ -137,6 +142,10 @@ class AdmissionController extends BaseController
         if (!$data['admission']) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Admission not found');
         }
+        
+        // Load active programs for course selection
+        $programModel = new \Modules\Program\Models\ProgramModel();
+        $data['programs'] = $programModel->where('status', 'active')->findAll();
         
         $data['menuItems'] = $this->loadModuleMenus();
         $data['user'] = auth()->user();

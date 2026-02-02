@@ -216,4 +216,167 @@ class ProgramController extends BaseController
         
         return redirect()->to('/program')->with('error', 'Failed to delete program.');
     }
+    
+    /**
+     * Download Excel template for bulk upload
+     */
+    public function downloadTemplate()
+    {
+        $templatePath = FCPATH . 'templates/program_bulk_upload_template.xlsx';
+        
+        if (!file_exists($templatePath)) {
+            return redirect()->back()->with('error', 'Template file not found.');
+        }
+        
+        return $this->response->download($templatePath, null)->setFileName('program_bulk_upload_template.xlsx');
+    }
+    
+    /**
+     * Handle bulk upload of programs via Excel
+     */
+    public function bulkUpload()
+    {
+        // Validate file upload
+        $validationRules = [
+            'excel_file' => [
+                'uploaded[excel_file]',
+                'max_size[excel_file,5120]',
+                'ext_in[excel_file,xlsx,xls]'
+            ]
+        ];
+        
+        if (!$this->validate($validationRules)) {
+            return redirect()->back()
+                ->with('error', 'Invalid file. Please upload a valid Excel file (.xlsx or .xls) with maximum size of 5MB.');
+        }
+        
+        $file = $this->request->getFile('excel_file');
+        
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File upload failed. Please try again.');
+        }
+        
+        try {
+            // Load the Excel file
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+            
+            // Remove header row
+            $headers = array_shift($rows);
+            
+            // Validate headers
+            $expectedHeaders = ['title', 'description', 'category', 'sub_category', 'registration_fee', 
+                              'tuition_fee', 'discount', 'status', 'features', 'facilities', 'extra_facilities'];
+            
+            $headerCheck = array_map('strtolower', array_map('trim', $headers));
+            $missingHeaders = array_diff($expectedHeaders, $headerCheck);
+            
+            if (!empty($missingHeaders)) {
+                return redirect()->back()
+                    ->with('error', 'Invalid template format. Missing columns: ' . implode(', ', $missingHeaders));
+            }
+            
+            // Process rows
+            $successCount = 0;
+            $errors = [];
+            $rowNumber = 2; // Start from 2 (1 is header)
+            
+            foreach ($rows as $row) {
+                // Skip empty rows
+                if (empty(array_filter($row))) {
+                    $rowNumber++;
+                    continue;
+                }
+                
+                // Extract data
+                $data = [
+                    'title' => trim($row[0] ?? ''),
+                    'description' => trim($row[1] ?? ''),
+                    'category' => trim($row[2] ?? ''),
+                    'sub_category' => trim($row[3] ?? ''),
+                    'registration_fee' => !empty($row[4]) ? floatval($row[4]) : 0,
+                    'tuition_fee' => !empty($row[5]) ? floatval($row[5]) : 0,
+                    'discount' => !empty($row[6]) ? floatval($row[6]) : 0,
+                    'status' => !empty($row[7]) ? strtolower(trim($row[7])) : 'active',
+                    'features' => $this->parsePipeSeparated($row[8] ?? ''),
+                    'facilities' => $this->parsePipeSeparated($row[9] ?? ''),
+                    'extra_facilities' => $this->parsePipeSeparated($row[10] ?? ''),
+                ];
+                
+                // Validate required fields
+                if (empty($data['title'])) {
+                    $errors[] = "Row $rowNumber: Title is required";
+                    $rowNumber++;
+                    continue;
+                }
+                
+                // Validate status
+                if (!in_array($data['status'], ['active', 'inactive'])) {
+                    $errors[] = "Row $rowNumber: Status must be 'active' or 'inactive'";
+                    $rowNumber++;
+                    continue;
+                }
+                
+                // Validate discount
+                if ($data['discount'] < 0 || $data['discount'] > 100) {
+                    $errors[] = "Row $rowNumber: Discount must be between 0 and 100";
+                    $rowNumber++;
+                    continue;
+                }
+                
+                // Validate fees
+                if ($data['registration_fee'] < 0 || $data['tuition_fee'] < 0) {
+                    $errors[] = "Row $rowNumber: Fees cannot be negative";
+                    $rowNumber++;
+                    continue;
+                }
+                
+                // Try to save
+                if ($this->programModel->save($data)) {
+                    $successCount++;
+                } else {
+                    $modelErrors = $this->programModel->errors();
+                    $errors[] = "Row $rowNumber: " . implode(', ', $modelErrors);
+                }
+                
+                $rowNumber++;
+            }
+            
+            // Prepare response message
+            if ($successCount > 0 && empty($errors)) {
+                return redirect()->to('/program')
+                    ->with('success', "Successfully imported $successCount program(s).");
+            } elseif ($successCount > 0 && !empty($errors)) {
+                $errorMsg = "Imported $successCount program(s) with some errors:<br>" . implode('<br>', array_slice($errors, 0, 10));
+                if (count($errors) > 10) {
+                    $errorMsg .= '<br>... and ' . (count($errors) - 10) . ' more errors';
+                }
+                return redirect()->to('/program')->with('warning', $errorMsg);
+            } else {
+                $errorMsg = "Failed to import programs. Errors:<br>" . implode('<br>', array_slice($errors, 0, 10));
+                if (count($errors) > 10) {
+                    $errorMsg .= '<br>... and ' . (count($errors) - 10) . ' more errors';
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
+            
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error processing file: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Parse pipe-separated string into array
+     */
+    private function parsePipeSeparated($value)
+    {
+        if (empty($value)) {
+            return '';
+        }
+        
+        $items = array_map('trim', explode('|', $value));
+        return array_filter($items); // Remove empty items
+    }
 }

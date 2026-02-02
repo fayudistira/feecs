@@ -37,8 +37,13 @@ class PageController extends BaseController
     
     public function apply(): string
     {
+        // Load programs for dropdown
+        $programModel = new \Modules\Program\Models\ProgramModel();
+        $programs = $programModel->getActivePrograms();
+        
         return view('Modules\Frontend\Views\apply', [
-            'title' => 'Apply for Admission'
+            'title' => 'Apply for Admission',
+            'programs' => $programs
         ]);
     }
     
