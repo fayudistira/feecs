@@ -171,7 +171,7 @@ class ProfileController extends BaseController
             if ($photoPath) {
                 // Delete old photo if exists
                 if ($profile['photo']) {
-                    $oldPhotoPath = WRITEPATH . 'uploads/' . $profile['photo'];
+                    $oldPhotoPath = FCPATH . 'uploads/' . $profile['photo'];
                     if (file_exists($oldPhotoPath)) {
                         unlink($oldPhotoPath);
                     }

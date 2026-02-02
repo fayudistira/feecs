@@ -97,7 +97,7 @@ class AdmissionController extends BaseController
         $photo = $this->request->getFile('photo');
         if ($photo && $photo->isValid() && !$photo->hasMoved()) {
             $photoName = $photo->getRandomName();
-            $photo->move(WRITEPATH . 'uploads/admissions/photos', $photoName);
+            $photo->move(FCPATH . 'uploads/admissions/photos', $photoName);
             $data['photo'] = $photoName;
         }
         
@@ -109,7 +109,7 @@ class AdmissionController extends BaseController
             foreach ($documents as $doc) {
                 if ($doc->isValid() && !$doc->hasMoved()) {
                     $docName = $doc->getRandomName();
-                    $doc->move(WRITEPATH . 'uploads/admissions/documents', $docName);
+                    $doc->move(FCPATH . 'uploads/admissions/documents', $docName);
                     $documentNames[] = $docName;
                 }
             }
@@ -174,12 +174,12 @@ class AdmissionController extends BaseController
         $photo = $this->request->getFile('photo');
         if ($photo && $photo->isValid() && !$photo->hasMoved()) {
             $photoName = $photo->getRandomName();
-            $photo->move(WRITEPATH . 'uploads/admissions/photos', $photoName);
+            $photo->move(FCPATH . 'uploads/admissions/photos', $photoName);
             $data['photo'] = $photoName;
             
             // Delete old photo if exists
             if (!empty($existing['photo'])) {
-                $oldPhotoPath = WRITEPATH . 'uploads/admissions/photos/' . $existing['photo'];
+                $oldPhotoPath = FCPATH . 'uploads/admissions/photos/' . $existing['photo'];
                 if (file_exists($oldPhotoPath)) {
                     unlink($oldPhotoPath);
                 }
@@ -194,7 +194,7 @@ class AdmissionController extends BaseController
             foreach ($documents as $doc) {
                 if ($doc->isValid() && !$doc->hasMoved()) {
                     $docName = $doc->getRandomName();
-                    $doc->move(WRITEPATH . 'uploads/admissions/documents', $docName);
+                    $doc->move(FCPATH . 'uploads/admissions/documents', $docName);
                     $documentNames[] = $docName;
                 }
             }
@@ -266,7 +266,7 @@ class AdmissionController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Document not found');
         }
         
-        $filepath = WRITEPATH . 'uploads/admissions/documents/' . $filename;
+        $filepath = FCPATH . 'uploads/admissions/documents/' . $filename;
         
         if (!file_exists($filepath)) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('File not found');

@@ -202,8 +202,8 @@ class PdfGenerator
         $this->dompdf->setPaper('A4', 'portrait');
         $this->dompdf->render();
         
-        // Save PDF to writable/uploads/receipts/ directory
-        $uploadPath = WRITEPATH . 'uploads/receipts/';
+        // Save PDF to public/uploads/receipts/ directory
+        $uploadPath = FCPATH . 'uploads/receipts/';
         
         // Create directory if it doesn't exist
         if (!is_dir($uploadPath)) {

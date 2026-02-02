@@ -227,8 +227,8 @@ class PaymentModel extends Model
             return false;
         }
         
-        // Store files in writable/uploads/receipts/ directory
-        $uploadPath = WRITEPATH . 'uploads/receipts/';
+        // Store files in public/uploads/receipts/ directory
+        $uploadPath = FCPATH . 'uploads/receipts/';
         
         // Create directory if it doesn't exist
         if (!is_dir($uploadPath)) {

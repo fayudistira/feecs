@@ -211,7 +211,7 @@ class PageController extends BaseController
         
         if ($photo && $photo->isValid() && !$photo->hasMoved()) {
             $photoName = $photo->getRandomName();
-            $photo->move(WRITEPATH . 'uploads/admissions/photos', $photoName);
+            $photo->move(FCPATH . 'uploads/admissions/photos', $photoName);
         }
         
         // Handle documents upload
@@ -222,7 +222,7 @@ class PageController extends BaseController
             foreach ($documents as $doc) {
                 if ($doc->isValid() && !$doc->hasMoved()) {
                     $docName = $doc->getRandomName();
-                    $doc->move(WRITEPATH . 'uploads/admissions/documents', $docName);
+                    $doc->move(FCPATH . 'uploads/admissions/documents', $docName);
                     $documentNames[] = $docName;
                 }
             }

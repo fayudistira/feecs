@@ -125,7 +125,7 @@ class ProgramController extends BaseController
         $thumbnail = $this->request->getFile('thumbnail');
         if ($thumbnail && $thumbnail->isValid() && !$thumbnail->hasMoved()) {
             $newName = $thumbnail->getRandomName();
-            $thumbnail->move(WRITEPATH . 'uploads/programs/thumbs', $newName);
+            $thumbnail->move(FCPATH . 'uploads/programs/thumbs', $newName);
             $data['thumbnail'] = $newName;
         }
         
@@ -213,14 +213,14 @@ class ProgramController extends BaseController
         if ($thumbnail && $thumbnail->isValid() && !$thumbnail->hasMoved()) {
             // Delete old thumbnail if exists
             if (!empty($program['thumbnail'])) {
-                $oldFile = WRITEPATH . 'uploads/programs/thumbs/' . $program['thumbnail'];
+                $oldFile = FCPATH . 'uploads/programs/thumbs/' . $program['thumbnail'];
                 if (file_exists($oldFile)) {
                     unlink($oldFile);
                 }
             }
             
             $newName = $thumbnail->getRandomName();
-            $thumbnail->move(WRITEPATH . 'uploads/programs/thumbs', $newName);
+            $thumbnail->move(FCPATH . 'uploads/programs/thumbs', $newName);
             $data['thumbnail'] = $newName;
         }
         

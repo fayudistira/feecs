@@ -95,7 +95,7 @@ class ProfileModel extends Model
             return false;
         }
         
-        $uploadPath = WRITEPATH . 'uploads/profiles/photos/';
+        $uploadPath = FCPATH . 'uploads/profiles/photos/';
         
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
@@ -128,7 +128,7 @@ class ProfileModel extends Model
             return false;
         }
         
-        $uploadPath = WRITEPATH . 'uploads/profiles/documents/';
+        $uploadPath = FCPATH . 'uploads/profiles/documents/';
         
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
