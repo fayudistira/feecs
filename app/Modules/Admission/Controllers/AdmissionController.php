@@ -162,6 +162,7 @@ class AdmissionController extends BaseController
     public function update($id)
     {
         $data = $this->request->getPost();
+        $data['id'] = $id; // Add ID to data for validation
         
         // Get existing admission
         $existing = $this->admissionModel->find($id);
