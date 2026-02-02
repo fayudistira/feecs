@@ -53,6 +53,24 @@
                             <th>Sub Category:</th>
                             <td><?= esc($program['sub_category'] ?? '-') ?></td>
                         </tr>
+                        <tr>
+                            <th>Delivery Mode:</th>
+                            <td>
+                                <?php if (!empty($program['mode'])): ?>
+                                    <?php if ($program['mode'] === 'online'): ?>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-laptop"></i> Online
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-building"></i> Offline
+                                        </span>
+                                    <?php endif ?>
+                                <?php else: ?>
+                                    <span class="text-muted">Not set</span>
+                                <?php endif ?>
+                            </td>
+                        </tr>
                     </table>
                 </div>
                 
@@ -131,6 +149,39 @@
             </div>
             
             <hr>
+            
+            <!-- Curriculum Section -->
+            <?php if (!empty($program['curriculum']) && is_array($program['curriculum'])): ?>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h6>Curriculum</h6>
+                        <div class="accordion" id="curriculumAccordion">
+                            <?php foreach ($program['curriculum'] as $index => $chapter): ?>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button <?= $index !== 0 ? 'collapsed' : '' ?>" 
+                                                type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#chapter-<?= $index ?>">
+                                            <span class="badge bg-dark me-2"><?= $index + 1 ?></span>
+                                            <?= esc($chapter['chapter']) ?>
+                                        </button>
+                                    </h2>
+                                    <div id="chapter-<?= $index ?>" 
+                                         class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>" 
+                                         data-bs-parent="#curriculumAccordion">
+                                        <div class="accordion-body">
+                                            <?= esc($chapter['description']) ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+            <?php endif ?>
             
             <div class="row">
                 <div class="col-md-12">

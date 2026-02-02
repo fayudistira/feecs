@@ -25,7 +25,9 @@ class ProgramModel extends Model
         'discount',
         'category',
         'sub_category',
-        'status'
+        'status',
+        'mode',
+        'curriculum'
     ];
     
     protected $useTimestamps = true;
@@ -38,7 +40,8 @@ class ProgramModel extends Model
         'registration_fee' => 'permit_empty|decimal',
         'tuition_fee' => 'permit_empty|decimal',
         'discount' => 'permit_empty|decimal|less_than_equal_to[100]',
-        'status' => 'required|in_list[active,inactive]'
+        'status' => 'required|in_list[active,inactive]',
+        'mode' => 'permit_empty|in_list[online,offline]'
     ];
     
     protected $validationMessages = [
@@ -96,6 +99,15 @@ class ProgramModel extends Model
             }
         }
         
+        // Handle curriculum separately - it's already JSON encoded in the controller
+        // Just pass it through if it's already a string
+        if (isset($data['data']['curriculum'])) {
+            if (is_array($data['data']['curriculum'])) {
+                $data['data']['curriculum'] = json_encode($data['data']['curriculum']);
+            }
+            // If it's already a JSON string, leave it as is
+        }
+        
         return $data;
     }
     
@@ -104,7 +116,7 @@ class ProgramModel extends Model
      */
     protected function decodeJsonFields(array $data): array
     {
-        $jsonFields = ['features', 'facilities', 'extra_facilities'];
+        $jsonFields = ['features', 'facilities', 'extra_facilities', 'curriculum'];
         
         if (isset($data['data'])) {
             foreach ($jsonFields as $field) {

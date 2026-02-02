@@ -102,8 +102,24 @@ class ProgramController extends BaseController
             'discount' => $this->request->getPost('discount') ?: 0,
             'category' => $this->request->getPost('category'),
             'sub_category' => $this->request->getPost('sub_category'),
-            'status' => $this->request->getPost('status') ?: 'active'
+            'status' => $this->request->getPost('status') ?: 'active',
+            'mode' => $this->request->getPost('mode') ?: 'offline'
         ];
+        
+        // Handle curriculum - filter out empty entries
+        $curriculum = $this->request->getPost('curriculum');
+        if (!empty($curriculum) && is_array($curriculum)) {
+            $filteredCurriculum = [];
+            foreach ($curriculum as $chapter) {
+                if (!empty($chapter['chapter']) || !empty($chapter['description'])) {
+                    $filteredCurriculum[] = [
+                        'chapter' => trim($chapter['chapter'] ?? ''),
+                        'description' => trim($chapter['description'] ?? '')
+                    ];
+                }
+            }
+            $data['curriculum'] = !empty($filteredCurriculum) ? json_encode($filteredCurriculum) : null;
+        }
         
         // Handle thumbnail upload
         $thumbnail = $this->request->getFile('thumbnail');
@@ -173,8 +189,24 @@ class ProgramController extends BaseController
             'discount' => $this->request->getPost('discount') ?: 0,
             'category' => $this->request->getPost('category'),
             'sub_category' => $this->request->getPost('sub_category'),
-            'status' => $this->request->getPost('status') ?: 'active'
+            'status' => $this->request->getPost('status') ?: 'active',
+            'mode' => $this->request->getPost('mode') ?: 'offline'
         ];
+        
+        // Handle curriculum - filter out empty entries
+        $curriculum = $this->request->getPost('curriculum');
+        if (!empty($curriculum) && is_array($curriculum)) {
+            $filteredCurriculum = [];
+            foreach ($curriculum as $chapter) {
+                if (!empty($chapter['chapter']) || !empty($chapter['description'])) {
+                    $filteredCurriculum[] = [
+                        'chapter' => trim($chapter['chapter'] ?? ''),
+                        'description' => trim($chapter['description'] ?? '')
+                    ];
+                }
+            }
+            $data['curriculum'] = !empty($filteredCurriculum) ? json_encode($filteredCurriculum) : null;
+        }
         
         // Handle thumbnail upload
         $thumbnail = $this->request->getFile('thumbnail');
