@@ -95,7 +95,7 @@ class PageController extends BaseController
     /**
      * Display program detail page
      */
-    public function programDetail($id): string
+    public function programDetail($id)
     {
         // Fetch single program from API
         $program = $this->fetchProgramFromAPI($id);
@@ -118,7 +118,7 @@ class PageController extends BaseController
     /**
      * Display apply form with pre-selected program
      */
-    public function applyWithProgram($programId): string
+    public function applyWithProgram($programId)
     {
         // Fetch single program from API
         $program = $this->fetchProgramFromAPI($programId);
