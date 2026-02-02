@@ -1,6 +1,8 @@
 <?= $this->extend('Modules\Dashboard\Views\layout') ?>
 
 <?= $this->section('content') ?>
+<!-- QRCode.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     .invoice-header {
         background: linear-gradient(to right, #8B0000, #6B0000);
@@ -88,7 +90,7 @@
                 </div>
                 <div class="card-body text-center">
                     <p class="small text-muted mb-2">Scan QR code to view invoice publicly</p>
-                    <img src="<?= base_url('invoice/qr/' . $invoice['id']) ?>" alt="Invoice QR Code" class="img-fluid" style="max-width: 200px;">
+                    <div id="qrcode" style="display: inline-block;"></div>
                     <div class="mt-2">
                         <a href="<?= base_url('invoice/public/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-box-arrow-up-right"></i> Public View
@@ -133,4 +135,20 @@
         </div>
     <?php endif ?>
 </div>
+
+<script>
+    // Generate QR Code when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const invoiceUrl = '<?= base_url('invoice/public/' . $invoice['id']) ?>';
+        
+        new QRCode(document.getElementById('qrcode'), {
+            text: invoiceUrl,
+            width: 200,
+            height: 200,
+            colorDark: '#8B0000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    });
+</script>
 <?= $this->endSection() ?>

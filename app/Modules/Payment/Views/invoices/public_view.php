@@ -6,6 +6,8 @@
     <title><?= esc($title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
             --dark-red: #8B0000;
@@ -275,9 +277,7 @@
                 <h5><i class="bi bi-qr-code"></i> Quick Access</h5>
                 <div class="text-center">
                     <p class="mb-2">Scan QR code to view this invoice online</p>
-                    <img src="<?= base_url('invoice/qr/' . $invoice['id']) ?>" 
-                         alt="Invoice QR Code" 
-                         style="max-width: 200px; border: 2px solid #ddd; padding: 10px; border-radius: 8px;">
+                    <div id="qrcode" style="display: inline-block;"></div>
                     <p class="small text-muted mt-2">Invoice #<?= esc($invoice['invoice_number']) ?></p>
                 </div>
             </div>
@@ -291,5 +291,20 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Generate QR Code when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const invoiceUrl = '<?= base_url('invoice/public/' . $invoice['id']) ?>';
+            
+            new QRCode(document.getElementById('qrcode'), {
+                text: invoiceUrl,
+                width: 200,
+                height: 200,
+                colorDark: '#8B0000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    </script>
 </body>
 </html>
