@@ -229,21 +229,21 @@ $(document).ready(function() {
                     invoiceSelect.empty().append('<option value="">-- Choose Invoice --</option>');
                     
                     if (response.data && response.data.length > 0) {
-                        let unpaidFound = false;
+                        let outstandingFound = false;
                         response.data.forEach(function(invoice) {
-                            if (invoice.status === 'unpaid') {
+                            if (invoice.status === 'outstanding') {
                                 const typeName = invoice.invoice_type ? invoice.invoice_type.replace(/_/g, ' ').toUpperCase() : 'INVOICE';
                                 invoiceSelect.append(`<option value="${invoice.id}" data-amount="${invoice.amount}">
                                     ${invoice.invoice_number} - ${typeName} (Rp ${parseInt(invoice.amount).toLocaleString('id-ID')})
                                 </option>`);
-                                unpaidFound = true;
+                                outstandingFound = true;
                             }
                         });
                         
-                        if (!unpaidFound) {
-                            invoiceSelect.append('<option value="" disabled>No unpaid invoices found</option>');
+                        if (!outstandingFound) {
+                            invoiceSelect.append('<option value="" disabled>No outstanding invoices found</option>');
                         } else {
-                            // If only one unpaid invoice, select it automatically
+                            // If only one outstanding invoice, select it automatically
                             if (invoiceSelect.find('option[data-amount]').length === 1) {
                                 invoiceSelect.find('option[data-amount]').prop('selected', true).trigger('change');
                             }

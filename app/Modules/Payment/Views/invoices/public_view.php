@@ -96,7 +96,7 @@
             font-weight: 600;
             font-size: 0.9rem;
         }
-        .status-unpaid {
+        .status-outstanding {
             background-color: #fff3cd;
             color: #856404;
         }
@@ -111,6 +111,10 @@
         .status-expired {
             background-color: #dc3545;
             color: #ffffff;
+        }
+        .status-partially-paid {
+            background-color: #d1ecf1;
+            color: #0c5460;
         }
         .payments-table {
             margin-top: 20px;
@@ -314,9 +318,9 @@
                         <div class="info-row">
                             <div class="info-label">Status:</div>
                             <div class="info-value">
-                                <span class="status-badge status-<?= $invoice['status'] ?>">
-                                    <?= ucfirst($invoice['status']) ?>
-                                </span>
+                                <div class="status-badge status-<?= str_replace('_', '-', $invoice['status']) ?>">
+                                <?= str_replace('_', ' ', ucfirst($invoice['status'])) ?>
+                            </div>
                             </div>
                         </div>
                     </div>

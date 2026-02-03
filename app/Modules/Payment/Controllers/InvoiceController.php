@@ -185,8 +185,8 @@ class InvoiceController extends BaseController
             return redirect()->to('/invoice')->with('error', 'Invoice not found.');
         }
 
-        if ($invoice['status'] !== 'unpaid') {
-            return redirect()->to('/invoice')->with('error', 'Only unpaid invoices can be cancelled.');
+        if ($invoice['status'] !== 'outstanding') {
+            return redirect()->to('/invoice')->with('error', 'Only outstanding invoices can be cancelled.');
         }
 
         if ($this->invoiceModel->updateInvoiceStatus($id, 'cancelled')) {

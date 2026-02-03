@@ -145,9 +145,21 @@ class PaymentController extends BaseController
         }
         
         if ($this->paymentModel->insert($data)) {
-            // If linked to invoice and status is paid, update invoice status
+            // If linked to invoice and status is paid, recalculate invoice status
             if ($data['invoice_id'] && $data['status'] === 'paid') {
-                $this->invoiceModel->updateInvoiceStatus($data['invoice_id'], 'paid');
+                $newInvoiceStatus = $this->invoiceModel->recalculateInvoiceStatus($data['invoice_id']);
+                
+                // Only auto-approve admission if the invoice is now FULLY paid
+                if ($newInvoiceStatus === 'paid') {
+                    $admission = $this->admissionModel->where('registration_number', $data['registration_number'])->first();
+                    if ($admission && $admission['status'] === 'pending') {
+                        $this->admissionModel->update($admission['id'], [
+                            'status' => 'approved',
+                            'reviewed_date' => date('Y-m-d H:i:s'),
+                            'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "Automatically approved upon full payment."
+                        ]);
+                    }
+                }
             }
             
             return redirect()->to('/payment')->with('success', 'Payment created successfully.');
@@ -175,8 +187,8 @@ class PaymentController extends BaseController
             return $student['status'] === 'approved';
         });
         
-        // Get unpaid invoices for dropdown
-        $invoices = $this->invoiceModel->where('status', 'unpaid')->findAll();
+        // Get outstanding invoices for dropdown
+        $invoices = $this->invoiceModel->where('status', 'outstanding')->findAll();
         
         return view('Modules\Payment\Views\payments\edit', [
             'title' => 'Edit Payment',
@@ -221,9 +233,21 @@ class PaymentController extends BaseController
         }
         
         if ($this->paymentModel->save($data)) {
-            // If linked to invoice and status is paid, update invoice status
+            // If linked to invoice and status is paid, recalculate invoice status
             if ($data['invoice_id'] && $data['status'] === 'paid') {
-                $this->invoiceModel->updateInvoiceStatus($data['invoice_id'], 'paid');
+                $newInvoiceStatus = $this->invoiceModel->recalculateInvoiceStatus($data['invoice_id']);
+                
+                // Only auto-approve admission if the invoice is now FULLY paid
+                if ($newInvoiceStatus === 'paid') {
+                    $admission = $this->admissionModel->where('registration_number', $data['registration_number'])->first();
+                    if ($admission && $admission['status'] === 'pending') {
+                        $this->admissionModel->update($admission['id'], [
+                            'status' => 'approved',
+                            'reviewed_date' => date('Y-m-d H:i:s'),
+                            'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "Automatically approved upon full payment update."
+                        ]);
+                    }
+                }
             }
             
             return redirect()->to('/payment')->with('success', 'Payment updated successfully.');

@@ -441,17 +441,18 @@ class AdmissionController extends BaseController
         
         $results = $this->admissionModel->searchAdmissions($keyword);
         
-        // Filter only approved students for payment
-        $filtered = array_filter($results, function($item) {
-            return $item['status'] === 'approved';
-        });
-        
-        $formatted = array_map(function($item) {
-            return [
-                'id' => $item['registration_number'],
-                'text' => $item['full_name'] . ' (' . $item['registration_number'] . ')'
-            ];
-        }, array_values($filtered));
+        // Filter only approved or pending students for payment
+    $filtered = array_filter($results, function($item) {
+        return in_array($item['status'], ['approved', 'pending']);
+    });
+    
+    $formatted = array_map(function($item) {
+        $statusSuffix = $item['status'] === 'pending' ? ' [PENDING]' : '';
+        return [
+            'id' => $item['registration_number'],
+            'text' => $item['full_name'] . ' (' . $item['registration_number'] . ')' . $statusSuffix
+        ];
+    }, array_values($filtered));
         
         return $this->response->setJSON(['results' => $formatted]);
     }

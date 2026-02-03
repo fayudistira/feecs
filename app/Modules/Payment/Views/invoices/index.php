@@ -53,8 +53,9 @@
                     <div class="col-md-2">
                         <select name="status" class="form-select">
                             <option value="">All Status</option>
-                            <option value="unpaid" <?= ($status ?? '') === 'unpaid' ? 'selected' : '' ?>>Unpaid</option>
+                            <option value="outstanding" <?= ($status ?? '') === 'outstanding' ? 'selected' : '' ?>>Outstanding</option>
                             <option value="paid" <?= ($status ?? '') === 'paid' ? 'selected' : '' ?>>Paid</option>
+                            <option value="partially_paid" <?= ($status ?? '') === 'partially_paid' ? 'selected' : '' ?>>Partially Paid</option>
                             <option value="cancelled" <?= ($status ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
                             <option value="expired" <?= ($status ?? '') === 'expired' ? 'selected' : '' ?>>Expired</option>
                         </select>
@@ -112,11 +113,12 @@
                                     <td>
                                         <span class="badge bg-<?php 
                                             if ($invoice['status'] === 'paid') echo 'success';
-                                            elseif ($invoice['status'] === 'unpaid') echo 'warning';
+                                            elseif ($invoice['status'] === 'partially_paid') echo 'info';
+                                            elseif ($invoice['status'] === 'outstanding') echo 'warning';
                                             elseif ($invoice['status'] === 'expired') echo 'danger';
                                             else echo 'secondary';
                                         ?>">
-                                            <?= ucfirst($invoice['status']) ?>
+                                            <?= str_replace('_', ' ', ucfirst($invoice['status'])) ?>
                                         </span>
                                     </td>
                                     <td>
@@ -125,14 +127,14 @@
                                         <a href="<?= base_url('invoice/pdf/' . $invoice['id']) ?>" 
                                            class="btn btn-sm btn-danger" target="_blank" title="Download PDF"><i class="bi bi-file-pdf"></i></a>
                                         
-                                        <?php if ($invoice['status'] === 'unpaid'): ?>
+                                        <?php if ($invoice['status'] === 'outstanding' || $invoice['status'] === 'expired'): ?>
                                             <a href="<?= base_url('invoice/cancel/' . $invoice['id']) ?>" 
                                                class="btn btn-sm btn-secondary" title="Cancel Invoice" 
                                                onclick="return confirm('Are you sure you want to cancel this invoice? This action cannot be undone.')">
                                                 <i class="bi bi-x-circle"></i>
                                             </a>
                                         <?php else: ?>
-                                            <button class="btn btn-sm btn-light disabled" title="Locked: Issued Document">
+                                            <button class="btn btn-sm btn-light disabled" title="Locked: Payment in Progress/Completed">
                                                 <i class="bi bi-lock-fill"></i>
                                             </button>
                                         <?php endif; ?>

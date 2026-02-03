@@ -33,7 +33,7 @@ class InvoiceModel extends Model
         'amount' => 'required|decimal|greater_than[0]',
         'due_date' => 'required|valid_date',
         'invoice_type' => 'required|in_list[registration_fee,tuition_fee,miscellaneous_fee]',
-        'status' => 'permit_empty|in_list[unpaid,paid,cancelled,expired]'
+        'status' => 'permit_empty|in_list[outstanding,paid,cancelled,expired,partially_paid]'
     ];
 
     /**
@@ -43,7 +43,7 @@ class InvoiceModel extends Model
      */
     public function processExpiredInvoices(): int
     {
-        return $this->where('status', 'unpaid')
+        return $this->where('status', 'outstanding')
                     ->where('due_date <', date('Y-m-d'))
                     ->set(['status' => 'expired'])
                     ->update();
@@ -114,9 +114,9 @@ class InvoiceModel extends Model
             $data['invoice_number'] = $this->generateInvoiceNumber();
         }
         
-        // Set default status to unpaid
+        // Set default status to outstanding
         if (!isset($data['status'])) {
-            $data['status'] = 'unpaid';
+            $data['status'] = 'outstanding';
         }
         
         return $this->insert($data);
@@ -135,15 +135,9 @@ class InvoiceModel extends Model
                     ->findAll();
     }
 
-    /**
-     * Get overdue invoices
-     * Filter by status='unpaid' and due_date < today
-     * 
-     * @return array
-     */
     public function getOverdueInvoices(): array
     {
-        return $this->where('status', 'unpaid')
+        return $this->where('status', 'outstanding')
                     ->where('due_date <', date('Y-m-d'))
                     ->orderBy('due_date', 'ASC')
                     ->findAll();
@@ -204,6 +198,44 @@ class InvoiceModel extends Model
     }
 
     /**
+     * Recalculate and update the status of an invoice based on its payments
+     * 
+     * @param int $invoiceId Invoice ID
+     * @return string The new status
+     */
+    public function recalculateInvoiceStatus(int $invoiceId): string
+    {
+        $invoice = $this->find($invoiceId);
+        if (!$invoice) return 'outstanding';
+
+        // Get sum of all 'paid' payments for this invoice
+        $db = \Config\Database::connect();
+        $paidAmount = $db->table('payments')
+                         ->where('invoice_id', $invoiceId)
+                         ->where('status', 'paid')
+                         ->where('deleted_at', null)
+                         ->selectSum('amount')
+                         ->get()
+                         ->getRowArray();
+        
+        $totalPaid = (float) ($paidAmount['amount'] ?? 0);
+        $invoiceAmount = (float) $invoice['amount'];
+
+        $newStatus = 'outstanding';
+        if ($totalPaid >= $invoiceAmount) {
+            $newStatus = 'paid';
+        } elseif ($totalPaid > 0) {
+            $newStatus = 'partially_paid';
+        }
+
+        // If it was cancelled or expired, and now has payments, we update it
+        // but if it's currently paid we don't downgrade it unless payments were deleted/changed
+        $this->update($invoiceId, ['status' => $newStatus]);
+
+        return $newStatus;
+    }
+
+    /**
      * Update invoice status
      * 
      * @param int $id Invoice ID
@@ -212,20 +244,12 @@ class InvoiceModel extends Model
      */
     public function updateInvoiceStatus(int $id, string $status): bool
     {
+        // For 'paid' or 'outstanding' requests, we recalculate to be safe
+        if ($status === 'paid' || $status === 'outstanding') {
+            $this->recalculateInvoiceStatus($id);
+            return true;
+        }
         return $this->update($id, ['status' => $status]);
-    }
-
-    /**
-     * Link payment to invoice
-     * 
-     * @param int $invoiceId Invoice ID
-     * @param int $paymentId Payment ID
-     * @return bool
-     */
-    public function linkPaymentToInvoice(int $invoiceId, int $paymentId): bool
-    {
-        // Update invoice status to paid
-        return $this->update($invoiceId, ['status' => 'paid']);
     }
 
     /**

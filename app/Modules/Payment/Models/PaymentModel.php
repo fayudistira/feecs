@@ -288,7 +288,7 @@ class PaymentModel extends Model
         
         // Count overdue invoices
         $overdueCount = $db->table('invoices')
-                          ->where('status', 'unpaid')
+                          ->where('status', 'outstanding')
                           ->where('due_date <', date('Y-m-d'))
                           ->where('deleted_at', null)
                           ->countAllResults();
@@ -404,7 +404,7 @@ class PaymentModel extends Model
                  ->select('invoices.*, profiles.full_name, profiles.email')
                  ->join('admissions', 'admissions.registration_number = invoices.registration_number')
                  ->join('profiles', 'profiles.id = admissions.profile_id')
-                 ->where('invoices.status', 'unpaid')
+                 ->where('invoices.status', 'outstanding')
                  ->where('invoices.due_date <', date('Y-m-d'))
                  ->where('invoices.deleted_at', null)
                  ->orderBy('invoices.due_date', 'ASC')

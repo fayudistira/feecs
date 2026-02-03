@@ -209,7 +209,7 @@ class InvoiceApiController extends ResourceController
 
     /**
      * Filter invoices by status
-     * GET /api/invoices/filter/status?status=unpaid
+     * GET /api/invoices/filter/status?status=outstanding
      */
     public function filterByStatus()
     {

@@ -111,6 +111,19 @@ class PaymentApiController extends ResourceController
             $id = $paymentModel->getInsertID();
             $payment = $paymentModel->find($id);
             
+            // Auto-approve admission if payment is paid
+            if (isset($data['status']) && $data['status'] === 'paid' && isset($data['registration_number'])) {
+                $admissionModel = new \Modules\Admission\Models\AdmissionModel();
+                $admission = $admissionModel->where('registration_number', $data['registration_number'])->first();
+                if ($admission && $admission['status'] === 'pending') {
+                    $admissionModel->update($admission['id'], [
+                        'status' => 'approved',
+                        'reviewed_date' => date('Y-m-d H:i:s'),
+                        'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "Automatically approved via API payment."
+                    ]);
+                }
+            }
+            
             return $this->respondCreated([
                 'status' => 'success',
                 'data' => $payment,
@@ -140,6 +153,20 @@ class PaymentApiController extends ResourceController
         
         if ($paymentModel->update($id, $data)) {
             $payment = $paymentModel->find($id);
+            
+            // Auto-approve admission if payment is paid
+            if (isset($data['status']) && $data['status'] === 'paid') {
+                $admissionModel = new \Modules\Admission\Models\AdmissionModel();
+                $regNumber = $data['registration_number'] ?? $payment['registration_number'];
+                $admission = $admissionModel->where('registration_number', $regNumber)->first();
+                if ($admission && $admission['status'] === 'pending') {
+                    $admissionModel->update($admission['id'], [
+                        'status' => 'approved',
+                        'reviewed_date' => date('Y-m-d H:i:s'),
+                        'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "Automatically approved via API payment update."
+                    ]);
+                }
+            }
             
             return $this->respond([
                 'status' => 'success',
@@ -189,6 +216,19 @@ class PaymentApiController extends ResourceController
         
         if ($paymentModel->updatePaymentStatus($id, $status, $additionalData)) {
             $payment = $paymentModel->find($id);
+            
+            // Auto-approve admission if payment is paid
+            if ($status === 'paid') {
+                $admissionModel = new \Modules\Admission\Models\AdmissionModel();
+                $admission = $admissionModel->where('registration_number', $payment['registration_number'])->first();
+                if ($admission && $admission['status'] === 'pending') {
+                    $admissionModel->update($admission['id'], [
+                        'status' => 'approved',
+                        'reviewed_date' => date('Y-m-d H:i:s'),
+                        'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "Automatically approved via API status update."
+                    ]);
+                }
+            }
             
             return $this->respond([
                 'status' => 'success',

@@ -24,7 +24,7 @@
                 <a href="<?= base_url('invoice/pdf/' . $invoice['id']) ?>" class="btn btn-light" target="_blank">
                     <i class="bi bi-file-pdf"></i> Download PDF
                 </a>
-                <?php if ($invoice['status'] === 'unpaid'): ?>
+                <?php if (in_array($invoice['status'], ['outstanding', 'expired'])): ?>
                     <a href="<?= base_url('invoice/cancel/' . $invoice['id']) ?>" class="btn btn-danger" 
                        onclick="return confirm('Are you sure you want to cancel this invoice? This action cannot be undone.')">
                         <i class="bi bi-x-circle"></i> Cancel Invoice
@@ -58,11 +58,12 @@
                         <span class="info-label">Status:</span> 
                         <span class="badge bg-<?php 
                             if ($invoice['status'] === 'paid') echo 'success';
-                            elseif ($invoice['status'] === 'unpaid') echo 'warning';
+                            elseif ($invoice['status'] === 'partially_paid') echo 'info';
+                            elseif ($invoice['status'] === 'outstanding') echo 'warning';
                             elseif ($invoice['status'] === 'expired') echo 'danger';
                             else echo 'secondary';
                         ?>">
-                            <?= ucfirst($invoice['status']) ?>
+                            <?= str_replace('_', ' ', ucfirst($invoice['status'])) ?>
                         </span>
                     </div>
                     <div class="mb-2">
