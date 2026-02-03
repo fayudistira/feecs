@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'Dashboard') ?> - SOSCT</title>
+    <title><?= esc($title ?? 'Dashboard') ?> - ERP.FEEC</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <?php 
@@ -431,7 +431,7 @@
         <div class="sidebar-header d-flex justify-content-between align-items-center">
             <h3>
                 <i class="bi bi-speedometer2 me-2"></i>
-                <span>SOSCT</span>
+                <span>ERP.FEEC/span>
             </h3>
             <button class="btn btn-link d-none d-lg-block p-0" id="sidebarToggle" style="color: var(--dark-red);">
                 <i class="bi bi-chevron-left" id="toggleIcon"></i>
