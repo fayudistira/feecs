@@ -50,7 +50,7 @@ class InvoiceApiController extends ResourceController
         
         // Enrich with student details
         foreach ($invoices as &$invoice) {
-            $student = $admissionModel->where('registration_number', $invoice['registration_number'])->first();
+            $student = $admissionModel->getByRegistrationNumber($invoice['registration_number']);
             $invoice['student'] = $student;
         }
         
@@ -197,7 +197,7 @@ class InvoiceApiController extends ResourceController
         
         // Enrich with student details
         foreach ($invoices as &$invoice) {
-            $student = $admissionModel->where('registration_number', $invoice['registration_number'])->first();
+            $student = $admissionModel->getByRegistrationNumber($invoice['registration_number']);
             $invoice['student'] = $student;
         }
         
@@ -272,7 +272,7 @@ class InvoiceApiController extends ResourceController
         }
         
         // Verify student exists
-        $student = $admissionModel->where('registration_number', $registrationNumber)->first();
+        $student = $admissionModel->getByRegistrationNumber($registrationNumber);
         if (!$student) {
             return $this->failNotFound('Student not found');
         }
@@ -304,7 +304,7 @@ class InvoiceApiController extends ResourceController
             $interval = $today->diff($dueDate);
             $invoice['days_overdue'] = $interval->days;
             
-            $student = $admissionModel->where('registration_number', $invoice['registration_number'])->first();
+            $student = $admissionModel->getByRegistrationNumber($invoice['registration_number']);
             $invoice['student'] = $student;
         }
         

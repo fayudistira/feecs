@@ -56,7 +56,7 @@ class InvoiceController extends BaseController
         
         // Enrich with student details
         foreach ($invoices as &$invoice) {
-            $student = $this->admissionModel->where('registration_number', $invoice['registration_number'])->first();
+            $student = $this->admissionModel->getByRegistrationNumber($invoice['registration_number']);
             $invoice['student'] = $student;
         }
         

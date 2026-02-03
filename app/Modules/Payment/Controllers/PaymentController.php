@@ -58,7 +58,7 @@ class PaymentController extends BaseController
         
         // Enrich with student details
         foreach ($payments as &$payment) {
-            $student = $this->admissionModel->where('registration_number', $payment['registration_number'])->first();
+            $student = $this->admissionModel->getByRegistrationNumber($payment['registration_number']);
             $payment['student'] = $student;
         }
         
@@ -90,7 +90,7 @@ class PaymentController extends BaseController
         }
         
         // Get student details
-        $student = $this->admissionModel->where('registration_number', $payment['registration_number'])->first();
+        $student = $this->admissionModel->getByRegistrationNumber($payment['registration_number']);
         $payment['student'] = $student;
         
         // Get invoice if linked

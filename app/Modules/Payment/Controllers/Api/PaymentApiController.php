@@ -50,7 +50,7 @@ class PaymentApiController extends ResourceController
         
         // Enrich with student details
         foreach ($payments as &$payment) {
-            $student = $admissionModel->where('registration_number', $payment['registration_number'])->first();
+            $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
             $payment['student'] = $student;
         }
         
@@ -82,7 +82,7 @@ class PaymentApiController extends ResourceController
         }
         
         // Get student details
-        $student = $admissionModel->where('registration_number', $payment['registration_number'])->first();
+        $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
         $payment['student'] = $student;
         
         // Get invoice details if linked
@@ -225,7 +225,7 @@ class PaymentApiController extends ResourceController
         
         // Enrich with student details
         foreach ($payments as &$payment) {
-            $student = $admissionModel->where('registration_number', $payment['registration_number'])->first();
+            $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
             $payment['student'] = $student;
         }
         
@@ -328,7 +328,7 @@ class PaymentApiController extends ResourceController
         }
         
         // Verify student exists
-        $student = $admissionModel->where('registration_number', $registrationNumber)->first();
+        $student = $admissionModel->getByRegistrationNumber($registrationNumber);
         if (!$student) {
             return $this->failNotFound('Student not found');
         }

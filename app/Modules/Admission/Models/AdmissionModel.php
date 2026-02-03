@@ -260,6 +260,60 @@ class AdmissionModel extends Model
     }
     
     /**
+     * Get admission with profile and program details by registration number
+     * 
+     * @param string $registrationNumber Registration Number
+     * @return array|null
+     */
+    public function getByRegistrationNumber(string $registrationNumber): ?array
+    {
+        return $this->select('
+                admissions.id as admission_id,
+                admissions.registration_number,
+                admissions.profile_id,
+                admissions.program_id,
+                admissions.status,
+                admissions.application_date,
+                admissions.reviewed_date,
+                admissions.reviewed_by,
+                admissions.notes,
+                admissions.applicant_notes,
+                admissions.created_at,
+                admissions.updated_at,
+                profiles.profile_number,
+                profiles.full_name,
+                profiles.nickname,
+                profiles.gender,
+                profiles.place_of_birth,
+                profiles.date_of_birth,
+                profiles.religion,
+                profiles.citizen_id,
+                profiles.phone,
+                profiles.email,
+                profiles.street_address,
+                profiles.district,
+                profiles.regency,
+                profiles.province,
+                profiles.postal_code,
+                profiles.emergency_contact_name,
+                profiles.emergency_contact_phone,
+                profiles.emergency_contact_relation,
+                profiles.father_name,
+                profiles.mother_name,
+                profiles.photo,
+                profiles.documents,
+                programs.title as program_title,
+                programs.category,
+                programs.tuition_fee,
+                programs.discount
+            ')
+                    ->join('profiles', 'profiles.id = admissions.profile_id')
+                    ->join('programs', 'programs.id = admissions.program_id')
+                    ->where('admissions.registration_number', $registrationNumber)
+                    ->first();
+    }
+
+    /**
      * Get all admissions with profile and program details
      * 
      * @return array
@@ -283,3 +337,5 @@ class AdmissionModel extends Model
                     ->findAll();
     }
 }
+
+

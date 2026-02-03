@@ -123,9 +123,10 @@ class PaymentModel extends Model
         
         return $builder->select('payments.*')
                       ->join('admissions', 'admissions.registration_number = payments.registration_number')
+                      ->join('profiles', 'profiles.id = admissions.profile_id')
                       ->where('payments.deleted_at', null)
                       ->groupStart()
-                          ->like('admissions.full_name', $keyword)
+                          ->like('profiles.full_name', $keyword)
                           ->orLike('payments.registration_number', $keyword)
                           ->orLike('payments.document_number', $keyword)
                       ->groupEnd()
@@ -399,8 +400,9 @@ class PaymentModel extends Model
         $db = \Config\Database::connect();
         
         return $db->table('invoices')
-                 ->select('invoices.*, admissions.full_name, admissions.email')
+                 ->select('invoices.*, profiles.full_name, profiles.email')
                  ->join('admissions', 'admissions.registration_number = invoices.registration_number')
+                 ->join('profiles', 'profiles.id = admissions.profile_id')
                  ->where('invoices.status', 'unpaid')
                  ->where('invoices.due_date <', date('Y-m-d'))
                  ->where('invoices.deleted_at', null)

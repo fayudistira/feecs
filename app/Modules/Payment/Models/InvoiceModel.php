@@ -150,10 +150,11 @@ class InvoiceModel extends Model
         
         return $builder->select('invoices.*')
                       ->join('admissions', 'admissions.registration_number = invoices.registration_number')
+                      ->join('profiles', 'profiles.id = admissions.profile_id')
                       ->where('invoices.deleted_at', null)
                       ->groupStart()
                           ->like('invoices.invoice_number', $keyword)
-                          ->orLike('admissions.full_name', $keyword)
+                          ->orLike('profiles.full_name', $keyword)
                       ->groupEnd()
                       ->orderBy('invoices.created_at', 'DESC')
                       ->get()
