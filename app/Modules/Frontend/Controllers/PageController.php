@@ -54,28 +54,39 @@ class PageController extends BaseController
     {
         $programModel = new \Modules\Program\Models\ProgramModel();
         
-        // Get selected category from query string
+        // Get selected category and sub-category from query string
         $selectedCategory = $this->request->getGet('category');
+        $selectedSubCategory = $this->request->getGet('sub_category');
         
         // Get all active programs
         $allPrograms = $programModel->where('status', 'active')
                                     ->orderBy('category', 'ASC')
+                                    ->orderBy('sub_category', 'ASC')
                                     ->orderBy('title', 'ASC')
                                     ->findAll();
         
-        // Group programs by category
+        // Group programs by category then by sub_category
         $programsByCategory = [];
         $categories = [];
         
         foreach ($allPrograms as $program) {
             $category = $program['category'] ?? 'Uncategorized';
+            $subCategory = $program['sub_category'] ?? 'General';
             
             if (!isset($programsByCategory[$category])) {
-                $programsByCategory[$category] = [];
+                $programsByCategory[$category] = [
+                    'sub_categories' => [],
+                    'total_programs' => 0
+                ];
                 $categories[] = $category;
             }
             
-            $programsByCategory[$category][] = $program;
+            if (!isset($programsByCategory[$category]['sub_categories'][$subCategory])) {
+                $programsByCategory[$category]['sub_categories'][$subCategory] = [];
+            }
+            
+            $programsByCategory[$category]['sub_categories'][$subCategory][] = $program;
+            $programsByCategory[$category]['total_programs']++;
         }
         
         // If no category selected, select the first one
@@ -83,11 +94,18 @@ class PageController extends BaseController
             $selectedCategory = $categories[0];
         }
         
+        // If no sub-category selected, select the first one of the selected category
+        if (empty($selectedSubCategory) && !empty($selectedCategory) && !empty($programsByCategory[$selectedCategory]['sub_categories'])) {
+            $subCategories = array_keys($programsByCategory[$selectedCategory]['sub_categories']);
+            $selectedSubCategory = $subCategories[0];
+        }
+        
         return view('Modules\Frontend\Views\Programs\index', [
             'title' => 'Our Programs',
             'programsByCategory' => $programsByCategory,
             'categories' => $categories,
             'selectedCategory' => $selectedCategory,
+            'selectedSubCategory' => $selectedSubCategory,
             'totalPrograms' => count($allPrograms)
         ]);
     }
