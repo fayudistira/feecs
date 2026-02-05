@@ -27,10 +27,16 @@
                          class="card-img-top"
                          style="width: 100%; height: 220px; object-fit: cover;">
                 <?php else: ?>
-                    <div class="bg-light d-flex align-items-center justify-content-center" 
-                         style="height: 220px;">
-                        <i class="bi bi-mortarboard" style="font-size: 3rem; color: #ccc;"></i>
-                    </div>
+                    <?php 
+                    // Generate a consistent random seed based on program ID for consistent images
+                    $seed = crc32($program['id']);
+                    $randomId = ($seed % 1000) + 1;
+                    ?>
+                    <img src="https://picsum.photos/seed/<?= $randomId ?>/800/600" 
+                         alt="<?= esc($program['title']) ?>" 
+                         class="card-img-top"
+                         style="width: 100%; height: 220px; object-fit: cover;"
+                         loading="lazy">
                 <?php endif ?>
             </div>
             
