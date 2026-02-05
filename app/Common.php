@@ -13,3 +13,25 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+if (! function_exists('format_whatsapp_number')) {
+    /**
+     * Format phone number for WhatsApp URL
+     * Converts 08xxx to 628xxx
+     * 
+     * @param string $number
+     * @return string
+     */
+    function format_whatsapp_number(string $number): string
+    {
+        // Remove any non-numeric characters
+        $number = preg_replace('/[^0-9]/', '', $number);
+        
+        // If number starts with 0, replace with 62
+        if (substr($number, 0, 1) === '0') {
+            $number = '62' . substr($number, 1);
+        }
+        
+        return $number;
+    }
+}

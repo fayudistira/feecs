@@ -7,8 +7,6 @@ ssh -p 65002 u623281586@185.232.14.158
 
 
 
-openrouter api key 
-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
 
 feecenter
 kampung.inggris2004 

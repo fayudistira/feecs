@@ -86,7 +86,15 @@
                     </div>
                     <div class="col-md-6">
                         <small class="text-muted d-block">Phone</small>
-                        <span class="fw-medium"><?= esc($staff['phone']) ?></span>
+                        <span class="fw-medium">
+                            <?php if ($staff['phone']): ?>
+                                <a href="https://wa.me/<?= format_whatsapp_number($staff['phone']) ?>" target="_blank" class="text-decoration-none">
+                                    <i class="bi bi-whatsapp text-success me-1"></i> <?= esc($staff['phone']) ?>
+                                </a>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </span>
                     </div>
                     <div class="col-md-6">
                         <small class="text-muted d-block">Gender</small>
