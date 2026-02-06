@@ -19,10 +19,10 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $admissionModel = new AdmissionModel();
-        
+
         $page = $this->request->getGet('page') ?? 1;
         $perPage = $this->request->getGet('per_page') ?? 10;
-        
+
         // Apply filters if provided
         $filters = [];
         if ($status = $this->request->getGet('status')) {
@@ -37,7 +37,7 @@ class PaymentApiController extends ResourceController
         if ($endDate = $this->request->getGet('end_date')) {
             $filters['end_date'] = $endDate;
         }
-        
+
         // Get payments
         if (!empty($filters)) {
             $payments = $paymentModel->filterPayments($filters);
@@ -47,13 +47,13 @@ class PaymentApiController extends ResourceController
             $payments = $paymentModel->paginate($perPage, 'default', $page);
             $total = $paymentModel->countAllResults(false);
         }
-        
+
         // Enrich with student details
         foreach ($payments as &$payment) {
             $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
             $payment['student'] = $student;
         }
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments,
@@ -74,24 +74,24 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $admissionModel = new AdmissionModel();
-        
+
         $payment = $paymentModel->find($id);
-        
+
         if (!$payment) {
             return $this->failNotFound('Payment not found');
         }
-        
+
         // Get student details
-        $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
+        $student = $admissionModel->getByRegistrationNumber((string)$payment['registration_number']);
         $payment['student'] = $student;
-        
+
         // Get invoice details if linked
         if ($payment['invoice_id']) {
             $invoiceModel = new \Modules\Payment\Models\InvoiceModel();
             $invoice = $invoiceModel->find($payment['invoice_id']);
             $payment['invoice'] = $invoice;
         }
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payment
@@ -106,11 +106,11 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $data = $this->request->getJSON(true);
-        
+
         if ($paymentModel->insert($data)) {
             $id = $paymentModel->getInsertID();
             $payment = $paymentModel->find($id);
-            
+
             // Auto-approve admission if payment is paid
             if (isset($data['status']) && $data['status'] === 'paid' && isset($data['registration_number'])) {
                 $admissionModel = new \Modules\Admission\Models\AdmissionModel();
@@ -123,14 +123,14 @@ class PaymentApiController extends ResourceController
                     ]);
                 }
             }
-            
+
             return $this->respondCreated([
                 'status' => 'success',
                 'data' => $payment,
                 'message' => 'Payment created successfully'
             ]);
         }
-        
+
         return $this->fail([
             'status' => 'error',
             'message' => 'Failed to create payment',
@@ -146,14 +146,14 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $data = $this->request->getJSON(true);
-        
+
         if (!$paymentModel->find($id)) {
             return $this->failNotFound('Payment not found');
         }
-        
+
         if ($paymentModel->update($id, $data)) {
             $payment = $paymentModel->find($id);
-            
+
             // Auto-approve admission if payment is paid
             if (isset($data['status']) && $data['status'] === 'paid') {
                 $admissionModel = new \Modules\Admission\Models\AdmissionModel();
@@ -167,14 +167,14 @@ class PaymentApiController extends ResourceController
                     ]);
                 }
             }
-            
+
             return $this->respond([
                 'status' => 'success',
                 'data' => $payment,
                 'message' => 'Payment updated successfully'
             ]);
         }
-        
+
         return $this->fail([
             'status' => 'error',
             'message' => 'Failed to update payment',
@@ -190,11 +190,11 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $data = $this->request->getJSON(true);
-        
+
         if (!$paymentModel->find($id)) {
             return $this->failNotFound('Payment not found');
         }
-        
+
         $status = $data['status'] ?? null;
         if (!$status) {
             return $this->fail([
@@ -202,7 +202,7 @@ class PaymentApiController extends ResourceController
                 'message' => 'Status is required'
             ], 422);
         }
-        
+
         $additionalData = [];
         if (isset($data['failure_reason'])) {
             $additionalData['failure_reason'] = $data['failure_reason'];
@@ -213,10 +213,10 @@ class PaymentApiController extends ResourceController
         if (isset($data['refund_reason'])) {
             $additionalData['refund_reason'] = $data['refund_reason'];
         }
-        
+
         if ($paymentModel->updatePaymentStatus($id, $status, $additionalData)) {
             $payment = $paymentModel->find($id);
-            
+
             // Auto-approve admission if payment is paid
             if ($status === 'paid') {
                 $admissionModel = new \Modules\Admission\Models\AdmissionModel();
@@ -229,14 +229,14 @@ class PaymentApiController extends ResourceController
                     ]);
                 }
             }
-            
+
             return $this->respond([
                 'status' => 'success',
                 'data' => $payment,
                 'message' => 'Payment status updated successfully'
             ]);
         }
-        
+
         return $this->fail([
             'status' => 'error',
             'message' => 'Failed to update payment status'
@@ -251,24 +251,24 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $admissionModel = new AdmissionModel();
-        
+
         $keyword = $this->request->getGet('q');
-        
+
         if (!$keyword) {
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Search keyword is required'
             ], 422);
         }
-        
+
         $payments = $paymentModel->searchPayments($keyword);
-        
+
         // Enrich with student details
         foreach ($payments as &$payment) {
             $student = $admissionModel->getByRegistrationNumber($payment['registration_number']);
             $payment['student'] = $student;
         }
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments
@@ -283,16 +283,16 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $status = $this->request->getGet('status');
-        
+
         if (!$status) {
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Status parameter is required'
             ], 422);
         }
-        
+
         $payments = $paymentModel->filterPayments(['status' => $status]);
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments
@@ -307,16 +307,16 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $method = $this->request->getGet('method');
-        
+
         if (!$method) {
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Method parameter is required'
             ], 422);
         }
-        
+
         $payments = $paymentModel->filterPayments(['method' => $method]);
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments
@@ -332,19 +332,19 @@ class PaymentApiController extends ResourceController
         $paymentModel = new PaymentModel();
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
-        
+
         if (!$startDate || !$endDate) {
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Both start_date and end_date are required'
             ], 422);
         }
-        
+
         $payments = $paymentModel->filterPayments([
             'start_date' => $startDate,
             'end_date' => $endDate
         ]);
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments
@@ -359,22 +359,22 @@ class PaymentApiController extends ResourceController
     {
         $paymentModel = new PaymentModel();
         $admissionModel = new AdmissionModel();
-        
+
         if (!$registrationNumber) {
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Registration number is required'
             ], 422);
         }
-        
+
         // Verify student exists
-        $student = $admissionModel->getByRegistrationNumber($registrationNumber);
+        $student = $admissionModel->getByRegistrationNumber((string)$registrationNumber);
         if (!$student) {
             return $this->failNotFound('Student not found');
         }
-        
+
         $payments = $paymentModel->getPaymentsByStudent($registrationNumber);
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payments,
@@ -389,20 +389,20 @@ class PaymentApiController extends ResourceController
     public function statistics()
     {
         $paymentModel = new PaymentModel();
-        
+
         $startDate = $this->request->getGet('start_date') ?? date('Y-01-01');
         $endDate = $this->request->getGet('end_date') ?? date('Y-m-d');
-        
+
         // Get dashboard statistics
         $stats = $paymentModel->getDashboardStatistics($startDate, $endDate);
-        
+
         // Get revenue breakdowns
         $stats['revenue_by_method'] = $paymentModel->getRevenueByMethod();
         $stats['revenue_by_type'] = $paymentModel->getRevenueByType();
-        
+
         // Get monthly trend for current year
         $stats['monthly_trend'] = $paymentModel->getMonthlyRevenueTrend(date('Y'));
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $stats,
@@ -420,13 +420,13 @@ class PaymentApiController extends ResourceController
     public function uploadReceipt($id = null)
     {
         $paymentModel = new PaymentModel();
-        
+
         // Check if payment exists
         $payment = $paymentModel->find($id);
         if (!$payment) {
             return $this->failNotFound('Payment not found');
         }
-        
+
         // Check if file was uploaded
         $file = $this->request->getFile('receipt_file');
         if (!$file) {
@@ -438,10 +438,10 @@ class PaymentApiController extends ResourceController
                 ]
             ], 422);
         }
-        
+
         // Upload file
         $filePath = $paymentModel->uploadReceiptFile($file);
-        
+
         if (!$filePath) {
             return $this->fail([
                 'status' => 'error',
@@ -451,13 +451,13 @@ class PaymentApiController extends ResourceController
                 ]
             ], 422);
         }
-        
+
         // Update payment record with file path
         $paymentModel->update($id, ['receipt_file' => $filePath]);
-        
+
         // Get updated payment
         $payment = $paymentModel->find($id);
-        
+
         return $this->respond([
             'status' => 'success',
             'data' => $payment,

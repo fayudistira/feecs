@@ -404,7 +404,7 @@
                         <td>
                             <strong><?= esc($invoice['description']) ?></strong>
                             <?php if (!empty($invoice['notes'])): ?>
-                                <br><small style="color: #666;"><?= nl2br(esc($invoice['notes'])) ?></small>
+                                <br><small style="color: #666;"><?= nl2br(esc((string)($invoice['notes'] ?? ''))) ?></small>
                             <?php endif ?>
                         </td>
                         <td style="text-align: right;">Rp <?= number_format($invoice['amount'], 0, ',', '.') ?></td>

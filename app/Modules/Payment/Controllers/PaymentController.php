@@ -58,7 +58,7 @@ class PaymentController extends BaseController
 
         // Enrich with student details
         foreach ($payments as &$payment) {
-            $student = $this->admissionModel->getByRegistrationNumber($payment['registration_number']);
+            $student = $this->admissionModel->getByRegistrationNumber((string)$payment['registration_number']);
             $payment['student'] = $student;
         }
 
@@ -90,7 +90,7 @@ class PaymentController extends BaseController
         }
 
         // Get student details
-        $student = $this->admissionModel->getByRegistrationNumber($payment['registration_number']);
+        $student = $this->admissionModel->getByRegistrationNumber((string)$payment['registration_number']);
         $payment['student'] = $student;
 
         // Get invoice if linked
@@ -204,8 +204,10 @@ class PaymentController extends BaseController
             return $student['status'] === 'approved';
         });
 
-        // Get outstanding invoices for dropdown
-        $invoices = $this->invoiceModel->where('status', 'outstanding')->findAll();
+        // Get outstanding and partially paid invoices for dropdown
+        $invoices = $this->invoiceModel->where('status', 'outstanding')
+            ->orWhere('status', 'partially_paid')
+            ->findAll();
 
         return view('Modules\Payment\Views\payments\edit', [
             'title' => 'Edit Payment',

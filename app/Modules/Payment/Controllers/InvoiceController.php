@@ -59,7 +59,7 @@ class InvoiceController extends BaseController
 
         // Enrich with student details
         foreach ($invoices as &$invoice) {
-            $student = $this->admissionModel->getByRegistrationNumber($invoice['registration_number']);
+            $student = $this->admissionModel->getByRegistrationNumber((string)$invoice['registration_number']);
             $invoice['student'] = $student;
         }
 
@@ -101,7 +101,7 @@ class InvoiceController extends BaseController
             ')
             ->join('profiles', 'profiles.id = admissions.profile_id')
             ->join('programs', 'programs.id = admissions.program_id')
-            ->where('admissions.registration_number', $invoice['registration_number'])
+            ->where('admissions.registration_number', (string)$invoice['registration_number'])
             ->first();
 
         $invoice['student'] = $student;
@@ -249,7 +249,7 @@ class InvoiceController extends BaseController
             ')
             ->join('profiles', 'profiles.id = admissions.profile_id')
             ->join('programs', 'programs.id = admissions.program_id')
-            ->where('admissions.registration_number', $invoice['registration_number'])
+            ->where('admissions.registration_number', (string)$invoice['registration_number'])
             ->first();
 
         return view('Modules\Payment\Views\invoices\print', [
@@ -272,12 +272,13 @@ class InvoiceController extends BaseController
         // Generate public URL for invoice
         $publicUrl = base_url('invoice/public/' . $id);
 
-        // Create QR code using Builder
-        $result = \Endroid\QrCode\Builder\Builder::create()
-            ->data($publicUrl)
-            ->size(300)
-            ->margin(10)
-            ->build();
+        // Create QR code using Builder (v6.0 API)
+        $builder = new \Endroid\QrCode\Builder\Builder(
+            data: $publicUrl,
+            size: 300,
+            margin: 10
+        );
+        $result = $builder->build();
 
         // Return QR code image
         return $this->response
@@ -307,7 +308,7 @@ class InvoiceController extends BaseController
             ')
             ->join('profiles', 'profiles.id = admissions.profile_id')
             ->join('programs', 'programs.id = admissions.program_id')
-            ->where('admissions.registration_number', $invoice['registration_number'])
+            ->where('admissions.registration_number', (string)$invoice['registration_number'])
             ->first();
 
         return view('Modules\Payment\Views\invoices\print', [

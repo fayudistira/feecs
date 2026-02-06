@@ -7,14 +7,14 @@ use CodeIgniter\Email\Email;
 class EmailService
 {
     protected $email;
-    protected $config = [];
+    protected $emailConfig;
 
     public function __construct()
     {
         $this->email = service('email');
 
         // Load email configuration
-        $this->config = (new \Config\Email())->getTempConfiguration();
+        $this->emailConfig = config('Email');
     }
 
     /**
@@ -29,7 +29,7 @@ class EmailService
     public function sendInvoiceNotification($invoice, $recipientEmail, $recipientName, $admissionData = [])
     {
         try {
-            $this->email->setFrom($this->config['SMTPUser'] ?? 'noreply@example.com', 'FEECS Admissions');
+            $this->email->setFrom($this->emailConfig->fromEmail, $this->emailConfig->fromName);
             $this->email->setTo($recipientEmail);
             $this->email->setSubject('Your Registration Invoice - ' . ($admissionData['registration_number'] ?? 'FEECS'));
 
@@ -58,7 +58,7 @@ class EmailService
     public function sendPaymentReceivedNotification($recipientEmail, $recipientName, $paymentData = [])
     {
         try {
-            $this->email->setFrom($this->config['SMTPUser'] ?? 'noreply@example.com', 'FEECS Admissions');
+            $this->email->setFrom($this->emailConfig->fromEmail, $this->emailConfig->fromName);
             $this->email->setTo($recipientEmail);
             $this->email->setSubject('Payment Received - Admissions Approved');
 

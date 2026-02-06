@@ -12,28 +12,34 @@
         border-radius: 5px;
         margin-bottom: 20px;
     }
+
     .btn-payment {
         background: linear-gradient(to right, #8B0000, #6B0000);
         color: white;
         border: none;
     }
+
     .btn-payment:hover {
         background: linear-gradient(to right, #6B0000, #8B0000);
         color: white;
     }
+
     /* Select2 Bootstrap 5 compatibility */
     .select2-container .select2-selection--single {
         height: 38px !important;
         border: 1px solid #dee2e6 !important;
         border-radius: 0.375rem !important;
     }
+
     .select2-container--default .select2-selection--single .select2-selection__rendered {
         line-height: 36px !important;
         padding-left: 12px !important;
     }
+
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 36px !important;
     }
+
     .loading-spinner {
         display: none;
         order: 2;
@@ -45,7 +51,7 @@
     <div class="payment-header">
         <h3 class="mb-0">Create Payment</h3>
     </div>
-    
+
     <?php if (session()->getFlashdata('errors')): ?>
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -55,12 +61,12 @@
             </ul>
         </div>
     <?php endif ?>
-    
+
     <div class="card shadow-sm">
         <div class="card-body">
             <form action="<?= base_url('payment/store') ?>" method="post" enctype="multipart/form-data" id="paymentForm">
                 <?= csrf_field() ?>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-4">
@@ -71,7 +77,7 @@
                             <div class="form-text">Search by registration number or student name.</div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="mb-4">
                             <label class="form-label fw-bold">2. Related Invoice *</label>
@@ -87,9 +93,9 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <hr class="my-4">
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -100,7 +106,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Payment Method *</label>
@@ -114,7 +120,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -122,7 +128,7 @@
                             <input type="text" name="document_number" class="form-control" placeholder="Trial/Ref Code/Tnx ID" required>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Payment Date *</label>
@@ -130,7 +136,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -142,7 +148,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Receipt File (Max 2MB)</label>
@@ -150,12 +156,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-4">
                     <label class="form-label fw-bold">Additional Notes</label>
                     <textarea name="notes" class="form-control" rows="3" placeholder="Any additional information..."></textarea>
                 </div>
-                
+
                 <div class="d-flex justify-content-between p-3 bg-light rounded shadow-sm border">
                     <a href="<?= base_url('payment') ?>" class="btn btn-outline-secondary">
                         <i class="bi bi-x-circle me-1"></i> Cancel
@@ -174,108 +180,109 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-$(document).ready(function() {
-    // Explicitly reset on load
-    $('#invoiceSelect').empty().append('<option value="">Select student first...</option>');
-    $('#amountInput').val('');
-
-    // Initialize Select2 for Student Search
-    $('#studentSearch').select2({
-        theme: 'default',
-        placeholder: 'Search for a student...',
-        minimumInputLength: 1,
-        ajax: {
-            url: '<?= base_url('admission/ajax-search') ?>',
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                return {
-                    q: params.term
-                };
-            },
-            processResults: function (data) {
-                return {
-                    results: data.results
-                };
-            },
-            cache: true
-        }
-    });
-
-    // When Student is selected, fetch their unpaid invoices
-    $('#studentSearch').on('change', function() {
-        const regNumber = $(this).val();
-        const invoiceSelect = $('#invoiceSelect');
-        const loadingSpinner = $('#invoiceLoading');
-        
-        console.log('Selected student registration number:', regNumber);
-        
-        // Reset and disable invoice dropdown
-        invoiceSelect.empty().append('<option value="">Loading invoices...</option>').prop('disabled', true);
+    $(document).ready(function() {
+        // Explicitly reset on load
+        $('#invoiceSelect').empty().append('<option value="">Select student first...</option>');
         $('#amountInput').val('');
-        
-        if (regNumber) {
-            loadingSpinner.show();
-            const apiUrl = '<?= base_url('api/invoices/student') ?>/' + regNumber;
-            console.log('Fetching invoices from:', apiUrl);
-            
-            $.ajax({
-                url: apiUrl,
-                method: 'GET',
-                success: function(response) {
-                    console.log('API full response:', response);
-                    loadingSpinner.hide();
-                    invoiceSelect.prop('disabled', false);
-                    invoiceSelect.empty().append('<option value="">-- Choose Invoice --</option>');
-                    
-                    if (response.data && response.data.length > 0) {
-                        let outstandingFound = false;
-                        response.data.forEach(function(invoice) {
-                            if (invoice.status === 'outstanding') {
-                                const typeName = invoice.invoice_type ? invoice.invoice_type.replace(/_/g, ' ').toUpperCase() : 'INVOICE';
-                                invoiceSelect.append(`<option value="${invoice.id}" data-amount="${invoice.amount}">
-                                    ${invoice.invoice_number} - ${typeName} (Rp ${parseInt(invoice.amount).toLocaleString('id-ID')})
-                                </option>`);
-                                outstandingFound = true;
-                            }
-                        });
-                        
-                        if (!outstandingFound) {
-                            invoiceSelect.append('<option value="" disabled>No outstanding invoices found</option>');
-                        } else {
-                            // If only one outstanding invoice, select it automatically
-                            if (invoiceSelect.find('option[data-amount]').length === 1) {
-                                invoiceSelect.find('option[data-amount]').prop('selected', true).trigger('change');
-                            }
-                        }
-                    } else {
-                        invoiceSelect.append('<option disabled>No invoices recorded for this student</option>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    loadingSpinner.hide();
-                    console.error('Failed to fetch invoices:', error);
-                    console.log('Response Text:', xhr.responseText);
-                    invoiceSelect.prop('disabled', false);
-                    invoiceSelect.empty().append('<option value="" disabled>Error loading invoices. Please try again.</option>');
-                    alert('Could not fetch invoices. Please check your connection or server logs.');
-                }
-            });
-        }
-    });
 
-    // When Invoice is selected, auto-populate the amount
-    $('#invoiceSelect').on('change', function() {
-        const selectedOption = $(this).find('option:selected');
-        const amount = selectedOption.data('amount');
-        
-        if (amount) {
-            $('#amountInput').val(amount);
-            // Highlight the change visually
-            $('#amountInput').addClass('is-valid');
-            setTimeout(() => $('#amountInput').removeClass('is-valid'), 2000);
-        }
+        // Initialize Select2 for Student Search
+        $('#studentSearch').select2({
+            theme: 'default',
+            placeholder: 'Search for a student...',
+            minimumInputLength: 1,
+            ajax: {
+                url: '<?= base_url('admission/ajax-search') ?>',
+                dataType: 'json',
+                delay: 300,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            }
+        });
+
+        // When Student is selected, fetch their unpaid invoices
+        $('#studentSearch').on('change', function() {
+            const regNumber = $(this).val();
+            const invoiceSelect = $('#invoiceSelect');
+            const loadingSpinner = $('#invoiceLoading');
+
+            console.log('Selected student registration number:', regNumber);
+
+            // Reset and disable invoice dropdown
+            invoiceSelect.empty().append('<option value="">Loading invoices...</option>').prop('disabled', true);
+            $('#amountInput').val('');
+
+            if (regNumber) {
+                loadingSpinner.show();
+                const apiUrl = '<?= base_url('api/invoices/student') ?>/' + regNumber;
+                console.log('Fetching invoices from:', apiUrl);
+
+                $.ajax({
+                    url: apiUrl,
+                    method: 'GET',
+                    success: function(response) {
+                        console.log('API full response:', response);
+                        loadingSpinner.hide();
+                        invoiceSelect.prop('disabled', false);
+                        invoiceSelect.empty().append('<option value="">-- Choose Invoice --</option>');
+
+                        if (response.data && response.data.length > 0) {
+                            let payableFound = false;
+                            response.data.forEach(function(invoice) {
+                                if (invoice.status === 'outstanding' || invoice.status === 'partially_paid') {
+                                    const typeName = invoice.invoice_type ? invoice.invoice_type.replace(/_/g, ' ').toUpperCase() : 'INVOICE';
+                                    const statusLabel = invoice.status === 'partially_paid' ? ' (Partially Paid)' : '';
+                                    invoiceSelect.append(`<option value="${invoice.id}" data-amount="${invoice.amount}">
+                                    ${invoice.invoice_number} - ${typeName}${statusLabel} (Rp ${parseInt(invoice.amount).toLocaleString('id-ID')})
+                                </option>`);
+                                    payableFound = true;
+                                }
+                            });
+
+                            if (!payableFound) {
+                                invoiceSelect.append('<option value="" disabled>No outstanding or partially paid invoices found</option>');
+                            } else {
+                                // If only one payable invoice, select it automatically
+                                if (invoiceSelect.find('option[data-amount]').length === 1) {
+                                    invoiceSelect.find('option[data-amount]').prop('selected', true).trigger('change');
+                                }
+                            }
+                        } else {
+                            invoiceSelect.append('<option disabled>No invoices recorded for this student</option>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        loadingSpinner.hide();
+                        console.error('Failed to fetch invoices:', error);
+                        console.log('Response Text:', xhr.responseText);
+                        invoiceSelect.prop('disabled', false);
+                        invoiceSelect.empty().append('<option value="" disabled>Error loading invoices. Please try again.</option>');
+                        alert('Could not fetch invoices. Please check your connection or server logs.');
+                    }
+                });
+            }
+        });
+
+        // When Invoice is selected, auto-populate the amount
+        $('#invoiceSelect').on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const amount = selectedOption.data('amount');
+
+            if (amount) {
+                $('#amountInput').val(amount);
+                // Highlight the change visually
+                $('#amountInput').addClass('is-valid');
+                setTimeout(() => $('#amountInput').removeClass('is-valid'), 2000);
+            }
+        });
     });
-});
 </script>
 <?= $this->endSection() ?>

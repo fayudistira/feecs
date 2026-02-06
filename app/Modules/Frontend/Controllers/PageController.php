@@ -417,7 +417,7 @@ class PageController extends BaseController
 
         if ($registrationNumber) {
             $admissionModel = new \Modules\Admission\Models\AdmissionModel();
-            $admission = $admissionModel->getByRegistrationNumber($registrationNumber);
+            $admission = $admissionModel->getByRegistrationNumber((string)$registrationNumber);
 
             $invoiceModel = new \Modules\Payment\Models\InvoiceModel();
             // Get all invoices for this registration, including paid ones
