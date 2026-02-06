@@ -411,7 +411,8 @@ class PageController extends BaseController
                         $emailData,
                         $profileData['email'],
                         $profileData['full_name'],
-                        $admissionContext
+                        $admissionContext,
+                        $invoiceId
                     );
 
                     log_message('info', 'Invoice email sent to ' . $profileData['email'] . ' for registration ' . $admissionData['registration_number']);

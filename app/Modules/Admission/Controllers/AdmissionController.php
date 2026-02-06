@@ -249,7 +249,8 @@ class AdmissionController extends BaseController
                         $emailData,
                         $profileData['email'],
                         $profileData['full_name'],
-                        $admissionContext
+                        $admissionContext,
+                        $invoiceModel->where('registration_number', $admissionData['registration_number'])->first()['id'] ?? null
                     );
                 }
             }

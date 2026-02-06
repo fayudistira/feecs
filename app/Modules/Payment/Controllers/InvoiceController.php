@@ -316,4 +316,49 @@ class InvoiceController extends BaseController
             'student' => $student
         ]);
     }
+
+    /**
+     * Secure invoice view using encrypted token (no authentication required)
+     */
+    public function secureView($token)
+    {
+        // Load EmailService for token verification
+        $emailService = new \App\Services\EmailService();
+        $tokenData = $emailService->verifyInvoiceToken($token);
+
+        if (!$tokenData) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Invalid or expired invoice link');
+        }
+
+        // Get invoice using the decrypted invoice ID
+        $invoice = $this->invoiceModel->getInvoiceWithItems($tokenData['invoice_id']);
+
+        if (!$invoice) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Invoice not found');
+        }
+
+        // Verify the email matches the invoice registration
+        $student = $this->admissionModel->select('
+                admissions.registration_number,
+                profiles.full_name,
+                profiles.email,
+                profiles.phone,
+                programs.title as program_title,
+                programs.category
+            ')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('programs', 'programs.id = admissions.program_id')
+            ->where('admissions.registration_number', (string)$invoice['registration_number'])
+            ->first();
+
+        // Verify the email matches the token email
+        if ($student['email'] !== $tokenData['email']) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Unauthorized access to invoice');
+        }
+
+        return view('Modules\Payment\Views\invoices\print', [
+            'invoice' => $invoice,
+            'student' => $student
+        ]);
+    }
 }

@@ -3,18 +3,77 @@
 namespace App\Services;
 
 use CodeIgniter\Email\Email;
+use CodeIgniter\Encryption\Encryption;
 
 class EmailService
 {
     protected $email;
     protected $emailConfig;
+    protected $encryption;
 
     public function __construct()
     {
-        $this->email = service('email');
+        // Use emailer helper like Shield does for better configuration
+        helper('email');
+        $this->email = emailer(['mailType' => 'html']);
 
         // Load email configuration
         $this->emailConfig = config('Email');
+
+        // Load encryption for secure tokens
+        $this->encryption = service('encrypter');
+    }
+
+    /**
+     * Generate secure token for invoice link
+     * 
+     * @param int $invoiceId Invoice ID
+     * @param string $email Recipient email
+     * @return string Encrypted token
+     */
+    private function generateInvoiceToken(int $invoiceId, string $email): string
+    {
+        $data = [
+            'invoice_id' => $invoiceId,
+            'email' => $email,
+            'timestamp' => time(),
+            'hash' => hash('sha256', $invoiceId . $email . time() . 'invoice_salt')
+        ];
+
+        return $this->encryption->encrypt(json_encode($data));
+    }
+
+    /**
+     * Verify invoice token
+     * 
+     * @param string $token Encrypted token
+     * @return array|false Decoded data or false if invalid
+     */
+    public function verifyInvoiceToken(string $token)
+    {
+        try {
+            $decoded = json_decode($this->encryption->decrypt($token), true);
+
+            if (!$decoded || !isset($decoded['invoice_id'], $decoded['email'], $decoded['timestamp'], $decoded['hash'])) {
+                return false;
+            }
+
+            // Check if token is expired (24 hours)
+            if (time() - $decoded['timestamp'] > 86400) {
+                return false;
+            }
+
+            // Verify hash
+            $expectedHash = hash('sha256', $decoded['invoice_id'] . $decoded['email'] . $decoded['timestamp'] . 'invoice_salt');
+            if (!hash_equals($decoded['hash'], $expectedHash)) {
+                return false;
+            }
+
+            return $decoded;
+        } catch (\Exception $e) {
+            log_message('error', 'Invoice token verification failed: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -24,26 +83,37 @@ class EmailService
      * @param string $recipientEmail Guest's email
      * @param string $recipientName Guest's full name
      * @param array $admissionData Admission data for context
+     * @param int|null $invoiceId Invoice ID for generating direct link
      * @return bool
      */
-    public function sendInvoiceNotification($invoice, $recipientEmail, $recipientName, $admissionData = [])
+    public function sendInvoiceNotification($invoice, $recipientEmail, $recipientName, $admissionData = [], $invoiceId = null)
     {
         try {
+            // Generate secure token for invoice link
+            $token = $this->generateInvoiceToken($invoiceId, $recipientEmail);
+            $invoiceLink = base_url('invoice/secure/' . $token);
+
+            // Set email properties
             $this->email->setFrom($this->emailConfig->fromEmail, $this->emailConfig->fromName);
             $this->email->setTo($recipientEmail);
-            $this->email->setSubject('Your Registration Invoice - ' . ($admissionData['registration_number'] ?? 'FEECS'));
+            $this->email->setSubject('Your Registration Invoice - ' . ($admissionData['registration_number'] ?? 'SOSCT'));
 
             // Build HTML email
-            $html = $this->buildInvoiceEmailTemplate($invoice, $recipientName, $admissionData);
+            $html = $this->buildInvoiceEmailTemplate($invoice, $recipientName, $admissionData, $invoiceId, $invoiceLink);
 
             $this->email->setMessage($html);
-            $this->email->setMailType('html');
 
-            if ($this->email->send(false)) {
-                log_message('info', "Invoice email sent to {$recipientEmail}");
+            // Send email and check result
+            if ($this->email->send()) {
+                log_message('info', "Invoice email sent to {$recipientEmail} with secure token");
+
+                // Clear the email like Shield does
+                $this->email->clear();
+
                 return true;
             } else {
-                log_message('error', "Failed to send invoice email to {$recipientEmail}: " . $this->email->printDebugger());
+                // Log detailed error information like Shield does
+                log_message('error', "Failed to send invoice email to {$recipientEmail}: " . $this->email->printDebugger(['headers']));
                 return false;
             }
         } catch (\Exception $e) {
@@ -65,13 +135,16 @@ class EmailService
             $html = $this->buildPaymentReceivedEmailTemplate($recipientName, $paymentData);
 
             $this->email->setMessage($html);
-            $this->email->setMailType('html');
 
-            if ($this->email->send(false)) {
+            if ($this->email->send()) {
                 log_message('info', "Payment confirmation email sent to {$recipientEmail}");
+
+                // Clear the email like Shield does
+                $this->email->clear();
+
                 return true;
             } else {
-                log_message('error', "Failed to send payment confirmation email: " . $this->email->printDebugger());
+                log_message('error', "Failed to send payment confirmation email: " . $this->email->printDebugger(['headers']));
                 return false;
             }
         } catch (\Exception $e) {
@@ -83,14 +156,17 @@ class EmailService
     /**
      * Build HTML template for invoice email
      */
-    private function buildInvoiceEmailTemplate($invoice, $recipientName, $admissionData)
+    private function buildInvoiceEmailTemplate($invoice, $recipientName, $admissionData, $invoiceId = null, $invoiceLink = null)
     {
         $logo = base_url('assets/images/logo.png'); // Adjust path as needed
-        $appName = 'FEECS';
+        $appName = 'SOSCT';
         $dueDate = date('F j, Y', strtotime($invoice['due_date'] ?? date('Y-m-d')));
         $amount = number_format($invoice['amount'] ?? 0, 2);
         $regNumber = $admissionData['registration_number'] ?? 'N/A';
         $programTitle = $admissionData['program_title'] ?? 'Program';
+
+        // Use provided secure invoice link or generate fallback
+        $invoiceLink = $invoiceLink ?: ($invoiceId ? base_url('invoice/public/' . $invoiceId) : base_url('payment/invoice'));
 
         return "
         <!DOCTYPE html>
@@ -159,7 +235,7 @@ class EmailService
                     </div>
 
                     <div class='action-buttons'>
-                        <a href='" . base_url('payment/invoice') . "' class='btn btn-primary'>View Full Invoice</a>
+                        <a href='{$invoiceLink}' class='btn btn-primary'>View Full Invoice</a>
                         <a href='https://wa.me/?text=I%20would%20like%20to%20inquire%20about%20my%20registration%20({$regNumber})' class='btn btn-whatsapp'>Contact via WhatsApp</a>
                     </div>
 
@@ -173,12 +249,12 @@ class EmailService
                     <p>If you have any questions, please don't hesitate to reach out.</p>
 
                     <p>Best regards,<br>
-                    <strong>FEECS Admissions Team</strong></p>
+                    <strong>SOSCT Admissions Team</strong></p>
                 </div>
 
                 <div class='footer'>
                     <p>This is an automated email. Please do not reply to this message.</p>
-                    <p>&copy; " . date('Y') . " FEECS. All rights reserved.</p>
+                    <p>&copy; " . date('Y') . " SOSCT. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -191,7 +267,7 @@ class EmailService
      */
     private function buildPaymentReceivedEmailTemplate($recipientName, $paymentData)
     {
-        $appName = 'FEECS';
+        $appName = 'SOSCT';
         $amount = number_format($paymentData['amount'] ?? 0, 2);
         $paymentDate = date('F j, Y', strtotime($paymentData['created_at'] ?? 'now'));
 
@@ -257,12 +333,12 @@ class EmailService
                     <p>Welcome to {$appName}! We're looking forward to seeing you soon.</p>
 
                     <p>Best regards,<br>
-                    <strong>FEECS Admissions Team</strong></p>
+                    <strong>SOSCT Admissions Team</strong></p>
                 </div>
 
                 <div class='footer'>
                     <p>This is an automated email. Please do not reply to this message.</p>
-                    <p>&copy; " . date('Y') . " FEECS. All rights reserved.</p>
+                    <p>&copy; " . date('Y') . " SOSCT. All rights reserved.</p>
                 </div>
             </div>
         </body>
