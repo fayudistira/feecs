@@ -388,6 +388,36 @@ class PageController extends BaseController
                 throw new \Exception('Transaction failed');
             }
 
+            // Send Invoice Email to Applicant
+            if ($totalAmount > 0) {
+                $emailService = new \App\Services\EmailService();
+                $invoiceModel = new \Modules\Payment\Models\InvoiceModel();
+                $invoiceDetails = $invoiceModel->where('registration_number', $admissionData['registration_number'])->first();
+
+                if ($invoiceDetails) {
+                    $emailData = [
+                        'amount' => $invoiceDetails['amount'],
+                        'due_date' => $invoiceDetails['due_date'],
+                        'description' => $invoiceDetails['description']
+                    ];
+
+                    $admissionContext = [
+                        'registration_number' => $admissionData['registration_number'],
+                        'program_title' => $program['title']
+                    ];
+
+                    // Send email (async - doesn't block if it fails)
+                    $emailService->sendInvoiceNotification(
+                        $emailData,
+                        $profileData['email'],
+                        $profileData['full_name'],
+                        $admissionContext
+                    );
+
+                    log_message('info', 'Invoice email sent to ' . $profileData['email'] . ' for registration ' . $admissionData['registration_number']);
+                }
+            }
+
             // Success - redirect to public invoice if it exists, otherwise success page
             if (isset($invoiceId) && $invoiceId) {
                 return redirect()->to('invoice/public/' . $invoiceId)
