@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Persentase Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="glass-card w-full max-w-md p-8">
+        <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">Kalkulator Persentase</h1>
+        
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-200 mb-6">
+            <button id="tab-diskon" onclick="switchMode('diskon')" class="flex-1 py-2 font-medium text-gray-500 transition-all tab-active">
+                Mode Diskon
+            </button>
+            <button id="tab-porsi" onclick="switchMode('porsi')" class="flex-1 py-2 font-medium text-gray-500 transition-all">
+                Mode Porsi
+            </button>
+        </div>
+
+        <!-- Content Mode Diskon -->
+        <div id="mode-diskon" class="space-y-4">
+            <p class="text-sm text-gray-600 mb-4 italic">Cari tahu berapa persen penurunan dari nilai asli ke nilai baru.</p>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Nilai Asli (Harga Awal)</label>
+                <input type="number" id="asli-1" placeholder="Contoh: 100000" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Nilai Baru (Harga Akhir)</label>
+                <input type="number" id="baru-1" placeholder="Contoh: 75000" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+            <button onclick="hitungDiskon()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">
+                Hitung Persentase Diskon
+            </button>
+        </div>
+
+        <!-- Content Mode Porsi -->
+        <div id="mode-porsi" class="space-y-4 hidden">
+            <p class="text-sm text-gray-600 mb-4 italic">Cari tahu berapa persen sebuah nilai dari total nilai tertentu.</p>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Bagian Nilai</label>
+                <input type="number" id="bagian" placeholder="Contoh: 20" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Total Nilai</label>
+                <input type="number" id="total" placeholder="Contoh: 100" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            </div>
+            <button onclick="hitungPorsi()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">
+                Hitung Persentase
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="result-box" class="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-100 hidden">
+            <p class="text-center text-gray-600 text-sm uppercase tracking-wider font-semibold">Hasil Perhitungan</p>
+            <div id="result-value" class="text-center text-4xl font-black text-blue-700 mt-2">0%</div>
+            <p id="result-desc" class="text-center text-gray-500 text-sm mt-2"></p>
+        </div>
+    </div>
+
+    <script>
+        function switchMode(mode) {
+            const diskonDiv = document.getElementById('mode-diskon');
+            const porsiDiv = document.getElementById('mode-porsi');
+            const tabDiskon = document.getElementById('tab-diskon');
+            const tabPorsi = document.getElementById('tab-porsi');
+            const resultBox = document.getElementById('result-box');
+
+            resultBox.classList.add('hidden');
+
+            if (mode === 'diskon') {
+                diskonDiv.classList.remove('hidden');
+                porsiDiv.classList.add('hidden');
+                tabDiskon.classList.add('tab-active');
+                tabPorsi.classList.remove('tab-active');
+            } else {
+                diskonDiv.classList.add('hidden');
+                porsiDiv.classList.remove('hidden');
+                tabDiskon.classList.remove('tab-active');
+                tabPorsi.classList.add('tab-active');
+            }
+        }
+
+        function formatDisplay(val) {
+            return Number.isInteger(val) ? val : val.toFixed(2);
+        }
+
+        function showResult(value, description) {
+            const resultBox = document.getElementById('result-box');
+            const resultVal = document.getElementById('result-value');
+            const resultDesc = document.getElementById('result-desc');
+
+            resultVal.innerText = formatDisplay(value) + "%";
+            resultDesc.innerText = description;
+            resultBox.classList.remove('hidden');
+        }
+
+        function hitungDiskon() {
+            const asli = parseFloat(document.getElementById('asli-1').value);
+            const baru = parseFloat(document.getElementById('baru-1').value);
+
+            if (isNaN(asli) || isNaN(baru) || asli === 0) {
+                alert("Mohon masukkan angka yang valid. Nilai asli tidak boleh nol.");
+                return;
+            }
+
+            const selisih = asli - baru;
+            const persen = (selisih / asli) * 100;
+            
+            let ket = `Terjadi penurunan (diskon) sebesar ${formatDisplay(persen)}%`;
+            if (persen < 0) {
+                ket = `Terjadi kenaikan harga sebesar ${formatDisplay(Math.abs(persen))}%`;
+            }
+
+            showResult(persen, ket);
+        }
+
+        function hitungPorsi() {
+            const bagian = parseFloat(document.getElementById('bagian').value);
+            const total = parseFloat(document.getElementById('total').value);
+
+            if (isNaN(bagian) || isNaN(total) || total === 0) {
+                alert("Mohon masukkan angka yang valid. Total tidak boleh nol.");
+                return;
+            }
+
+            const persen = (bagian / total) * 100;
+            const ket = `${bagian} adalah ${formatDisplay(persen)}% dari ${total}`;
+
+            showResult(persen, ket);
+        }
+    </script>
+</body>
+</html>
