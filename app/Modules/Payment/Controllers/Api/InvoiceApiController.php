@@ -261,11 +261,13 @@ class InvoiceApiController extends ResourceController
      */
     public function getByStudent($registrationNumber = null)
     {
+        log_message('debug', '=== getByStudent START ===');
         log_message('debug', 'Fetching invoices for student: ' . $registrationNumber);
         $invoiceModel = new InvoiceModel();
         $admissionModel = new AdmissionModel();
 
         if (!$registrationNumber) {
+            log_message('error', 'Registration number is empty');
             return $this->fail([
                 'status' => 'error',
                 'message' => 'Registration number is required'
@@ -279,14 +281,25 @@ class InvoiceApiController extends ResourceController
             return $this->failNotFound('Student not found');
         }
 
+        log_message('debug', 'Student found: ' . json_encode($student));
+
         $invoices = $invoiceModel->getInvoicesByStudent($registrationNumber);
         log_message('debug', 'Found ' . count($invoices) . ' invoices for student ' . $registrationNumber);
 
-        return $this->respond([
+        // Log each invoice with its status
+        foreach ($invoices as $invoice) {
+            log_message('debug', 'Invoice ID: ' . $invoice['id'] . ', Number: ' . $invoice['invoice_number'] . ', Status: ' . $invoice['status'] . ', Amount: ' . $invoice['amount']);
+        }
+
+        $response = [
             'status' => 'success',
             'data' => $invoices,
             'student' => $student
-        ]);
+        ];
+        log_message('debug', 'Response: ' . json_encode($response));
+        log_message('debug', '=== getByStudent END ===');
+
+        return $this->respond($response);
     }
 
     /**

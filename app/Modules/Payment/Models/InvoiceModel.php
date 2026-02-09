@@ -34,7 +34,7 @@ class InvoiceModel extends Model
         'amount' => 'required|decimal|greater_than[0]',
         'due_date' => 'required|valid_date',
         'invoice_type' => 'required|in_list[registration_fee,tuition_fee,miscellaneous_fee]',
-        'status' => 'permit_empty|in_list[outstanding,paid,cancelled,expired,partially_paid]'
+        'status' => 'permit_empty|in_list[unpaid,paid,cancelled,expired,partially_paid]'
     ];
 
     /**
@@ -44,7 +44,7 @@ class InvoiceModel extends Model
      */
     public function processExpiredInvoices(): int
     {
-        return $this->where('status', 'outstanding')
+        return $this->where('status', 'unpaid')
             ->where('due_date <', date('Y-m-d'))
             ->set(['status' => 'expired'])
             ->update();
@@ -115,9 +115,9 @@ class InvoiceModel extends Model
             $data['invoice_number'] = $this->generateInvoiceNumber();
         }
 
-        // Set default status to outstanding
+        // Set default status to unpaid
         if (!isset($data['status'])) {
-            $data['status'] = 'outstanding';
+            $data['status'] = 'unpaid';
         }
 
         return $this->insert($data);
@@ -125,20 +125,34 @@ class InvoiceModel extends Model
 
     /**
      * Get invoices by student registration number
-     * 
+     *
      * @param string $registrationNumber Student registration number
      * @return array
      */
     public function getInvoicesByStudent(string $registrationNumber): array
     {
-        return $this->where('registration_number', $registrationNumber)
+        log_message('debug', '=== getInvoicesByStudent START ===');
+        log_message('debug', 'Querying invoices for registration_number: ' . $registrationNumber);
+
+        $invoices = $this->where('registration_number', $registrationNumber)
             ->orderBy('created_at', 'DESC')
             ->findAll();
+
+        log_message('debug', 'Query returned ' . count($invoices) . ' invoices');
+
+        // Log the last query for debugging
+        $db = \Config\Database::connect();
+        $lastQuery = $db->getLastQuery();
+        log_message('debug', 'Last Query: ' . $lastQuery->getQuery());
+
+        log_message('debug', '=== getInvoicesByStudent END ===');
+
+        return $invoices;
     }
 
     public function getOverdueInvoices(): array
     {
-        return $this->where('status', 'outstanding')
+        return $this->where('status', 'unpaid')
             ->where('due_date <', date('Y-m-d'))
             ->orderBy('due_date', 'ASC')
             ->findAll();
@@ -207,7 +221,7 @@ class InvoiceModel extends Model
     public function recalculateInvoiceStatus(int $invoiceId): string
     {
         $invoice = $this->find($invoiceId);
-        if (!$invoice) return 'outstanding';
+        if (!$invoice) return 'unpaid';
 
         // Get sum of all 'paid' payments for this invoice
         $db = \Config\Database::connect();
@@ -222,7 +236,7 @@ class InvoiceModel extends Model
         $totalPaid = (float) ($paidAmount['amount'] ?? 0);
         $invoiceAmount = (float) $invoice['amount'];
 
-        $newStatus = 'outstanding';
+        $newStatus = 'unpaid';
         if ($totalPaid >= $invoiceAmount) {
             $newStatus = 'paid';
         } elseif ($totalPaid > 0) {
@@ -245,8 +259,8 @@ class InvoiceModel extends Model
      */
     public function updateInvoiceStatus(int $id, string $status): bool
     {
-        // For 'paid' or 'outstanding' requests, we recalculate to be safe
-        if ($status === 'paid' || $status === 'outstanding') {
+        // For 'paid' or 'unpaid' requests, we recalculate to be safe
+        if ($status === 'paid' || $status === 'unpaid') {
             $this->recalculateInvoiceStatus($id);
             return true;
         }

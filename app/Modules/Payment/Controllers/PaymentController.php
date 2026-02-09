@@ -204,8 +204,8 @@ class PaymentController extends BaseController
             return $student['status'] === 'approved';
         });
 
-        // Get outstanding and partially paid invoices for dropdown
-        $invoices = $this->invoiceModel->where('status', 'outstanding')
+        // Get unpaid and partially paid invoices for dropdown
+        $invoices = $this->invoiceModel->where('status', 'unpaid')
             ->orWhere('status', 'partially_paid')
             ->findAll();
 

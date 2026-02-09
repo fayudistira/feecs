@@ -229,43 +229,59 @@
                     url: apiUrl,
                     method: 'GET',
                     success: function(response) {
+                        console.log('=== AJAX SUCCESS ===');
                         console.log('API full response:', response);
+                        console.log('Response status:', response.status);
+                        console.log('Response data length:', response.data ? response.data.length : 0);
                         loadingSpinner.hide();
                         invoiceSelect.prop('disabled', false);
                         invoiceSelect.empty().append('<option value="">-- Choose Invoice --</option>');
 
                         if (response.data && response.data.length > 0) {
+                            console.log('Processing ' + response.data.length + ' invoices...');
                             let payableFound = false;
                             response.data.forEach(function(invoice) {
-                                if (invoice.status === 'outstanding' || invoice.status === 'partially_paid') {
+                                console.log('Invoice:', invoice.invoice_number, 'Status:', invoice.status, 'Type:', invoice.invoice_type);
+                                if (invoice.status === 'unpaid' || invoice.status === 'partially_paid') {
+                                    console.log('  -> MATCH: Adding to dropdown');
                                     const typeName = invoice.invoice_type ? invoice.invoice_type.replace(/_/g, ' ').toUpperCase() : 'INVOICE';
                                     const statusLabel = invoice.status === 'partially_paid' ? ' (Partially Paid)' : '';
                                     invoiceSelect.append(`<option value="${invoice.id}" data-amount="${invoice.amount}">
                                     ${invoice.invoice_number} - ${typeName}${statusLabel} (Rp ${parseInt(invoice.amount).toLocaleString('id-ID')})
                                 </option>`);
                                     payableFound = true;
+                                } else {
+                                    console.log('  -> SKIP: Status is ' + invoice.status + ' (not unpaid or partially_paid)');
                                 }
                             });
 
                             if (!payableFound) {
-                                invoiceSelect.append('<option value="" disabled>No outstanding or partially paid invoices found</option>');
+                                console.log('No payable invoices found');
+                                invoiceSelect.append('<option value="" disabled>No unpaid or partially paid invoices found</option>');
                             } else {
+                                console.log('Found ' + payableFound + ' payable invoice(s)');
                                 // If only one payable invoice, select it automatically
                                 if (invoiceSelect.find('option[data-amount]').length === 1) {
                                     invoiceSelect.find('option[data-amount]').prop('selected', true).trigger('change');
                                 }
                             }
                         } else {
+                            console.log('No invoices in response data');
                             invoiceSelect.append('<option disabled>No invoices recorded for this student</option>');
                         }
+                        console.log('=== AJAX SUCCESS END ===');
                     },
                     error: function(xhr, status, error) {
+                        console.log('=== AJAX ERROR ===');
                         loadingSpinner.hide();
                         console.error('Failed to fetch invoices:', error);
+                        console.log('Status:', status);
                         console.log('Response Text:', xhr.responseText);
+                        console.log('Status Code:', xhr.status);
                         invoiceSelect.prop('disabled', false);
                         invoiceSelect.empty().append('<option value="" disabled>Error loading invoices. Please try again.</option>');
                         alert('Could not fetch invoices. Please check your connection or server logs.');
+                        console.log('=== AJAX ERROR END ===');
                     }
                 });
             }
