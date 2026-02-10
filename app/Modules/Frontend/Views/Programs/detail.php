@@ -153,7 +153,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                         <h6 class="card-title fw-bold mb-2">
                             <i class="bi bi-file-text-fill me-2" style="color: var(--dark-red);"></i>Description
                         </h6>
-                        <p class="card-text text-muted mb-0 small lh-base"><?= nl2br(esc($program['description'])) ?></p>
+                        <p class="card-text text-muted mb-0 small lh-base"><?= nl2br(esc((string)($program['description'] ?? ''))) ?></p>
                     </div>
                 </div>
             <?php endif ?>

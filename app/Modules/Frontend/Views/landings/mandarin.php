@@ -194,7 +194,7 @@
                                             <!-- Category Overlay -->
                                             <div class="position-absolute top-0 end-0 m-3">
                                                 <span class="badge bg-white text-dark shadow-sm py-2 px-3 rounded-pill fw-bold" style="font-size: 0.7rem;">
-                                                    <?= strtoupper(esc($subCategory)) ?>
+                                                    <?= strtoupper(esc((string)($program['sub_category'] ?? 'Standard'))) ?>
                                                 </span>
                                             </div>
 
@@ -228,14 +228,14 @@
                                             <div class="d-flex flex-wrap gap-2 mb-2">
                                                 <?php if (!empty($program['mode'])): ?>
                                                     <span class="badge bg-light text-muted border small">
-                                                        <i class="bi bi-<?= $program['mode'] === 'online' ? 'wifi' : 'building' ?> me-1"></i>
-                                                        <?= ucfirst(esc($program['mode'])) ?>
+                                                        <i class="bi bi-<?= (string)($program['mode'] ?? '') === 'online' ? 'wifi' : 'building' ?> me-1"></i>
+                                                        <?= ucfirst(esc((string)($program['mode'] ?? ''))) ?>
                                                     </span>
                                                 <?php endif ?>
                                                 <?php if (!empty($program['sub_category'])): ?>
                                                     <span class="badge bg-light text-muted border small">
                                                         <i class="bi bi-tag me-1"></i>
-                                                        <?= esc($program['sub_category']) ?>
+                                                        <?= esc((string)($program['sub_category'] ?? '')) ?>
                                                     </span>
                                                 <?php endif ?>
                                             </div>
