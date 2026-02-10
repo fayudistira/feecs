@@ -269,8 +269,21 @@ class InvoiceController extends BaseController
             return $this->response->setStatusCode(404)->setBody('Invoice not found');
         }
 
-        // Generate public URL for invoice
-        $publicUrl = base_url('invoice/public/' . $id);
+        // Get student email for token generation
+        $student = $this->admissionModel->select('profiles.email')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->where('admissions.registration_number', (string)$invoice['registration_number'])
+            ->first();
+
+        if (!$student || empty($student['email'])) {
+            // Fallback to public URL if no email available
+            $publicUrl = base_url('invoice/public/' . $id);
+        } else {
+            // Generate secure token for invoice
+            $emailService = new \App\Services\EmailService();
+            $token = $emailService->generateInvoiceToken($id, $student['email']);
+            $publicUrl = base_url('invoice/secure/' . $token);
+        }
 
         // Create QR code using Builder (v6.0 API)
         $builder = new \Endroid\QrCode\Builder\Builder(

@@ -56,10 +56,28 @@ class PaymentController extends BaseController
             $payments = $this->paymentModel->paginate($perPage);
         }
 
-        // Enrich with student details
+        // Enrich with student and invoice details (only for paginated results)
         foreach ($payments as &$payment) {
-            $student = $this->admissionModel->getByRegistrationNumber((string)$payment['registration_number']);
-            $payment['student'] = $student;
+            // For paginated results, fetch student and invoice details
+            if (!isset($payment['student_name'])) {
+                $student = $this->admissionModel->getByRegistrationNumber((string)$payment['registration_number']);
+                $payment['student'] = $student;
+                $payment['student_name'] = $student['full_name'] ?? 'N/A';
+
+                // Get invoice details if linked
+                if ($payment['invoice_id']) {
+                    $invoice = $this->invoiceModel->find($payment['invoice_id']);
+                    $payment['invoice_number'] = $invoice['invoice_number'] ?? 'N/A';
+                } else {
+                    $payment['invoice_number'] = 'N/A';
+                }
+            } else {
+                // For search/filter results, student_name and invoice_number are already set
+                // Just set student array for compatibility
+                $payment['student'] = [
+                    'full_name' => $payment['student_name'] ?? 'N/A'
+                ];
+            }
         }
 
         $pager = $this->paymentModel->pager;
@@ -354,5 +372,205 @@ class PaymentController extends BaseController
             ->setHeader('Content-Type', 'text/csv')
             ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->setBody($csv);
+    }
+
+    /**
+     * Display printable payment receipt
+     */
+    public function receipt($id)
+    {
+        $payment = $this->paymentModel->find($id);
+
+        if (!$payment) {
+            return redirect()->to('/payment')->with('error', 'Payment not found.');
+        }
+
+        // Get student details
+        $student = $this->admissionModel->select('
+                admissions.registration_number,
+                profiles.full_name,
+                profiles.email,
+                profiles.phone,
+                programs.title as program_title
+            ')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('programs', 'programs.id = admissions.program_id')
+            ->where('admissions.registration_number', (string)$payment['registration_number'])
+            ->first();
+
+        // Get invoice details if linked
+        $invoice = null;
+        if ($payment['invoice_id']) {
+            $invoice = $this->invoiceModel->getInvoiceWithItems($payment['invoice_id']);
+        }
+
+        // Company information
+        $company = [
+            'address' => 'Perum GPR 1 Blok C No.4, Jl. Veteran Tulungrejo, Pare, Kediri 64212',
+            'email' => 'admin@kursusbahasa.org',
+            'phone' => '+62 858 1031 0950'
+        ];
+
+        // Generate payment number if not exists
+        if (!isset($payment['payment_number'])) {
+            $payment['payment_number'] = 'PAY-' . date('Y') . '-' . str_pad((string)$payment['id'], 4, '0', STR_PAD_LEFT);
+        }
+
+        return view('Modules\Payment\Views\payments\receipt', [
+            'payment' => $payment,
+            'student' => $student,
+            'invoice' => $invoice,
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Public receipt view (no authentication required)
+     */
+    public function publicReceipt($id)
+    {
+        $payment = $this->paymentModel->find($id);
+
+        if (!$payment) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Payment not found');
+        }
+
+        // Get student details
+        $student = $this->admissionModel->select('
+                admissions.registration_number,
+                profiles.full_name,
+                profiles.email,
+                profiles.phone,
+                programs.title as program_title
+            ')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('programs', 'programs.id = admissions.program_id')
+            ->where('admissions.registration_number', (string)$payment['registration_number'])
+            ->first();
+
+        // Get invoice details if linked
+        $invoice = null;
+        if ($payment['invoice_id']) {
+            $invoice = $this->invoiceModel->getInvoiceWithItems($payment['invoice_id']);
+        }
+
+        // Company information
+        $company = [
+            'address' => 'Perum GPR 1 Blok C No.4, Jl. Veteran Tulungrejo, Pare, Kediri 64212',
+            'email' => 'admin@kursusbahasa.org',
+            'phone' => '+62 858 1031 0950'
+        ];
+
+        // Generate payment number if not exists
+        if (!isset($payment['payment_number'])) {
+            $payment['payment_number'] = 'PAY-' . date('Y') . '-' . str_pad((string)$payment['id'], 4, '0', STR_PAD_LEFT);
+        }
+
+        return view('Modules\Payment\Views\payments\receipt', [
+            'payment' => $payment,
+            'student' => $student,
+            'invoice' => $invoice,
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Generate QR code for payment receipt
+     */
+    public function generateQr($id)
+    {
+        $payment = $this->paymentModel->find($id);
+
+        if (!$payment) {
+            return $this->response->setStatusCode(404)->setBody('Payment not found');
+        }
+
+        // Get student email for token generation
+        $student = $this->admissionModel->select('profiles.email')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->where('admissions.registration_number', (string)$payment['registration_number'])
+            ->first();
+
+        if (!$student || empty($student['email'])) {
+            // Fallback to public URL if no email available
+            $publicUrl = base_url('payment/public/' . $id);
+        } else {
+            // Generate secure token for payment receipt
+            $emailService = new \App\Services\EmailService();
+            $token = $emailService->generatePaymentToken($id, $student['email']);
+            $publicUrl = base_url('payment/secure/' . $token);
+        }
+
+        // Create QR code using Builder (v6.0 API)
+        $builder = new \Endroid\QrCode\Builder\Builder(
+            data: $publicUrl,
+            size: 300,
+            margin: 10
+        );
+        $result = $builder->build();
+
+        // Return QR code image
+        return $this->response
+            ->setHeader('Content-Type', 'image/png')
+            ->setBody($result->getString());
+    }
+
+    /**
+     * Secure receipt view using encrypted token (no authentication required)
+     */
+    public function secureReceipt($token)
+    {
+        // Load EmailService for token verification
+        $emailService = new \App\Services\EmailService();
+        $tokenData = $emailService->verifyPaymentToken($token);
+
+        if (!$tokenData) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Invalid or expired receipt link');
+        }
+
+        // Get payment using the decrypted payment ID
+        $payment = $this->paymentModel->find($tokenData['payment_id']);
+
+        if (!$payment) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Payment not found');
+        }
+
+        // Get student details
+        $student = $this->admissionModel->select('
+                admissions.registration_number,
+                profiles.full_name,
+                profiles.email,
+                profiles.phone,
+                programs.title as program_title
+            ')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('programs', 'programs.id = admissions.program_id')
+            ->where('admissions.registration_number', (string)$payment['registration_number'])
+            ->first();
+
+        // Get invoice details if linked
+        $invoice = null;
+        if ($payment['invoice_id']) {
+            $invoice = $this->invoiceModel->getInvoiceWithItems($payment['invoice_id']);
+        }
+
+        // Company information
+        $company = [
+            'address' => 'Perum GPR 1 Blok C No.4, Jl. Veteran Tulungrejo, Pare, Kediri 64212',
+            'email' => 'admin@kursusbahasa.org',
+            'phone' => '+62 858 1031 0950'
+        ];
+
+        // Generate payment number if not exists
+        if (!isset($payment['payment_number'])) {
+            $payment['payment_number'] = 'PAY-' . date('Y') . '-' . str_pad((string)$payment['id'], 4, '0', STR_PAD_LEFT);
+        }
+
+        return view('Modules\Payment\Views\payments\receipt', [
+            'payment' => $payment,
+            'student' => $student,
+            'invoice' => $invoice,
+            'company' => $company
+        ]);
     }
 }

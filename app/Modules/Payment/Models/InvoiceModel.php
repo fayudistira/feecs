@@ -269,7 +269,7 @@ class InvoiceModel extends Model
 
     /**
      * Get invoice with associated payments
-     * 
+     *
      * @param int $id Invoice ID
      * @return array|null
      */
@@ -297,12 +297,21 @@ class InvoiceModel extends Model
 
         $invoice['payments'] = $payments;
 
+        // Calculate total paid from associated payments
+        $totalPaid = 0;
+        foreach ($payments as $payment) {
+            if ($payment['status'] === 'paid') {
+                $totalPaid += (float) $payment['amount'];
+            }
+        }
+        $invoice['total_paid'] = $totalPaid;
+
         return $invoice;
     }
 
     /**
      * Get invoice with associated items
-     * 
+     *
      * @param int $id Invoice ID
      * @return array|null
      */
@@ -324,6 +333,21 @@ class InvoiceModel extends Model
         // Get associated items from JSON
         $items = !empty($invoice['items']) ? json_decode($invoice['items'], true) : [];
         $invoice['items'] = $items;
+
+        // Get associated payments and calculate total paid
+        $paymentsBuilder = $db->table('payments');
+        $payments = $paymentsBuilder->where('invoice_id', $id)
+            ->where('deleted_at', null)
+            ->get()
+            ->getResultArray();
+
+        $totalPaid = 0;
+        foreach ($payments as $payment) {
+            if ($payment['status'] === 'paid') {
+                $totalPaid += (float) $payment['amount'];
+            }
+        }
+        $invoice['total_paid'] = $totalPaid;
 
         return $invoice;
     }

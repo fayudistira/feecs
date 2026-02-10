@@ -122,9 +122,10 @@ class PaymentModel extends Model
         $db = \Config\Database::connect();
         $builder = $db->table($this->table);
 
-        return $builder->select('payments.*')
+        return $builder->select('payments.*, profiles.full_name as student_name, invoices.invoice_number')
             ->join('admissions', 'admissions.registration_number = payments.registration_number')
             ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('invoices', 'invoices.id = payments.invoice_id', 'left')
             ->where('payments.deleted_at', null)
             ->groupStart()
             ->like('profiles.full_name', $keyword)
@@ -144,23 +145,32 @@ class PaymentModel extends Model
      */
     public function filterPayments(array $filters): array
     {
+        $db = \Config\Database::connect();
+        $builder = $db->table($this->table);
+
+        $builder->select('payments.*, profiles.full_name as student_name, invoices.invoice_number')
+            ->join('admissions', 'admissions.registration_number = payments.registration_number')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('invoices', 'invoices.id = payments.invoice_id', 'left')
+            ->where('payments.deleted_at', null);
+
         if (isset($filters['status'])) {
-            $this->where('status', $filters['status']);
+            $builder->where('payments.status', $filters['status']);
         }
 
         if (isset($filters['method'])) {
-            $this->where('payment_method', $filters['method']);
+            $builder->where('payments.payment_method', $filters['method']);
         }
 
         if (isset($filters['start_date'])) {
-            $this->where('payment_date >=', $filters['start_date']);
+            $builder->where('payments.payment_date >=', $filters['start_date']);
         }
 
         if (isset($filters['end_date'])) {
-            $this->where('payment_date <=', $filters['end_date']);
+            $builder->where('payments.payment_date <=', $filters['end_date']);
         }
 
-        return $this->orderBy('payment_date', 'DESC')->findAll();
+        return $builder->orderBy('payments.payment_date', 'DESC')->get()->getResultArray();
     }
 
     /**

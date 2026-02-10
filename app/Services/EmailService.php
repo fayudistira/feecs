@@ -31,12 +31,12 @@ class EmailService
 
     /**
      * Generate secure token for invoice link
-     * 
+     *
      * @param int $invoiceId Invoice ID
      * @param string $email Recipient email
      * @return string Encrypted token
      */
-    private function generateInvoiceToken(int $invoiceId, string $email): string
+    public function generateInvoiceToken(int $invoiceId, string $email): string
     {
         // If encryption is not available, return a simple fallback token
         if ($this->encryption === null) {
@@ -63,7 +63,7 @@ class EmailService
 
     /**
      * Verify invoice token
-     * 
+     *
      * @param string $token Encrypted token
      * @return array|false Decoded data or false if invalid
      */
@@ -92,6 +92,73 @@ class EmailService
             return $decoded;
         } catch (\Exception $e) {
             log_message('error', 'Invoice token verification failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Generate secure token for payment receipt link
+     *
+     * @param int $paymentId Payment ID
+     * @param string $email Recipient email
+     * @return string Encrypted token
+     */
+    public function generatePaymentToken(int $paymentId, string $email): string
+    {
+        // If encryption is not available, return a simple fallback token
+        if ($this->encryption === null) {
+            // Create a simple base64-encoded token without encryption
+            $data = [
+                'payment_id' => $paymentId,
+                'email' => $email,
+                'timestamp' => time()
+            ];
+            return rtrim(strtr(base64_encode(json_encode($data)), '+/', '-_'), '=');
+        }
+
+        $data = [
+            'payment_id' => $paymentId,
+            'email' => $email,
+            'timestamp' => time(),
+            'hash' => hash('sha256', $paymentId . $email . time() . 'payment_salt')
+        ];
+
+        // Encrypt and then encode as URL-safe base64 to avoid disallowed URI characters
+        $encrypted = $this->encryption->encrypt(json_encode($data));
+        return rtrim(strtr(base64_encode($encrypted), '+/', '-_'), '=');
+    }
+
+    /**
+     * Verify payment token
+     *
+     * @param string $token Encrypted token
+     * @return array|false Decoded data or false if invalid
+     */
+    public function verifyPaymentToken(string $token)
+    {
+        try {
+            // Decode URL-safe base64 back to raw encrypted data
+            $encrypted = base64_decode(strtr($token, '-_', '+/'));
+            $decoded = json_decode($this->encryption->decrypt($encrypted), true);
+
+            if (!$decoded || !isset($decoded['payment_id'], $decoded['email'], $decoded['timestamp'], $decoded['hash'])) {
+                return false;
+            }
+
+            // Check if token is expired (24 hours)
+            if (time() - $decoded['timestamp'] > 86400) {
+                return false;
+            }
+
+            // Verify hash
+            $expectedHash = hash('sha256', $decoded['payment_id'] . $decoded['email'] . $decoded['timestamp'] . 'payment_salt');
+            if (!hash_equals($decoded['hash'], $expectedHash)) {
+                return false;
+            }
+
+            return $decoded;
+        } catch (\Exception $e) {
+            log_message('error', 'Payment token verification failed: ' . $e->getMessage());
             return false;
         }
     }

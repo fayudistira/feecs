@@ -94,6 +94,44 @@
                     </div>
                 </div>
 
+                <!-- Invoice Payment Summary -->
+                <div id="invoiceSummary" class="card mb-3" style="display: none;">
+                    <div class="card-header" style="background-color: #8B0000; color: white;">
+                        <h5 class="mb-0">Invoice Payment Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <span class="info-label">Invoice Number:</span> <span id="summaryInvoiceNumber">-</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="info-label">Invoice Type:</span> <span id="summaryInvoiceType">-</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="info-label">Total Amount:</span> <span id="summaryTotalAmount">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <span class="info-label">Total Paid:</span> <span id="summaryTotalPaid">-</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="info-label">Remaining Balance:</span> <span id="summaryRemainingBalance" class="badge bg-warning">-</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="info-label">Payment Progress:</span>
+                                    <div class="progress" style="height: 20px;">
+                                        <div id="summaryProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            0%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <hr class="my-4">
 
                 <div class="row">
@@ -288,16 +326,41 @@
             }
         });
 
-        // When Invoice is selected, auto-populate the amount
+        // When Invoice is selected, show summary
         $('#invoiceSelect').on('change', function() {
             const selectedOption = $(this).find('option:selected');
-            const amount = selectedOption.data('amount');
+            const invoiceId = $(this).val();
 
-            if (amount) {
-                $('#amountInput').val(amount);
-                // Highlight the change visually
-                $('#amountInput').addClass('is-valid');
-                setTimeout(() => $('#amountInput').removeClass('is-valid'), 2000);
+            // Fetch invoice details for summary
+            if (invoiceId) {
+                const apiUrl = '<?= base_url('api/invoices/') ?>' + invoiceId;
+                $.ajax({
+                    url: apiUrl,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.status === 'success' && response.data) {
+                            const invoice = response.data;
+                            const totalAmount = parseFloat(invoice.amount) || 0;
+                            const totalPaid = parseFloat(invoice.total_paid) || 0;
+                            const remainingBalance = totalAmount - totalPaid;
+                            const progress = totalAmount > 0 ? (totalPaid / totalAmount * 100) : 0;
+
+                            $('#summaryInvoiceNumber').text(invoice.invoice_number);
+                            $('#summaryInvoiceType').text(invoice.invoice_type ? invoice.invoice_type.replace(/_/g, ' ').toUpperCase() : 'N/A');
+                            $('#summaryTotalAmount').text('Rp ' + totalAmount.toLocaleString('id-ID'));
+                            $('#summaryTotalPaid').text('Rp ' + totalPaid.toLocaleString('id-ID'));
+                            $('#summaryRemainingBalance').text('Rp ' + remainingBalance.toLocaleString('id-ID'));
+                            $('#summaryProgressBar').css('width', progress + '%').attr('aria-valuenow', progress).text(progress.toFixed(1) + '%');
+
+                            $('#invoiceSummary').show();
+                        }
+                    },
+                    error: function() {
+                        $('#invoiceSummary').hide();
+                    }
+                });
+            } else {
+                $('#invoiceSummary').hide();
             }
         });
     });

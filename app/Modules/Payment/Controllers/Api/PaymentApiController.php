@@ -464,4 +464,62 @@ class PaymentApiController extends ResourceController
             'message' => 'Receipt file uploaded successfully'
         ]);
     }
+
+    /**
+     * Get payment receipt details
+     * GET /api/payments/{id}/receipt
+     */
+    public function getReceipt($id = null)
+    {
+        $paymentModel = new PaymentModel();
+        $admissionModel = new AdmissionModel();
+
+        $payment = $paymentModel->find($id);
+
+        if (!$payment) {
+            return $this->failNotFound('Payment not found');
+        }
+
+        // Get student details
+        $student = $admissionModel->select('
+                admissions.registration_number,
+                profiles.full_name,
+                profiles.email,
+                profiles.phone,
+                programs.title as program_title
+            ')
+            ->join('profiles', 'profiles.id = admissions.profile_id')
+            ->join('programs', 'programs.id = admissions.program_id')
+            ->where('admissions.registration_number', (string)$payment['registration_number'])
+            ->first();
+
+        // Get invoice details if linked
+        $invoice = null;
+        if ($payment['invoice_id']) {
+            $invoiceModel = new \Modules\Payment\Models\InvoiceModel();
+            $invoice = $invoiceModel->find($payment['invoice_id']);
+        }
+
+        // Company information
+        $company = [
+            'address' => 'Perum GPR 1 Blok C No.4, Jl. Veteran Tulungrejo, Pare, Kediri 64212',
+            'email' => 'admin@kursusbahasa.org',
+            'phone' => '+62 858 1031 0950'
+        ];
+
+        // Generate payment number if not exists
+        if (!isset($payment['payment_number'])) {
+            $payment['payment_number'] = 'PAY-' . date('Y') . '-' . str_pad((string)$payment['id'], 4, '0', STR_PAD_LEFT);
+        }
+
+        // Return HTML content for receipt
+        $html = view('Modules\Payment\Views\payments\receipt', [
+            'payment' => $payment,
+            'student' => $student,
+            'invoice' => $invoice,
+            'company' => $company
+        ]);
+
+        return $this->response->setBody($html);
+    }
 }

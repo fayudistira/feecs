@@ -1,8 +1,6 @@
 <?= $this->extend('Modules\Dashboard\Views\layout') ?>
 
 <?= $this->section('content') ?>
-<!-- QRCode.js Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
     .invoice-header {
         background: linear-gradient(to right, #8B0000, #6B0000);
@@ -76,6 +74,38 @@
                     </div>
                 </div>
             </div>
+
+            <?php if ($invoice['status'] === 'partially_paid' || !empty($invoice['total_paid'])): ?>
+                <div class="card mb-3">
+                    <div class="card-header" style="background-color: #8B0000; color: white;">
+                        <h5 class="mb-0">Payment Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <span class="info-label">Total Amount:</span> Rp <?= number_format($invoice['amount'], 0, ',', '.') ?>
+                        </div>
+                        <div class="mb-2">
+                            <span class="info-label">Total Paid:</span> Rp <?= number_format($invoice['total_paid'] ?? 0, 0, ',', '.') ?>
+                        </div>
+                        <div class="mb-2">
+                            <span class="info-label">Remaining Balance:</span>
+                            <span class="badge bg-warning">Rp <?= number_format(($invoice['amount'] ?? 0) - ($invoice['total_paid'] ?? 0), 0, ',', '.') ?></span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="info-label">Payment Progress:</span>
+                            <div class="progress" style="height: 20px;">
+                                <?php
+                                $progress = ($invoice['total_paid'] ?? 0) / ($invoice['amount'] ?? 1) * 100;
+                                $progress = min($progress, 100);
+                                ?>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: <?= $progress ?>%;" aria-valuenow="<?= $progress ?>" aria-valuemin="0" aria-valuemax="100">
+                                    <?= number_format($progress, 1) ?>%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif ?>
         </div>
 
         <div class="col-md-6">
@@ -95,21 +125,6 @@
                     </div>
                     <div class="mb-2">
                         <span class="info-label">Phone:</span> <?= esc($invoice['student']['phone'] ?? 'N/A') ?>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-header" style="background-color: #8B0000; color: white;">
-                    <h5 class="mb-0">Share Invoice</h5>
-                </div>
-                <div class="card-body text-center">
-                    <p class="small text-muted mb-2">Scan QR code to view invoice publicly</p>
-                    <div id="qrcode" style="display: inline-block;"></div>
-                    <div class="mt-2">
-                        <a href="<?= base_url('invoice/public/' . $invoice['id']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-box-arrow-up-right"></i> Public View
-                        </a>
                     </div>
                 </div>
             </div>
@@ -150,20 +165,4 @@
         </div>
     <?php endif ?>
 </div>
-
-<script>
-    // Generate QR Code when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        const invoiceUrl = '<?= base_url('invoice/public/' . $invoice['id']) ?>';
-
-        new QRCode(document.getElementById('qrcode'), {
-            text: invoiceUrl,
-            width: 200,
-            height: 200,
-            colorDark: '#8B0000',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    });
-</script>
 <?= $this->endSection() ?>

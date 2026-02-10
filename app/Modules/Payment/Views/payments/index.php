@@ -9,57 +9,65 @@
         border-radius: 5px;
         margin-bottom: 20px;
     }
+
     .btn-payment {
         background: linear-gradient(to right, #8B0000, #6B0000);
         color: white;
         border: none;
     }
+
     .btn-payment:hover {
         background: linear-gradient(to right, #6B0000, #8B0000);
         color: white;
     }
-    .badge-paid { background-color: #28a745; }
-    .badge-pending { background-color: #ffc107; }
-    .badge-failed { background-color: #dc3545; }
-    .badge-refunded { background-color: #6c757d; }
+
+    .badge-paid {
+        background-color: #28a745;
+    }
+
+    .badge-pending {
+        background-color: #ffc107;
+    }
+
+    .badge-failed {
+        background-color: #dc3545;
+    }
+
+    .badge-refunded {
+        background-color: #6c757d;
+    }
 </style>
 
 <div class="container-fluid">
-    <div class="payment-header">
-        <div class="row">
-            <div class="col-md-6">
-                <h3 class="mb-0">Payments</h3>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="<?= base_url('payment/create') ?>" class="btn btn-light">
-                    <i class="bi bi-plus-circle"></i> Add New Payment
-                </a>
-            </div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Payments</h3>
+        <a href="<?= base_url('payment/create') ?>" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Payment
+        </a>
     </div>
-    
+
     <?php if (session()->getFlashdata('success')): ?>
         <div class="alert alert-success alert-dismissible fade show">
             <?= session()->getFlashdata('success') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif ?>
-    
+
     <?php if (session()->getFlashdata('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show">
             <?= session()->getFlashdata('error') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif ?>
-    
+
     <!-- Search and Filter -->
     <div class="card mb-3">
         <div class="card-body">
             <form method="get" action="<?= base_url('payment') ?>">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" 
-                               placeholder="Search..." value="<?= esc($keyword ?? '') ?>">
+                        <input type="text" name="search" class="form-control"
+                            placeholder="Search..." value="<?= esc($keyword ?? '') ?>">
                     </div>
                     <div class="col-md-2">
                         <select name="status" class="form-select">
@@ -90,59 +98,68 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Payments Table -->
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Invoice</th>
                             <th>Student</th>
                             <th>Amount</th>
                             <th>Method</th>
-                            <th>Document #</th>
-                            <th>Date</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($payments)): ?>
-                            <?php foreach ($payments as $payment): ?>
-                                <tr>
-                                    <td><?= esc($payment['id']) ?></td>
-                                    <td>
-                                        <?= esc($payment['student']['full_name'] ?? 'N/A') ?><br>
-                                        <small class="text-muted"><?= esc($payment['registration_number']) ?></small>
-                                    </td>
-                                    <td>Rp <?= number_format($payment['amount'], 0, ',', '.') ?></td>
-                                    <td><?= ucwords(str_replace('_', ' ', $payment['payment_method'])) ?></td>
-                                    <td><?= esc($payment['document_number']) ?></td>
-                                    <td><?= date('M d, Y', strtotime($payment['payment_date'])) ?></td>
-                                    <td>
-                                        <span class="badge badge-<?= $payment['status'] ?>">
-                                            <?= ucfirst($payment['status']) ?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="<?= base_url('payment/view/' . $payment['id']) ?>" 
-                                           class="btn btn-sm btn-info">View</a>
-                                        <a href="<?= base_url('payment/edit/' . $payment['id']) ?>" 
-                                           class="btn btn-sm btn-warning">Edit</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach ?>
-                        <?php else: ?>
+                        <?php foreach ($payments as $payment): ?>
                             <tr>
-                                <td colspan="8" class="text-center">No payments found</td>
+                                <td><?= date('M d, Y', strtotime($payment['payment_date'])) ?></td>
+                                <td>
+                                    <?php if (!empty($payment['invoice_id']) && !empty($payment['invoice_number'])): ?>
+                                        <a href="<?= base_url('invoice/view/' . $payment['invoice_id']) ?>">
+                                            #<?= esc($payment['invoice_number']) ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <span>N/A</span>
+                                    <?php endif ?>
+                                </td>
+                                <td><?= esc($payment['student_name'] ?? 'N/A') ?></td>
+                                <td>Rp <?= number_format($payment['amount'] ?? 0, 0, ',', '.') ?></td>
+                                <td><?= ucwords(str_replace('_', ' ', $payment['payment_method'] ?? 'N/A')) ?></td>
+                                <td>
+                                    <span class="badge bg-<?= $payment['status'] === 'paid' ? 'success' : 'warning' ?>">
+                                        <?= ucfirst($payment['status'] ?? 'N/A') ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="<?= base_url('payment/view/' . $payment['id']) ?>"
+                                            class="btn btn-sm btn-outline-primary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="<?= base_url('payment/edit/' . $payment['id']) ?>"
+                                            class="btn btn-sm btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="<?= base_url('payment/receipt/' . $payment['id']) ?>"
+                                            class="btn btn-sm btn-outline-info"
+                                            target="_blank"
+                                            title="Print Receipt">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
-                        <?php endif ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-            
+
             <?php if (isset($pager)): ?>
                 <div class="mt-3">
                     <?= $pager->links() ?>

@@ -9,6 +9,11 @@ $routes->get('invoice/public/(:segment)', '\Modules\Payment\Controllers\InvoiceC
 $routes->get('invoice/secure/(:any)', '\Modules\Payment\Controllers\InvoiceController::secureView/$1');
 $routes->get('invoice/qr/(:segment)', '\Modules\Payment\Controllers\InvoiceController::generateQr/$1');
 
+// Public Payment Routes (MUST be before grouped routes to avoid conflicts)
+$routes->get('payment/public/(:segment)', '\Modules\Payment\Controllers\PaymentController::publicReceipt/$1');
+$routes->get('payment/secure/(:any)', '\Modules\Payment\Controllers\PaymentController::secureReceipt/$1');
+$routes->get('payment/qr/(:segment)', '\Modules\Payment\Controllers\PaymentController::generateQr/$1');
+
 // Payment Web UI Routes
 $routes->group('payment', ['namespace' => 'Modules\Payment\Controllers', 'filter' => 'session'], function ($routes) {
     $routes->get('/', 'PaymentController::index');
@@ -17,6 +22,7 @@ $routes->group('payment', ['namespace' => 'Modules\Payment\Controllers', 'filter
     $routes->post('store', 'PaymentController::store');
     $routes->get('edit/(:segment)', 'PaymentController::edit/$1');
     $routes->post('update/(:segment)', 'PaymentController::update/$1');
+    $routes->get('receipt/(:segment)', 'PaymentController::receipt/$1');
 });
 
 // Payment Reports Routes
@@ -63,6 +69,9 @@ $routes->group('api/payments', ['namespace' => 'Modules\Payment\Controllers\Api'
 
     // Receipt upload
     $routes->post('(:segment)/receipt', 'PaymentApiController::uploadReceipt/$1');
+
+    // Add this line
+    $routes->get('(:segment)/receipt', 'PaymentApiController::getReceipt/$1');
 });
 
 // Invoice API Routes

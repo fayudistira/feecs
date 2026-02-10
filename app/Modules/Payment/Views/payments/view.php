@@ -9,7 +9,11 @@
         border-radius: 5px;
         margin-bottom: 20px;
     }
-    .info-label { font-weight: bold; color: #8B0000; }
+
+    .info-label {
+        font-weight: bold;
+        color: #8B0000;
+    }
 </style>
 
 <div class="container-fluid">
@@ -19,12 +23,15 @@
                 <h3 class="mb-0">Payment Details #<?= esc($payment['id']) ?></h3>
             </div>
             <div class="col-md-6 text-end">
+                <a href="<?= base_url('payment/receipt/' . $payment['id']) ?>" class="btn btn-light" target="_blank">
+                    <i class="bi bi-printer"></i> Print Receipt
+                </a>
                 <a href="<?= base_url('payment/edit/' . $payment['id']) ?>" class="btn btn-light">Edit</a>
                 <a href="<?= base_url('payment') ?>" class="btn btn-outline-light">Back to List</a>
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col-md-6">
             <div class="card mb-3">
@@ -45,7 +52,7 @@
                         <span class="info-label">Payment Date:</span> <?= date('F d, Y', strtotime($payment['payment_date'])) ?>
                     </div>
                     <div class="mb-2">
-                        <span class="info-label">Status:</span> 
+                        <span class="info-label">Status:</span>
                         <span class="badge bg-<?= $payment['status'] === 'paid' ? 'success' : ($payment['status'] === 'pending' ? 'warning' : 'danger') ?>">
                             <?= ucfirst($payment['status']) ?>
                         </span>
@@ -53,59 +60,59 @@
                     <?php if ($payment['notes']): ?>
                         <div class="mb-2">
                             <span class="info-label">Notes:</span><br>
-                            <?= nl2br(esc($payment['notes'])) ?>
+                            <?= nl2br(esc((string)$payment['notes'])) ?>
                         </div>
                     <?php endif ?>
                 </div>
             </div>
-            
+
             <?php if (!empty($payment['receipt_file'])): ?>
-            <div class="card mb-3">
-                <div class="card-header" style="background-color: #8B0000; color: white;">
-                    <h5 class="mb-0">Receipt Document</h5>
-                </div>
-                <div class="card-body">
-                    <?php 
-                    $filePath = WRITEPATH . 'uploads/' . $payment['receipt_file'];
-                    $fileUrl = base_url('uploads/' . $payment['receipt_file']);
-                    $fileExt = strtolower(pathinfo($payment['receipt_file'], PATHINFO_EXTENSION));
-                    ?>
-                    
-                    <div class="mb-3">
-                        <span class="info-label">File Name:</span> <?= basename($payment['receipt_file']) ?>
+                <div class="card mb-3">
+                    <div class="card-header" style="background-color: #8B0000; color: white;">
+                        <h5 class="mb-0">Receipt Document</h5>
                     </div>
-                    
-                    <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])): ?>
-                        <!-- Image Preview -->
-                        <div class="text-center mb-3">
-                            <img src="<?= $fileUrl ?>" 
-                                 class="img-fluid rounded border" 
-                                 style="max-height: 400px;" 
-                                 alt="Receipt">
-                        </div>
-                    <?php elseif ($fileExt === 'pdf'): ?>
-                        <!-- PDF Preview -->
+                    <div class="card-body">
+                        <?php
+                        $filePath = WRITEPATH . 'uploads/' . $payment['receipt_file'];
+                        $fileUrl = base_url('uploads/' . $payment['receipt_file']);
+                        $fileExt = strtolower(pathinfo($payment['receipt_file'], PATHINFO_EXTENSION));
+                        ?>
+
                         <div class="mb-3">
-                            <embed src="<?= $fileUrl ?>" 
-                                   type="application/pdf" 
-                                   width="100%" 
-                                   height="500px" 
-                                   class="border rounded">
+                            <span class="info-label">File Name:</span> <?= basename($payment['receipt_file']) ?>
                         </div>
-                    <?php endif; ?>
-                    
-                    <div class="d-grid gap-2">
-                        <a href="<?= $fileUrl ?>" 
-                           target="_blank" 
-                           class="btn btn-outline-secondary">
-                            <i class="bi bi-download"></i> Download Receipt
-                        </a>
+
+                        <?php if (in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif'])): ?>
+                            <!-- Image Preview -->
+                            <div class="text-center mb-3">
+                                <img src="<?= $fileUrl ?>"
+                                    class="img-fluid rounded border"
+                                    style="max-height: 400px;"
+                                    alt="Receipt">
+                            </div>
+                        <?php elseif ($fileExt === 'pdf'): ?>
+                            <!-- PDF Preview -->
+                            <div class="mb-3">
+                                <embed src="<?= $fileUrl ?>"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="500px"
+                                    class="border rounded">
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="d-grid gap-2">
+                            <a href="<?= $fileUrl ?>"
+                                target="_blank"
+                                class="btn btn-outline-secondary">
+                                <i class="bi bi-download"></i> Download Receipt
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
         </div>
-        
+
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header" style="background-color: #8B0000; color: white;">

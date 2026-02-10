@@ -14,54 +14,6 @@
     </div>
 </div>
 
-<!-- Statistics Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-lg-3 col-md-6">
-        <div class="dashboard-card stat-card">
-            <div class="card-body compact">
-                <div class="stat-label">Total Applications</div>
-                <div class="stat-number"><?= $statusCounts['total'] ?? 0 ?></div>
-                <div class="stat-change">
-                    <i class="bi bi-file-earmark-text me-1"></i>All submissions
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="dashboard-card stat-card">
-            <div class="card-body compact">
-                <div class="stat-label">Pending Review</div>
-                <div class="stat-number"><?= $statusCounts['pending'] ?? 0 ?></div>
-                <div class="stat-change">
-                    <i class="bi bi-clock-history me-1"></i>Awaiting decision
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="dashboard-card stat-card">
-            <div class="card-body compact">
-                <div class="stat-label">Approved</div>
-                <div class="stat-number"><?= $statusCounts['approved'] ?? 0 ?></div>
-                <div class="stat-change positive">
-                    <i class="bi bi-check-circle me-1"></i>Accepted
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="dashboard-card stat-card">
-            <div class="card-body compact">
-                <div class="stat-label">Rejected</div>
-                <div class="stat-number"><?= $statusCounts['rejected'] ?? 0 ?></div>
-                <div class="stat-change negative">
-                    <i class="bi bi-x-circle me-1"></i>Not admitted
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Search Bar -->
 <div class="row mb-3">
     <div class="col-md-6">
@@ -107,7 +59,7 @@
                                 <td><?= esc($admission['program_title'] ?? 'N/A') ?></td>
                                 <td>
                                     <?php
-                                    $badgeClass = match($admission['status']) {
+                                    $badgeClass = match ($admission['status']) {
                                         'pending' => 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25',
                                         'approved' => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25',
                                         'rejected' => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
@@ -139,7 +91,7 @@
             </table>
         </div>
     </div>
-    
+
     <!-- Pagination -->
     <?php if (isset($totalPages) && $totalPages > 1): ?>
         <div class="card-body">
@@ -157,17 +109,17 @@
 </div>
 
 <script>
-function confirmDelete(id) {
-    if (confirm('Are you sure you want to delete this admission?')) {
-        fetch('<?= base_url('admission/delete/') ?>' + id, {
-            method: 'DELETE',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        }).then(() => {
-            window.location.reload();
-        });
+    function confirmDelete(id) {
+        if (confirm('Are you sure you want to delete this admission?')) {
+            fetch('<?= base_url('admission/delete/') ?>' + id, {
+                method: 'DELETE',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(() => {
+                window.location.reload();
+            });
+        }
     }
-}
 </script>
 <?= $this->endSection() ?>
