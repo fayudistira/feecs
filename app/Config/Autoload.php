@@ -43,6 +43,7 @@ class Autoload extends AutoloadConfig
         'Modules\Test' => APPPATH . 'Modules/Test',
         'Modules\Program' => APPPATH . 'Modules/Program',
         'Modules\Classroom' => APPPATH . 'Modules/Classroom',
+        'Modules\Academic' => APPPATH . 'Modules/Academic',
     ];
 
     /**

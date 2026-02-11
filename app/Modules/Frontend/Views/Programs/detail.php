@@ -50,7 +50,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
             <!-- Quick Info Card -->
             <div class="card border-0 shadow-sm sticky-info mb-3">
                 <div class="card-header text-white py-2" style="background: linear-gradient(135deg, var(--dark-red) 0%, var(--medium-red) 100%);">
-                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Pricing</h6>
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Biaya</h6>
                 </div>
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center mb-2 pb-2 border-bottom">
@@ -58,7 +58,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                             <i class="bi bi-cash-coin fs-5 text-warning"></i>
                         </div>
                         <div class="flex-grow-1 ms-2">
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Registration</small>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Registrasi</small>
                             <span class="fw-bold small">Rp <?= number_format($program['registration_fee'], 0, ',', '.') ?></span>
                         </div>
                     </div>
@@ -68,7 +68,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                             <i class="bi bi-credit-card fs-5 text-success"></i>
                         </div>
                         <div class="flex-grow-1 ms-2">
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Tuition Fee</small>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Biaya Kursus</small>
                             <?php if ($program['discount'] > 0): ?>
                                 <div>
                                     <span class="text-decoration-line-through text-muted" style="font-size: 0.75rem;">
@@ -84,7 +84,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                                     Rp <?= number_format($program['tuition_fee'], 0, ',', '.') ?>
                                 </div>
                             <?php endif ?>
-                            <small class="text-muted" style="font-size: 0.7rem;">per semester</small>
+                            <small class="text-muted" style="font-size: 0.7rem;">per program</small>
                         </div>
                     </div>
                 </div>
@@ -96,16 +96,16 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                     <div class="d-grid gap-2">
                         <a href="<?= base_url('apply/' . $program['id']) ?>"
                             class="btn btn-apply-compact">
-                            <i class="bi bi-pencil-square me-1"></i>Apply Now
+                            <i class="bi bi-pencil-square me-1"></i>Daftar Sekarang
                         </a>
                         <a href="https://wa.me/<?= config('App')->adminWhatsApp ?? '6281234567890' ?>?text=<?= urlencode("Hello, I'm interested in the " . $program['title'] . " program.") ?>"
                             target="_blank"
                             class="btn btn-success-compact">
-                            <i class="bi bi-whatsapp me-1"></i>Ask via WhatsApp
+                            <i class="bi bi-whatsapp me-1"></i>Konsultasi dengan Admin
                         </a>
                         <a href="<?= base_url('programs') ?>"
                             class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrow-left me-1"></i>Back to Programs
+                            <i class="bi bi-arrow-left me-1"></i>Kembali
                         </a>
                     </div>
                 </div>
@@ -127,7 +127,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                             </span>
                         <?php else: ?>
                             <span class="badge bg-primary px-2 py-1" style="font-size: 0.75rem;">
-                                <i class="bi bi-building me-1"></i>In-Person
+                                <i class="bi bi-building me-1"></i>Tatap Muka
                             </span>
                         <?php endif ?>
                     <?php endif ?>
@@ -143,6 +143,12 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                             <i class="bi bi-tag me-1"></i><?= esc($program['sub_category']) ?>
                         </span>
                     <?php endif ?>
+
+                    <?php if (!empty($program['duration'])): ?>
+                        <span class="badge bg-dark px-2 py-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-clock me-1"></i><?= esc($program['duration']) ?>
+                        </span>
+                    <?php endif ?>
                 </div>
             </div>
 
@@ -151,7 +157,7 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                 <div class="card border-0 shadow-sm mb-3">
                     <div class="card-body p-3">
                         <h6 class="card-title fw-bold mb-2">
-                            <i class="bi bi-file-text-fill me-2" style="color: var(--dark-red);"></i>Description
+                            <i class="bi bi-file-text-fill me-2" style="color: var(--dark-red);"></i>Tentang Program
                         </h6>
                         <p class="card-text text-muted mb-0 small lh-base"><?= nl2br(esc((string)($program['description'] ?? ''))) ?></p>
                     </div>
@@ -169,21 +175,21 @@ if (!empty($program['discount']) && $program['discount'] > 0) {
                             <?php if (!empty($program['features']) && is_array($program['features'])): ?>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active small py-2" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button">
-                                        <i class="bi bi-star-fill me-1"></i>Features
+                                        <i class="bi bi-star-fill me-1"></i>Keunggulan
                                     </button>
                                 </li>
                             <?php endif ?>
                             <?php if (!empty($program['facilities']) && is_array($program['facilities'])): ?>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link <?= empty($program['features']) ? 'active' : '' ?> small py-2" id="facilities-tab" data-bs-toggle="tab" data-bs-target="#facilities" type="button">
-                                        <i class="bi bi-building-fill me-1"></i>Facilities
+                                        <i class="bi bi-building-fill me-1"></i>Fasilitas
                                     </button>
                                 </li>
                             <?php endif ?>
                             <?php if (!empty($program['extra_facilities']) && is_array($program['extra_facilities'])): ?>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link <?= empty($program['features']) && empty($program['facilities']) ? 'active' : '' ?> small py-2" id="extra-tab" data-bs-toggle="tab" data-bs-target="#extra" type="button">
-                                        <i class="bi bi-plus-circle-fill me-1"></i>Extras
+                                        <i class="bi bi-plus-circle-fill me-1"></i>Extra
                                     </button>
                                 </li>
                             <?php endif ?>

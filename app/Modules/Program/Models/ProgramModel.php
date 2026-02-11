@@ -11,7 +11,7 @@ class ProgramModel extends Model
     protected $useAutoIncrement = false;
     protected $returnType = 'array';
     protected $useSoftDeletes = true;
-    
+
     protected $allowedFields = [
         'id',
         'title',
@@ -25,16 +25,17 @@ class ProgramModel extends Model
         'discount',
         'category',
         'sub_category',
+        'duration',
         'status',
         'mode',
         'curriculum'
     ];
-    
+
     protected $useTimestamps = true;
     protected $createdField = 'created_at';
     protected $updatedField = 'updated_at';
     protected $deletedField = 'deleted_at';
-    
+
     protected $validationRules = [
         'title' => 'required|min_length[3]|max_length[255]',
         'registration_fee' => 'permit_empty|decimal',
@@ -43,7 +44,7 @@ class ProgramModel extends Model
         'status' => 'required|in_list[active,inactive]',
         'mode' => 'permit_empty|in_list[online,offline]'
     ];
-    
+
     protected $validationMessages = [
         'title' => [
             'required' => 'Program title is required.',
@@ -53,11 +54,11 @@ class ProgramModel extends Model
             'less_than_equal_to' => 'Discount cannot exceed 100%.'
         ]
     ];
-    
+
     protected $beforeInsert = ['generateUUID', 'encodeJsonFields'];
     protected $beforeUpdate = ['encodeJsonFields'];
     protected $afterFind = ['decodeJsonFields'];
-    
+
     /**
      * Generate UUID for new records
      */
@@ -68,7 +69,7 @@ class ProgramModel extends Model
         }
         return $data;
     }
-    
+
     /**
      * Generate UUID v4
      */
@@ -79,14 +80,14 @@ class ProgramModel extends Model
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
-    
+
     /**
      * Encode JSON fields before save
      */
     protected function encodeJsonFields(array $data): array
     {
         $jsonFields = ['features', 'facilities', 'extra_facilities'];
-        
+
         foreach ($jsonFields as $field) {
             if (isset($data['data'][$field])) {
                 if (is_string($data['data'][$field])) {
@@ -98,7 +99,7 @@ class ProgramModel extends Model
                 }
             }
         }
-        
+
         // Handle curriculum separately - it's already JSON encoded in the controller
         // Just pass it through if it's already a string
         if (isset($data['data']['curriculum'])) {
@@ -107,17 +108,17 @@ class ProgramModel extends Model
             }
             // If it's already a JSON string, leave it as is
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Decode JSON fields after fetch
      */
     protected function decodeJsonFields(array $data): array
     {
         $jsonFields = ['features', 'facilities', 'extra_facilities', 'curriculum'];
-        
+
         if (isset($data['data'])) {
             foreach ($jsonFields as $field) {
                 if (isset($data['data'][$field]) && is_string($data['data'][$field])) {
@@ -131,10 +132,10 @@ class ProgramModel extends Model
                 }
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Get programs with pagination
      */
@@ -142,18 +143,18 @@ class ProgramModel extends Model
     {
         return $this->orderBy('created_at', 'DESC')->paginate($perPage);
     }
-    
+
     /**
      * Search programs
      */
     public function searchPrograms(string $keyword)
     {
         return $this->like('title', $keyword)
-                    ->orLike('description', $keyword)
-                    ->orLike('category', $keyword)
-                    ->findAll();
+            ->orLike('description', $keyword)
+            ->orLike('category', $keyword)
+            ->findAll();
     }
-    
+
     /**
      * Filter by status
      */
@@ -161,7 +162,7 @@ class ProgramModel extends Model
     {
         return $this->where('status', $status)->findAll();
     }
-    
+
     /**
      * Filter by category
      */
@@ -169,7 +170,7 @@ class ProgramModel extends Model
     {
         return $this->where('category', $category)->findAll();
     }
-    
+
     /**
      * Get active programs only
      */
@@ -177,7 +178,7 @@ class ProgramModel extends Model
     {
         return $this->where('status', 'active')->findAll();
     }
-    
+
     /**
      * Get programs grouped by category
      */
@@ -185,14 +186,14 @@ class ProgramModel extends Model
     {
         $db = \Config\Database::connect();
         $builder = $db->table($this->table);
-        
+
         $results = $builder->select('category, COUNT(*) as total')
-                          ->where('deleted_at', null)
-                          ->groupBy('category')
-                          ->orderBy('category', 'ASC')
-                          ->get()
-                          ->getResultArray();
-        
+            ->where('deleted_at', null)
+            ->groupBy('category')
+            ->orderBy('category', 'ASC')
+            ->get()
+            ->getResultArray();
+
         return $results;
     }
 }

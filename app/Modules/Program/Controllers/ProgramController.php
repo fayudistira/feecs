@@ -8,12 +8,12 @@ use Modules\Program\Models\ProgramModel;
 class ProgramController extends BaseController
 {
     protected $programModel;
-    
+
     public function __construct()
     {
         $this->programModel = new ProgramModel();
     }
-    
+
     /**
      * Display list of programs
      */
@@ -23,26 +23,26 @@ class ProgramController extends BaseController
         $keyword = $this->request->getGet('search');
         $status = $this->request->getGet('status');
         $category = $this->request->getGet('category');
-        
+
         $builder = $this->programModel;
-        
+
         if ($keyword) {
             $builder = $builder->like('title', $keyword)
-                             ->orLike('description', $keyword)
-                             ->orLike('category', $keyword);
+                ->orLike('description', $keyword)
+                ->orLike('category', $keyword);
         }
-        
+
         if ($status) {
             $builder = $builder->where('status', $status);
         }
-        
+
         if ($category) {
             $builder = $builder->where('category', $category);
         }
-        
+
         $programs = $builder->paginate($perPage);
         $pager = $builder->pager;
-        
+
         return view('Modules\Program\Views\index', [
             'title' => 'Programs',
             'programs' => $programs,
@@ -54,18 +54,18 @@ class ProgramController extends BaseController
             'user' => auth()->user()
         ]);
     }
-    
+
     /**
      * Display program details
      */
     public function view($id)
     {
         $program = $this->programModel->find($id);
-        
+
         if (!$program) {
             return redirect()->to('/program')->with('error', 'Program not found.');
         }
-        
+
         return view('Modules\Program\Views\view', [
             'title' => 'Program Details',
             'program' => $program,
@@ -73,7 +73,7 @@ class ProgramController extends BaseController
             'user' => auth()->user()
         ]);
     }
-    
+
     /**
      * Show create form
      */
@@ -85,7 +85,7 @@ class ProgramController extends BaseController
             'user' => auth()->user()
         ]);
     }
-    
+
     /**
      * Store new program
      */
@@ -102,10 +102,11 @@ class ProgramController extends BaseController
             'discount' => $this->request->getPost('discount') ?: 0,
             'category' => $this->request->getPost('category'),
             'sub_category' => $this->request->getPost('sub_category'),
+            'duration' => $this->request->getPost('duration'),
             'status' => $this->request->getPost('status') ?: 'active',
             'mode' => $this->request->getPost('mode') ?: 'offline'
         ];
-        
+
         // Handle curriculum - filter out empty entries
         $curriculum = $this->request->getPost('curriculum');
         if (!empty($curriculum) && is_array($curriculum)) {
@@ -120,7 +121,7 @@ class ProgramController extends BaseController
             }
             $data['curriculum'] = !empty($filteredCurriculum) ? json_encode($filteredCurriculum) : null;
         }
-        
+
         // Handle thumbnail upload
         $thumbnail = $this->request->getFile('thumbnail');
         if ($thumbnail && $thumbnail->isValid() && !$thumbnail->hasMoved()) {
@@ -128,25 +129,25 @@ class ProgramController extends BaseController
             $thumbnail->move(FCPATH . 'uploads/programs/thumbs', $newName);
             $data['thumbnail'] = $newName;
         }
-        
+
         if ($this->programModel->save($data)) {
             return redirect()->to('/program')->with('success', 'Program created successfully.');
         }
-        
+
         return redirect()->back()->withInput()->with('errors', $this->programModel->errors());
     }
-    
+
     /**
      * Show edit form
      */
     public function edit($id)
     {
         $program = $this->programModel->find($id);
-        
+
         if (!$program) {
             return redirect()->to('/program')->with('error', 'Program not found.');
         }
-        
+
         // Convert arrays back to multiline strings for textarea
         if (is_array($program['features'])) {
             $program['features'] = implode("\n", $program['features']);
@@ -157,7 +158,7 @@ class ProgramController extends BaseController
         if (is_array($program['extra_facilities'])) {
             $program['extra_facilities'] = implode("\n", $program['extra_facilities']);
         }
-        
+
         return view('Modules\Program\Views\edit', [
             'title' => 'Edit Program',
             'program' => $program,
@@ -165,18 +166,18 @@ class ProgramController extends BaseController
             'user' => auth()->user()
         ]);
     }
-    
+
     /**
      * Update program
      */
     public function update($id)
     {
         $program = $this->programModel->find($id);
-        
+
         if (!$program) {
             return redirect()->to('/program')->with('error', 'Program not found.');
         }
-        
+
         $data = [
             'id' => $id,
             'title' => $this->request->getPost('title'),
@@ -189,10 +190,11 @@ class ProgramController extends BaseController
             'discount' => $this->request->getPost('discount') ?: 0,
             'category' => $this->request->getPost('category'),
             'sub_category' => $this->request->getPost('sub_category'),
+            'duration' => $this->request->getPost('duration'),
             'status' => $this->request->getPost('status') ?: 'active',
             'mode' => $this->request->getPost('mode') ?: 'offline'
         ];
-        
+
         // Handle curriculum - filter out empty entries
         $curriculum = $this->request->getPost('curriculum');
         if (!empty($curriculum) && is_array($curriculum)) {
@@ -207,7 +209,7 @@ class ProgramController extends BaseController
             }
             $data['curriculum'] = !empty($filteredCurriculum) ? json_encode($filteredCurriculum) : null;
         }
-        
+
         // Handle thumbnail upload
         $thumbnail = $this->request->getFile('thumbnail');
         if ($thumbnail && $thumbnail->isValid() && !$thumbnail->hasMoved()) {
@@ -218,51 +220,51 @@ class ProgramController extends BaseController
                     unlink($oldFile);
                 }
             }
-            
+
             $newName = $thumbnail->getRandomName();
             $thumbnail->move(FCPATH . 'uploads/programs/thumbs', $newName);
             $data['thumbnail'] = $newName;
         }
-        
+
         if ($this->programModel->save($data)) {
             return redirect()->to('/program')->with('success', 'Program updated successfully.');
         }
-        
+
         return redirect()->back()->withInput()->with('errors', $this->programModel->errors());
     }
-    
+
     /**
      * Delete program (soft delete)
      */
     public function delete($id)
     {
         $program = $this->programModel->find($id);
-        
+
         if (!$program) {
             return redirect()->to('/program')->with('error', 'Program not found.');
         }
-        
+
         if ($this->programModel->delete($id)) {
             return redirect()->to('/program')->with('success', 'Program deleted successfully.');
         }
-        
+
         return redirect()->to('/program')->with('error', 'Failed to delete program.');
     }
-    
+
     /**
      * Download Excel template for bulk upload
      */
     public function downloadTemplate()
     {
         $templatePath = FCPATH . 'templates/program_bulk_upload_template.xlsx';
-        
+
         if (!file_exists($templatePath)) {
             return redirect()->back()->with('error', 'Template file not found.');
         }
-        
+
         return $this->response->download($templatePath, null)->setFileName('program_bulk_upload_template.xlsx');
     }
-    
+
     /**
      * Handle bulk upload of programs via Excel
      */
@@ -276,51 +278,62 @@ class ProgramController extends BaseController
                 'ext_in[excel_file,xlsx,xls]'
             ]
         ];
-        
+
         if (!$this->validate($validationRules)) {
             return redirect()->back()
                 ->with('error', 'Invalid file. Please upload a valid Excel file (.xlsx or .xls) with maximum size of 5MB.');
         }
-        
+
         $file = $this->request->getFile('excel_file');
-        
+
         if (!$file->isValid()) {
             return redirect()->back()->with('error', 'File upload failed. Please try again.');
         }
-        
+
         try {
             // Load the Excel file
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
             $worksheet = $spreadsheet->getActiveSheet();
             $rows = $worksheet->toArray();
-            
+
             // Remove header row
             $headers = array_shift($rows);
-            
+
             // Validate headers
-            $expectedHeaders = ['title', 'description', 'category', 'sub_category', 'registration_fee', 
-                              'tuition_fee', 'discount', 'status', 'features', 'facilities', 'extra_facilities'];
-            
+            $expectedHeaders = [
+                'title',
+                'description',
+                'category',
+                'sub_category',
+                'registration_fee',
+                'tuition_fee',
+                'discount',
+                'status',
+                'features',
+                'facilities',
+                'extra_facilities'
+            ];
+
             $headerCheck = array_map('strtolower', array_map('trim', $headers));
             $missingHeaders = array_diff($expectedHeaders, $headerCheck);
-            
+
             if (!empty($missingHeaders)) {
                 return redirect()->back()
                     ->with('error', 'Invalid template format. Missing columns: ' . implode(', ', $missingHeaders));
             }
-            
+
             // Process rows
             $successCount = 0;
             $errors = [];
             $rowNumber = 2; // Start from 2 (1 is header)
-            
+
             foreach ($rows as $row) {
                 // Skip empty rows
                 if (empty(array_filter($row))) {
                     $rowNumber++;
                     continue;
                 }
-                
+
                 // Extract data
                 $data = [
                     'title' => trim($row[0] ?? ''),
@@ -335,35 +348,35 @@ class ProgramController extends BaseController
                     'facilities' => $this->parsePipeSeparated($row[9] ?? ''),
                     'extra_facilities' => $this->parsePipeSeparated($row[10] ?? ''),
                 ];
-                
+
                 // Validate required fields
                 if (empty($data['title'])) {
                     $errors[] = "Row $rowNumber: Title is required";
                     $rowNumber++;
                     continue;
                 }
-                
+
                 // Validate status
                 if (!in_array($data['status'], ['active', 'inactive'])) {
                     $errors[] = "Row $rowNumber: Status must be 'active' or 'inactive'";
                     $rowNumber++;
                     continue;
                 }
-                
+
                 // Validate discount
                 if ($data['discount'] < 0 || $data['discount'] > 100) {
                     $errors[] = "Row $rowNumber: Discount must be between 0 and 100";
                     $rowNumber++;
                     continue;
                 }
-                
+
                 // Validate fees
                 if ($data['registration_fee'] < 0 || $data['tuition_fee'] < 0) {
                     $errors[] = "Row $rowNumber: Fees cannot be negative";
                     $rowNumber++;
                     continue;
                 }
-                
+
                 // Try to save
                 if ($this->programModel->save($data)) {
                     $successCount++;
@@ -371,10 +384,10 @@ class ProgramController extends BaseController
                     $modelErrors = $this->programModel->errors();
                     $errors[] = "Row $rowNumber: " . implode(', ', $modelErrors);
                 }
-                
+
                 $rowNumber++;
             }
-            
+
             // Prepare response message
             if ($successCount > 0 && empty($errors)) {
                 return redirect()->to('/program')
@@ -392,13 +405,12 @@ class ProgramController extends BaseController
                 }
                 return redirect()->back()->with('error', $errorMsg);
             }
-            
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Error processing file: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Parse pipe-separated string into array
      */
@@ -407,7 +419,7 @@ class ProgramController extends BaseController
         if (empty($value)) {
             return '';
         }
-        
+
         $items = array_map('trim', explode('|', $value));
         return array_filter($items); // Remove empty items
     }

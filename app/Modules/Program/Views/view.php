@@ -15,7 +15,7 @@
             </a>
         </div>
     </div>
-    
+
     <div class="card">
         <div class="card-body">
             <div class="row">
@@ -25,10 +25,10 @@
                 </div>
                 <div class="col-md-4 text-end">
                     <?php if (!empty($program['thumbnail'])): ?>
-                        <img src="<?= base_url('uploads/programs/thumbs/' . $program['thumbnail']) ?>" 
-                             alt="<?= esc($program['title']) ?>" 
-                             class="img-thumbnail mb-2" 
-                             style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                        <img src="<?= base_url('uploads/programs/thumbs/' . $program['thumbnail']) ?>"
+                            alt="<?= esc($program['title']) ?>"
+                            class="img-thumbnail mb-2"
+                            style="max-width: 200px; max-height: 200px; object-fit: cover;">
                         <br>
                     <?php endif ?>
                     <?php if ($program['status'] === 'active'): ?>
@@ -38,9 +38,9 @@
                     <?php endif ?>
                 </div>
             </div>
-            
+
             <hr>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     <h6>Category Information</h6>
@@ -52,6 +52,10 @@
                         <tr>
                             <th>Sub Category:</th>
                             <td><?= esc($program['sub_category'] ?? '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>Duration:</th>
+                            <td><?= esc($program['duration'] ?? '-') ?></td>
                         </tr>
                         <tr>
                             <th>Delivery Mode:</th>
@@ -73,7 +77,7 @@
                         </tr>
                     </table>
                 </div>
-                
+
                 <div class="col-md-6">
                     <h6>Fee Information</h6>
                     <table class="table table-sm">
@@ -98,9 +102,9 @@
                     </table>
                 </div>
             </div>
-            
+
             <hr>
-            
+
             <div class="row">
                 <div class="col-md-4">
                     <h6>Features</h6>
@@ -116,7 +120,7 @@
                         <p class="text-muted">No features listed</p>
                     <?php endif ?>
                 </div>
-                
+
                 <div class="col-md-4">
                     <h6>Facilities</h6>
                     <?php if (!empty($program['facilities']) && is_array($program['facilities'])): ?>
@@ -131,7 +135,7 @@
                         <p class="text-muted">No facilities listed</p>
                     <?php endif ?>
                 </div>
-                
+
                 <div class="col-md-4">
                     <h6>Extra Facilities</h6>
                     <?php if (!empty($program['extra_facilities']) && is_array($program['extra_facilities'])): ?>
@@ -147,9 +151,9 @@
                     <?php endif ?>
                 </div>
             </div>
-            
+
             <hr>
-            
+
             <!-- Curriculum Section -->
             <?php if (!empty($program['curriculum']) && is_array($program['curriculum'])): ?>
                 <div class="row">
@@ -159,17 +163,17 @@
                             <?php foreach ($program['curriculum'] as $index => $chapter): ?>
                                 <div class="accordion-item">
                                     <h2 class="accordion-header">
-                                        <button class="accordion-button <?= $index !== 0 ? 'collapsed' : '' ?>" 
-                                                type="button" 
-                                                data-bs-toggle="collapse" 
-                                                data-bs-target="#chapter-<?= $index ?>">
+                                        <button class="accordion-button <?= $index !== 0 ? 'collapsed' : '' ?>"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#chapter-<?= $index ?>">
                                             <span class="badge bg-dark me-2"><?= $index + 1 ?></span>
                                             <?= esc($chapter['chapter']) ?>
                                         </button>
                                     </h2>
-                                    <div id="chapter-<?= $index ?>" 
-                                         class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>" 
-                                         data-bs-parent="#curriculumAccordion">
+                                    <div id="chapter-<?= $index ?>"
+                                        class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
+                                        data-bs-parent="#curriculumAccordion">
                                         <div class="accordion-body">
                                             <?= esc($chapter['description']) ?>
                                         </div>
@@ -179,14 +183,14 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <hr>
             <?php endif ?>
-            
+
             <div class="row">
                 <div class="col-md-12">
                     <small class="text-muted">
-                        Created: <?= date('d M Y H:i', strtotime($program['created_at'])) ?> | 
+                        Created: <?= date('d M Y H:i', strtotime($program['created_at'])) ?> |
                         Updated: <?= date('d M Y H:i', strtotime($program['updated_at'])) ?>
                     </small>
                 </div>

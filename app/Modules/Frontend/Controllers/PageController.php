@@ -454,7 +454,7 @@ class PageController extends BaseController
     {
         $programModel = new ProgramModel();
         $programs = $programModel->where('status', 'active')
-            ->where('category', 'Chinese')
+            ->where('category', 'Mandarin')
             ->orderBy('created_at', 'DESC')
             ->findAll();
 

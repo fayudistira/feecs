@@ -56,6 +56,7 @@ Stores language course programs with pricing and features.
 | discount         | DECIMAL(5,2)  | Discount percentage (0-100)                                    |
 | category         | VARCHAR(100)  | Language category (Chinese, Japanese, Korean, German, English) |
 | sub_category     | VARCHAR(100)  | Subcategory (Regular, Package, Private)                        |
+| duration         | VARCHAR(255)  | Course duration (e.g., 3 months, 6 weeks, 1 year)              |
 | mode             | VARCHAR(20)   | Delivery mode (online, offline)                                |
 | curriculum       | JSON          | Curriculum data                                                |
 | thumbnail        | VARCHAR(255)  | Thumbnail image filename                                       |
