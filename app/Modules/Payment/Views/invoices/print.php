@@ -412,10 +412,15 @@
             <tbody>
                 <?php
                 $items = [];
+                // Debug: Log what's in items
+                $debugItems = !empty($invoice['items']) ? $invoice['items'] : 'EMPTY';
                 if (!empty($invoice['items'])) {
                     $items = is_string($invoice['items']) ? json_decode($invoice['items'], true) : $invoice['items'];
                     $items = is_array($items) ? $items : [];
                 }
+                // Debug output - remove in production
+                // echo '<pre>Debug Items: ' . print_r($debugItems, true) . '</pre>';
+                // echo '<pre>Parsed Items: ' . print_r($items, true) . '</pre>';
                 ?>
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>

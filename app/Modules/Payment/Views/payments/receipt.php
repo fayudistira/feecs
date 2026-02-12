@@ -346,7 +346,7 @@
             <?php endif ?>
             <?php if (!empty($payment['notes'])): ?>
                 <div class="detail-row">
-                    <div class="detail-label">Catatan:</div>
+                    <div class="detail-label">Keterangan:</div>
                     <div class="detail-value"><?= nl2br(esc((string)$payment['notes'])) ?></div>
                 </div>
             <?php endif ?>
@@ -361,7 +361,8 @@
         <!-- QR Code -->
         <div class="qr-code">
             <img src="<?= base_url('payment/qr/' . $payment['id']) ?>" alt="QR Code" width="100" height="100">
-            <p>Scan untuk verifikasi pembayaran</p>
+            <p>Scan untuk verifikasi kwitansi</p>
+            <p>Jika anda menemukan ketidak samaan dengan kwitansi ini, silahkan hubungi admin</p>
         </div>
 
         <!-- Footer -->

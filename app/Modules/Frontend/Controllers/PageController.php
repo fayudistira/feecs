@@ -280,15 +280,32 @@ class PageController extends BaseController
 
             if ($totalAmount > 0) {
                 $invoiceModel = new \Modules\Payment\Models\InvoiceModel();
+
+                // Create items array with 2 entries (Registration Fee + Course Fee)
+                $items = [
+                    [
+                        'description' => 'Registration Fee for ' . $program['title'],
+                        'amount' => (float)$regFee,
+                        'type' => 'registration_fee'
+                    ],
+                    [
+                        'description' => 'Course Fee for ' . $program['title'],
+                        'amount' => (float)$finalTuition,
+                        'type' => 'tuition_fee'
+                    ]
+                ];
+
                 $invoiceData = [
                     'registration_number' => $admissionData['registration_number'],
                     'description' => 'Initial Fees: Registration and Tuition for ' . $program['title'],
                     'amount' => $totalAmount,
                     'due_date' => date('Y-m-d', strtotime('+3 days')), // Due in 3 days
                     'invoice_type' => 'tuition_fee',
-                    'status' => 'unpaid'
+                    'status' => 'unpaid',
+                    'items' => json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
                 ];
 
+                log_message('error', '[Frontend Apply] Invoice Data: ' . json_encode($invoiceData, JSON_UNESCAPED_UNICODE));
                 $invoiceId = $invoiceModel->createInvoice($invoiceData);
                 log_message('error', '[Frontend Apply] Invoice created with ID: ' . $invoiceId);
 
