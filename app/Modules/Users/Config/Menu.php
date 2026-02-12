@@ -6,7 +6,7 @@
 
 return [
     [
-        'title' => 'User Management',
+        'title' => 'Manajemen User',
         'url' => 'users',
         'icon' => 'people',
         'permission' => 'admin.settings',

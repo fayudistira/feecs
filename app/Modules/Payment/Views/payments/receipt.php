@@ -335,7 +335,7 @@
             <div class="detail-row">
                 <div class="detail-label">Status Pembayaran:</div>
                 <div class="detail-value">
-                    <span class="badge bg-success">Lunas</span>
+                    <span class="badge bg-success">Valid</span>
                 </div>
             </div>
             <?php if (!empty($payment['transaction_id'])): ?>
@@ -366,7 +366,7 @@
 
         <!-- Footer -->
         <div class="receipt-footer">
-            <p>Ini adalah kwitansi yang dihasilkan komputer. Tidak memerlukan tanda tangan.</p>
+            <p>Ini adalah kwitansi yang dihasilkan secara elektronik dan tidak memerlukan tanda tangan.</p>
             <p>Terima kasih atas pembayaran Anda!</p>
         </div>
     </div>

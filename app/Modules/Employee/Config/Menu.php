@@ -2,7 +2,7 @@
 
 return [
     [
-        'title' => 'Employee Management',
+        'title' => 'Manajemen Pegawai',
         'icon' => 'people-fill',
         'url' => 'admin/employee',
         'permission' => 'admin.settings',
