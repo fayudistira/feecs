@@ -137,6 +137,36 @@
             border-bottom: none;
         }
 
+        .payment-recap-table {
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-bottom: 15px;
+            border-collapse: collapse;
+        }
+
+        .payment-recap-table th {
+            background: #f8f9fa;
+            color: #333;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 2px solid #8B0000;
+        }
+
+        .payment-recap-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .payment-recap-table tr.grand-total td {
+            border-top: 2px solid #8B0000;
+            font-weight: bold;
+            font-size: 14px;
+            color: #8B0000;
+        }
+
         .invoice-totals {
             margin-left: auto;
             width: 250px;
@@ -443,23 +473,31 @@
             </tbody>
         </table>
 
-        <!-- Totals -->
-        <div class="invoice-totals">
-            <div class="total-row">
-                <span>Subtotal:</span>
-                <span>Rp <?= number_format($invoice['amount'], 0, ',', '.') ?></span>
-            </div>
-            <?php if (!empty($invoice['total_paid']) && $invoice['total_paid'] > 0): ?>
-                <div class="total-row">
-                    <span>Dibayar:</span>
-                    <span style="color: green;">- Rp <?= number_format($invoice['total_paid'], 0, ',', '.') ?></span>
-                </div>
-            <?php endif ?>
-            <div class="total-row grand-total">
-                <span>Sisa Tagihan:</span>
-                <span>Rp <?= number_format($invoice['amount'] - ($invoice['total_paid'] ?? 0), 0, ',', '.') ?></span>
-            </div>
-        </div>
+        <!-- Payment Recap Table -->
+        <table class="payment-recap-table">
+            <thead>
+                <tr>
+                    <th>Rekap Pembayaran</th>
+                    <th style="width: 150px; text-align: right;">Jumlah</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Biaya</td>
+                    <td style="text-align: right;">Rp <?= number_format($invoice['amount'], 0, ',', '.') ?></td>
+                </tr>
+                <?php if (!empty($invoice['total_paid']) && $invoice['total_paid'] > 0): ?>
+                    <tr>
+                        <td>Biaya yang sudah dibayar</td>
+                        <td style="text-align: right; color: green;">- Rp <?= number_format($invoice['total_paid'], 0, ',', '.') ?></td>
+                    </tr>
+                <?php endif; ?>
+                <tr class="grand-total">
+                    <td>Sisa Tagihan</td>
+                    <td style="text-align: right;">Rp <?= number_format($invoice['amount'] - ($invoice['total_paid'] ?? 0), 0, ',', '.') ?></td>
+                </tr>
+            </tbody>
+        </table>
         <p style="margin-top: 10px; font-size: 11px;">
             Konfirmasi Pendaftaran Anda via Whatsap di bawah untuk fast response Admin
         </p>
