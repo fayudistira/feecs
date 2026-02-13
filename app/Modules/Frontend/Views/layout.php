@@ -55,8 +55,8 @@
     <?php endif; ?>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2991/2991148.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= base_url('assets/images/sos-logo.png') ?>">
+    <link rel="apple-touch-icon" href="<?= base_url('assets/images/sos-logo.png') ?>">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faktur #<?= esc($invoice['invoice_number']) ?></title>
+    <title>Invoice #<?= esc($invoice['invoice_number']) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         @media print {
@@ -401,8 +401,8 @@
                 <p>Telp: +62 858 1031 0950</p>
             </div>
             <div class="invoice-meta">
-                <h2>FAKTUR</h2>
-                <p><strong>#<?= esc($invoice['invoice_number']) ?></strong> <button class="copy-btn no-print" data-copy="#<?= esc($invoice['invoice_number']) ?>" title="Salin Nomor Faktur"><i class="bi bi-clipboard"></i></button></p>
+                <h2>INVOICE</h2>
+                <p><strong>#<?= esc($invoice['invoice_number']) ?></strong> <button class="copy-btn no-print" data-copy="#<?= esc($invoice['invoice_number']) ?>" title="Salin Nomor Invoice"><i class="bi bi-clipboard"></i></button></p>
                 <p>Tgl: <?= date('d M Y', strtotime($invoice['created_at'])) ?></p>
                 <p>Jt.Tempo: <?= date('d M Y', strtotime($invoice['due_date'])) ?></p>
                 <p>
@@ -524,7 +524,7 @@
                 <p>Rekening: 2205502277</p>
                 <p>Nama: SOS Course and Training</p>
                 <p style="margin-top: 10px; font-size: 11px;">
-                    Harap cantumkan nomor Faktur <strong>#<?= esc($invoice['invoice_number']) ?></strong> pada keterangan Transfer.
+                    Harap cantumkan nomor Invoice <strong>#<?= esc($invoice['invoice_number']) ?></strong> pada keterangan Transfer.
                 </p>
             </div>
             <div class="qr-code">

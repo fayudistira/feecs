@@ -128,7 +128,7 @@ $ogImage = 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?a
                 </h1>
                 <h2 class="h3 text-white-50 mb-4">Xihuan Mandarin Pare</h2>
                 <p class="lead mb-4 text-white-90" style="font-size: 1.15rem;">
-                    Xihuan Mandarin Pare - Spesialis Pemula dengan Camp Mandarin Area Pertama di Indonesia. Program HSK 1-6, HSKK, dan Translator.
+                    Spesialis Pemula dengan Camp Mandarin Area Pertama di Indonesia. Program HSK 1-6, HSKK, dan Translator.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="https://wa.me/6285810310950?text=Hai,%20saya%20tertarik%20dengan%20kursus%20Bahasa%20Mandarin"
@@ -141,29 +141,7 @@ $ogImage = 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?a
                     </a>
                 </div>
             </div>
-            <div class="col-lg-5 text-center">
-                <div class="bg-white bg-opacity-10 rounded-5 p-5 backdrop-blur">
-                    <div class="display-1 mb-3">🀄</div>
-                    <h3 class="text-white fw-bold mb-3">Xihuan Mandarin</h3>
-                    <p class="text-white-50">Kursus Mandarin Pare</p>
-                    <div class="mt-4">
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                                    <div class="h4 fw-bold text-white mb-0">HSK 1-6</div>
-                                    <small class="text-white-50">Level Tersedia</small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-white bg-opacity-20 rounded-3 p-3">
-                                    <div class="h4 fw-bold text-white mb-0">Native</div>
-                                    <small class="text-white-50">Pengajar</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>

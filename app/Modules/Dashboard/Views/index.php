@@ -24,7 +24,7 @@
                         <div class="col-6">
                             <div class="p-3 border rounded text-center">
                                 <div class="stat-number text-primary"><?= $admissionStats['total'] ?></div>
-                                <div class="stat-label">Total Aplikasi</div>
+                                <div class="stat-label">Pendaftar</div>
                                 <div class="progress mt-2" style="height: 6px;">
                                     <div class="progress-bar" style="width: 100%; background-color: var(--dark-red);"></div>
                                 </div>
@@ -33,7 +33,7 @@
                         <div class="col-6">
                             <div class="p-3 border rounded text-center">
                                 <div class="stat-number" style="color: #FFA500;"><?= $admissionStats['pending'] ?></div>
-                                <div class="stat-label">Menunggu</div>
+                                <div class="stat-label">Pending</div>
                                 <div class="progress mt-2" style="height: 6px;">
                                     <div class="progress-bar bg-warning" style="width: <?= $admissionStats['total'] > 0 ? ($admissionStats['pending'] / $admissionStats['total'] * 100) : 0 ?>%;"></div>
                                 </div>
@@ -42,7 +42,7 @@
                         <div class="col-6">
                             <div class="p-3 border rounded text-center">
                                 <div class="stat-number text-success"><?= $admissionStats['approved'] ?></div>
-                                <div class="stat-label">Disetujui</div>
+                                <div class="stat-label">Aktif</div>
                                 <div class="progress mt-2" style="height: 6px;">
                                     <div class="progress-bar bg-success" style="width: <?= $admissionStats['total'] > 0 ? ($admissionStats['approved'] / $admissionStats['total'] * 100) : 0 ?>%;"></div>
                                 </div>
