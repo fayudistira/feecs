@@ -5,18 +5,21 @@ namespace Modules\Payment\Controllers;
 use App\Controllers\BaseController;
 use Modules\Payment\Models\PaymentModel;
 use Modules\Payment\Models\InvoiceModel;
+use Modules\Payment\Models\InstallmentModel;
 use Modules\Admission\Models\AdmissionModel;
 
 class PaymentController extends BaseController
 {
     protected $paymentModel;
     protected $invoiceModel;
+    protected $installmentModel;
     protected $admissionModel;
 
     public function __construct()
     {
         $this->paymentModel = new PaymentModel();
         $this->invoiceModel = new InvoiceModel();
+        $this->installmentModel = new InstallmentModel();
         $this->admissionModel = new AdmissionModel();
     }
 
@@ -142,9 +145,21 @@ class PaymentController extends BaseController
      */
     public function store()
     {
+        // Get the invoice first to link to installment
+        $invoiceId = $this->request->getPost('invoice_id');
+        $installmentId = null;
+
+        if ($invoiceId) {
+            $invoice = $this->invoiceModel->find($invoiceId);
+            if ($invoice && !empty($invoice['installment_id'])) {
+                $installmentId = $invoice['installment_id'];
+            }
+        }
+
         $data = [
             'registration_number' => $this->request->getPost('registration_number'),
-            'invoice_id' => $this->request->getPost('invoice_id') ?: null,
+            'invoice_id' => $invoiceId ?: null,
+            'installment_id' => $installmentId,
             'amount' => $this->request->getPost('amount'),
             'payment_method' => $this->request->getPost('payment_method'),
             'document_number' => $this->request->getPost('document_number'),
@@ -163,9 +178,16 @@ class PaymentController extends BaseController
         }
 
         if ($this->paymentModel->insert($data)) {
+            $paymentId = $this->paymentModel->insertID();
+
+            // If linked to installment, update its totals
+            if ($installmentId) {
+                $this->installmentModel->updatePaymentTotal($installmentId);
+            }
+
             // If linked to invoice and status is paid, recalculate invoice status
-            if ($data['invoice_id'] && $data['status'] === 'paid') {
-                $newInvoiceStatus = $this->invoiceModel->recalculateInvoiceStatus($data['invoice_id']);
+            if ($invoiceId && $data['status'] === 'paid') {
+                $newInvoiceStatus = $this->invoiceModel->recalculateInvoiceStatus($invoiceId);
 
                 // Auto-approve admission when ANY payment is recorded for the initial invoice
                 $admission = $this->admissionModel->where('registration_number', $data['registration_number'])->first();
@@ -174,7 +196,7 @@ class PaymentController extends BaseController
                     $this->admissionModel->update($admission['id'], [
                         'status' => 'approved',
                         'reviewed_date' => date('Y-m-d H:i:s'),
-                        'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "[" . date('Y-m-d H:i:s') . "] Automatically approved upon payment of invoice #" . $this->invoiceModel->find($data['invoice_id'])['invoice_number'] . ". Amount: Rp " . number_format($data['amount'], 0, ',', '.') . ". Invoice status: " . $newInvoiceStatus . "."
+                        'notes' => ($admission['notes'] ? $admission['notes'] . "\n" : "") . "[" . date('Y-m-d H:i:s') . "] Automatically approved upon payment of invoice #" . $this->invoiceModel->find($invoiceId)['invoice_number'] . ". Amount: Rp " . number_format($data['amount'], 0, ',', '.') . ". Invoice status: " . $newInvoiceStatus . "."
                     ]);
 
                     // Send approval notification email to applicant

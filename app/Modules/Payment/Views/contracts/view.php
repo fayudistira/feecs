@@ -180,7 +180,7 @@
                             </a>
                         <?php endif; ?>
 
-                        <a href="<?= base_url('admission/view/' . $admission['id'] ?? '') ?>"
+                        <a href="<?= base_url('admission/view/' . ($admission['admission_id'] ?? '')) ?>"
                             class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali ke Pendaftaran
                         </a>

@@ -30,8 +30,8 @@ class InstallmentModel extends Model
 
     protected $validationRules = [
         'registration_number' => 'required|max_length[20]',
-        'total_contract_amount' => 'required|decimal|greater_than_equal[0]',
-        'total_paid' => 'permit_empty|decimal|greater_than_equal[0]',
+        'total_contract_amount' => 'required|decimal|greater_than_equal_to[0]',
+        'total_paid' => 'permit_empty|decimal|greater_than_equal_to[0]',
         'remaining_balance' => 'required|decimal',
         'status' => 'permit_empty|in_list[unpaid,partial,paid]'
     ];

@@ -65,7 +65,7 @@
                         <div class="d-flex justify-content-between mt-4">
                             <a href="<?= base_url('student') ?>" class="btn btn-outline-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-circle me-2"></i>Lanjutkan Naik Tingkat
+                                <i class="bi bi-check-circle me-2"></i>Buat Akun Siswa
                             </button>
                         </div>
                     </form>

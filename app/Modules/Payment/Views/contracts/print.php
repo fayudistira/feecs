@@ -268,7 +268,7 @@
     </div>
 
     <div class="section">
-        <div class="section-title">Contract Details</div>
+        <div class="section-title">Detail Kontrak</div>
         <div class="info-grid">
             <div class="info-item">
                 <label>Contract Status</label>
@@ -292,15 +292,15 @@
     <div class="summary-box">
         <div class="summary-grid">
             <div class="summary-item total">
-                <div class="label">Total Contract Amount</div>
+                <div class="label">Jumlah Biaya</div>
                 <div class="value">Rp <?= number_format($installment['total_contract_amount'], 0, ',', '.') ?></div>
             </div>
             <div class="summary-item paid">
-                <div class="label">Total Paid</div>
+                <div class="label">Jumalh yang Sudah Dibayar</div>
                 <div class="value">Rp <?= number_format($totalPaid, 0, ',', '.') ?></div>
             </div>
             <div class="summary-item balance">
-                <div class="label">Remaining Balance</div>
+                <div class="label">Sisa Tagihan</div>
                 <div class="value">Rp <?= number_format($remainingBalance, 0, ',', '.') ?></div>
             </div>
         </div>
@@ -312,10 +312,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Document Number</th>
-                        <th>Payment Method</th>
-                        <th>Amount</th>
+                        <th>Tgl.</th>
+                        <th>No. Dokumen</th>
+                        <th>Metode Pembayaran</th>
+                        <th>Jumlah</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -341,12 +341,12 @@
 
     <div class="footer">
         <div class="signature-box">
-            <p>Student Signature</p>
+            <p>Tanda Tangan Siswa</p>
             <div class="signature-line"><?= $admission['full_name'] ?? $installment['full_name'] ?></div>
         </div>
         <div class="signature-box">
-            <p>Authorized Signature</p>
-            <div class="signature-line">FEECS Admin</div>
+            <p>Menyetujui</p>
+            <div class="signature-line">Admin</div>
         </div>
     </div>
 

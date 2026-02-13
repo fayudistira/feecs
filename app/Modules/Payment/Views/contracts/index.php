@@ -101,7 +101,7 @@
                                     <td>Rp <?= number_format($contract['total_contract_amount'], 0, ',', '.') ?></td>
                                     <td class="text-success">Rp <?= number_format($contract['total_paid'], 0, ',', '.') ?></td>
                                     <td class="text-danger">Rp <?= number_format($contract['remaining_balance'], 0, ',', '.') ?></td>
-                                    <td><?= date('M d, Y', strtotime($contract['due_date'])) ?></td>
+                                    <td><?= !empty($contract['due_date']) ? date('M d, Y', strtotime($contract['due_date'])) : '-' ?></td>
                                     <td>
                                         <span class="badge bg-<?php
                                                                 if ($contract['status'] === 'paid') echo 'success';

@@ -289,6 +289,55 @@
                 <?php endif ?>
             </div>
         </div>
+
+        <?php if (!empty($installment)): ?>
+            <!-- Contract / Payment Info -->
+            <div class="dashboard-card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-file-contract me-2"></i>Contract / Payment
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="stat-label">Registration Number</label>
+                        <div class="fw-medium"><?= esc($installment['registration_number']) ?></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="stat-label">Total Contract</label>
+                        <div class="fw-medium text-primary">$<?= number_format($installment['total_contract_amount'], 2) ?></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="stat-label">Amount Paid</label>
+                        <div class="fw-medium text-success">$<?= number_format($installment['total_paid'], 2) ?></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="stat-label">Balance Due</label>
+                        <div class="fw-medium <?= $installment['remaining_balance'] > 0 ? 'text-danger' : 'text-success' ?>">
+                            $<?= number_format($installment['remaining_balance'], 2) ?>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="stat-label">Due Date</label>
+                        <div class="fw-medium"><?= !empty($installment['due_date']) ? date('M d, Y', strtotime($installment['due_date'])) : '-' ?></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="stat-label">Status</label>
+                        <?php
+                        $statusClass = match ($installment['status']) {
+                            'unpaid' => 'bg-warning text-dark',
+                            'partial' => 'bg-info text-dark',
+                            'paid' => 'bg-success',
+                            default => 'bg-secondary'
+                        };
+                        ?>
+                        <span class="badge <?= $statusClass ?>"><?= ucfirst($installment['status']) ?></span>
+                    </div>
+                    <a href="<?= base_url('contract/view/' . $admission['registration_number']) ?>"
+                        class="btn btn-primary w-100 mt-2">
+                        <i class="bi bi-file-text me-1"></i> View Contract
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

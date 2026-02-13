@@ -268,13 +268,33 @@ class PageController extends BaseController
                 throw new \Exception('Failed to create admission: ' . json_encode($admissionModel->errors()));
             }
 
-            // STEP 3: Auto-generate Invoice
-            $invoiceId = null;
+            // STEP 3: Create Installment Record
+            $installmentModel = new \Modules\Payment\Models\InstallmentModel();
+            $dueDate = date('Y-m-d', strtotime('+2 weeks')); // 2 weeks to pay
+
             $regFee = $program['registration_fee'] ?? 0;
             $tuitionFee = $program['tuition_fee'] ?? 0;
             $discount = $program['discount'] ?? 0;
             $finalTuition = $tuitionFee * (1 - $discount / 100);
             $totalAmount = $regFee + $finalTuition;
+
+            $installmentData = [
+                'registration_number' => $admissionData['registration_number'],
+                'total_contract_amount' => $totalAmount,
+                'total_paid' => 0,
+                'remaining_balance' => $totalAmount,
+                'status' => 'unpaid',
+                'due_date' => $dueDate
+            ];
+
+            if (!$installmentModel->createInstallment($installmentData)) {
+                throw new \Exception('Failed to create installment record: ' . json_encode($installmentModel->errors()));
+            }
+            $installmentId = $installmentModel->insertID();
+            log_message('error', '[Frontend Apply] Installment created with ID: ' . $installmentId);
+
+            // STEP 4: Auto-generate Invoice
+            $invoiceId = null;
 
             log_message('error', '[Frontend Apply] Program: ' . $program['title'] . ' | RegFee: ' . $regFee . ' | TuitionFee: ' . $tuitionFee . ' | Discount: ' . $discount . ' | TotalAmount: ' . $totalAmount);
 
@@ -297,9 +317,11 @@ class PageController extends BaseController
 
                 $invoiceData = [
                     'registration_number' => $admissionData['registration_number'],
+                    'contract_number' => $admissionData['registration_number'],
+                    'installment_id' => $installmentId,
                     'description' => 'Initial Fees: Registration and Tuition for ' . $program['title'],
                     'amount' => $totalAmount,
-                    'due_date' => date('Y-m-d', strtotime('+3 days')), // Due in 3 days
+                    'due_date' => $dueDate, // Use installment due date
                     'invoice_type' => 'tuition_fee',
                     'status' => 'unpaid',
                     'items' => json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
@@ -351,7 +373,7 @@ class PageController extends BaseController
                 );
 
                 log_message('error', '[Frontend Apply] Email send result: ' . ($emailSent ? 'SUCCESS' : 'FAILED'));
-            } catch (\Exception $emailEx) {
+            } catch (\Throwable $emailEx) {
                 log_message('error', '[Frontend Apply] Email exception: ' . $emailEx->getMessage());
                 // Continue even if email fails - don't let it break the flow
             }

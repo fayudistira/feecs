@@ -7,6 +7,20 @@
 
 return [
     [
+        'title' => 'Contracts',
+        'url' => 'contract',
+        'icon' => 'file-contract',
+        'permission' => ['payment.manage', 'invoice.manage', 'admission.manage'],
+        'order' => 19,
+        'submenu' => [
+            [
+                'title' => 'All Contracts',
+                'url' => 'contract',
+                'icon' => 'list-ul'
+            ]
+        ]
+    ],
+    [
         'title' => 'Pembayaran',
         'url' => 'payment',
         'icon' => 'cash-coin',
