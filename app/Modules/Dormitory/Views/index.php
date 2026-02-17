@@ -7,6 +7,9 @@
         <p class="text-muted">Manage dormitory rooms and student assignments</p>
     </div>
     <div class="col-md-6 text-end">
+        <a href="<?= base_url('dormitory/search') ?>" class="btn btn-outline-primary me-2">
+            <i class="bi bi-search me-1"></i> Search Student
+        </a>
         <a href="<?= base_url('dormitory/create') ?>" class="btn btn-dark-red">
             <i class="bi bi-plus-lg me-1"></i> Add New Room
         </a>

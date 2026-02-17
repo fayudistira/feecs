@@ -18,6 +18,10 @@ $routes->group('dormitory', ['namespace' => 'Modules\Dormitory\Controllers', 'fi
     $routes->get('assignments/(:segment)', 'DormitoryController::assignments/$1', ['filter' => 'permission:dormitory.assign']);
     $routes->post('assign/(:segment)', 'DormitoryController::assign/$1', ['filter' => 'permission:dormitory.assign']);
     $routes->post('unassign/(:num)', 'DormitoryController::unassign/$1', ['filter' => 'permission:dormitory.assign']);
+    
+    // Student search routes
+    $routes->get('search', 'DormitoryController::searchStudent', ['filter' => 'permission:dormitory.view,dormitory.manage']);
+    $routes->get('student/(:num)', 'DormitoryController::studentAssignment/$1', ['filter' => 'permission:dormitory.view,dormitory.manage']);
 });
 
 // Public Dormitory Routes (Frontend)

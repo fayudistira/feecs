@@ -159,4 +159,46 @@ class DormitoryAssignmentModel extends Model
         $occupied = $this->getOccupiedBedsCount($dormitoryId);
         return $occupied < $capacity;
     }
+
+    /**
+     * Search students by name and get their dormitory assignment
+     */
+    public function searchStudentWithAssignment(string $search): array
+    {
+        $db = \Config\Database::connect();
+        
+        return $db->table('students s')
+            ->select('s.id as student_id, s.student_number, p.full_name, p.phone, p.email,
+                     da.id as assignment_id, da.dormitory_id, da.start_date, da.end_date, da.status as assignment_status, da.notes,
+                     d.room_name, d.location, d.map_url, d.room_capacity')
+            ->join('profiles p', 'p.id = s.profile_id', 'left')
+            ->join('dormitory_assignments da', 'da.student_id = s.id AND da.status = "active"', 'left')
+            ->join('dormitories d', 'd.id = da.dormitory_id', 'left')
+            ->groupStart()
+                ->like('p.full_name', $search)
+                ->orLike('s.student_number', $search)
+            ->groupEnd()
+            ->orderBy('p.full_name', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get student with dormitory assignment by student ID
+     */
+    public function getStudentWithAssignment(int $studentId): ?array
+    {
+        $db = \Config\Database::connect();
+        
+        return $db->table('students s')
+            ->select('s.id as student_id, s.student_number, p.full_name, p.phone, p.email,
+                     da.id as assignment_id, da.dormitory_id, da.start_date, da.end_date, da.status as assignment_status, da.notes,
+                     d.room_name, d.location, d.map_url, d.room_capacity')
+            ->join('profiles p', 'p.id = s.profile_id', 'left')
+            ->join('dormitory_assignments da', 'da.student_id = s.id AND da.status = "active"', 'left')
+            ->join('dormitories d', 'd.id = da.dormitory_id', 'left')
+            ->where('s.id', $studentId)
+            ->get()
+            ->getRowArray();
+    }
 }

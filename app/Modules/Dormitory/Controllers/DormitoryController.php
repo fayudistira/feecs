@@ -307,4 +307,42 @@ class DormitoryController extends BaseController
 
         return $gallery;
     }
+
+    /**
+     * Search students and display their dormitory assignment
+     */
+    public function searchStudent()
+    {
+        $search = $this->request->getGet('q');
+        $results = [];
+
+        if (!empty($search)) {
+            $results = $this->assignmentModel->searchStudentWithAssignment($search);
+        }
+
+        return view('Modules\Dormitory\Views\search', [
+            'title'   => 'Search Student Dormitory',
+            'search'  => $search,
+            'results' => $results,
+            'menu'    => ['index' => base_url('dormitory')],
+        ]);
+    }
+
+    /**
+     * View student dormitory assignment details
+     */
+    public function studentAssignment(int $studentId)
+    {
+        $student = $this->assignmentModel->getStudentWithAssignment($studentId);
+
+        if (!$student) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('Modules\Dormitory\Views\student_assignment', [
+            'title'   => 'Student Dormitory Assignment',
+            'student' => $student,
+            'menu'    => ['index' => base_url('dormitory')],
+        ]);
+    }
 }
