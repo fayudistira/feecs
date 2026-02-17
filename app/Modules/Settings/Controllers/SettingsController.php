@@ -220,6 +220,16 @@ class SettingsController extends BaseController
 
                 // 1. Create Profile
                 $profileModel = new ProfileModel();
+                
+                // Generate dummy Indonesian citizen ID (NIK format: 16 digits)
+                // Format: PPCCDDDDMMDDXXXX (Province, City, District, Birth date, Serial)
+                $provinceCode = str_pad(rand(11, 99), 2, '0', STR_PAD_LEFT);
+                $cityCode = str_pad(rand(1, 99), 2, '0', STR_PAD_LEFT);
+                $districtCode = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                $birthDate = date('dm', strtotime('-' . rand(18, 35) . ' years'));
+                $serial = str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+                $citizenId = $provinceCode . $cityCode . $districtCode . $birthDate . $serial;
+                
                 $profileData = [
                     'profile_number' => $profileModel->generateProfileNumber(),
                     'full_name' => $fullName,
@@ -227,6 +237,7 @@ class SettingsController extends BaseController
                     'gender' => rand(0, 1) ? 'Male' : 'Female',
                     'email' => $email,
                     'phone' => $phone,
+                    'citizen_id' => $citizenId,
                     'place_of_birth' => $city,
                     'date_of_birth' => date('Y-m-d', strtotime('-' . rand(18, 35) . ' years')),
                     'religion' => $religions[array_rand($religions)],

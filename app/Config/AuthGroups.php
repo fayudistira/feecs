@@ -100,6 +100,9 @@ class AuthGroups extends ShieldAuthGroups
         'classroom.view'      => 'Can view classrooms (read-only)',
         'student.manage'      => 'Can manage student records (view)',
         'student.access'      => 'Can access student portal (invoices, payments)',
+        'dormitory.manage'    => 'Can manage dormitories (CRUD)',
+        'dormitory.view'      => 'Can view dormitories (read-only)',
+        'dormitory.assign'    => 'Can assign students to dormitories',
     ];
 
     /**
@@ -121,6 +124,7 @@ class AuthGroups extends ShieldAuthGroups
             'payment.*',
             'invoice.*',
             'classroom.*',
+            'dormitory.*',
             'student.manage',
         ],
         'admin' => [
@@ -135,12 +139,16 @@ class AuthGroups extends ShieldAuthGroups
             'payment.manage',
             'invoice.manage',
             'classroom.manage',
+            'dormitory.manage',
+            'dormitory.assign',
         ],
         'frontline' => [
             'dashboard.access',
             'admission.manage',
             'program.manage',
             'classroom.manage',
+            'dormitory.manage',
+            'dormitory.assign',
         ],
         'finance' => [
             'dashboard.access',

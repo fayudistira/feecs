@@ -503,12 +503,69 @@
         </p>
         <!-- Action Buttons -->
         <div class="action-buttons no-print">
-            <!-- <button onclick="window.print()" class="btn-action btn-print">
-                <i class="bi bi-printer"></i> Cetak / Unduh
-            </button> -->
             <?php
             $waNumber = '6285810310950';
-            $message = "Halo Admin, saya sudah mendaftar dan menerima invoice dengan nomor #" . $invoice['invoice_number'] . ".";
+            
+            // Build comprehensive WhatsApp message with registration details
+            $message = "Halo Admin SOS Course & Training,\n\n";
+            $message .= "Saya sudah mendaftar dan menerima invoice dengan detail berikut:\n\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "📋 *INVOICE*\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "No. Invoice: #" . $invoice['invoice_number'] . "\n";
+            $message .= "No. Registrasi: " . $invoice['registration_number'] . "\n";
+            $message .= "Tanggal: " . date('d M Y', strtotime($invoice['created_at'])) . "\n";
+            $message .= "Jatuh Tempo: " . date('d M Y', strtotime($invoice['due_date'])) . "\n\n";
+            
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "👤 *DATA PENDAFTAR*\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "Nama: " . ($student['full_name'] ?? 'N/A') . "\n";
+            $message .= "Email: " . ($student['email'] ?? '-') . "\n";
+            $message .= "Telepon: " . ($student['phone'] ?? '-') . "\n\n";
+            
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "📚 *PROGRAM KURSUS*\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "Program: " . ($student['program_title'] ?? 'N/A') . "\n";
+            if (!empty($student['category'])) {
+                $message .= "Kategori: Bahasa " . $student['category'] . "\n";
+            }
+            $message .= "\n";
+            
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "💰 *RINCIAN PEMBAYARAN*\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            
+            // Add invoice items
+            $items = [];
+            if (!empty($invoice['items'])) {
+                $items = is_string($invoice['items']) ? json_decode($invoice['items'], true) : $invoice['items'];
+                $items = is_array($items) ? $items : [];
+            }
+            
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    $message .= ($item['description'] ?? '') . ": Rp " . number_format($item['amount'] ?? 0, 0, ',', '.') . "\n";
+                }
+            } else {
+                $message .= ($invoice['description'] ?? 'Biaya Kursus') . ": Rp " . number_format($invoice['amount'], 0, ',', '.') . "\n";
+            }
+            
+            $message .= "\n";
+            $message .= "Total Biaya: Rp " . number_format($invoice['amount'], 0, ',', '.') . "\n";
+            
+            if (!empty($invoice['total_paid']) && $invoice['total_paid'] > 0) {
+                $message .= "Sudah Dibayar: Rp " . number_format($invoice['total_paid'], 0, ',', '.') . "\n";
+                $message .= "Sisa Tagihan: Rp " . number_format($invoice['amount'] - $invoice['total_paid'], 0, ',', '.') . "\n";
+            }
+            
+            $message .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+            $message .= "Status: *" . strtoupper($invoice['status']) . "*\n";
+            $message .= "━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+            
+            $message .= "Mohon konfirmasi pendaftaran saya. Terima kasih.";
+            
             $waUrl = "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
             ?>
             <a href="<?= $waUrl ?>" target="_blank" class="btn-action btn-whatsapp">

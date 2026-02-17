@@ -1,0 +1,169 @@
+<?= $this->extend('Modules\Dashboard\Views\layout') ?>
+
+<?= $this->section('content') ?>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2 class="fw-bold"><i class="bi bi-building me-2"></i>Dormitory Management</h2>
+        <p class="text-muted">Manage dormitory rooms and student assignments</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="<?= base_url('dormitory/create') ?>" class="btn btn-dark-red">
+            <i class="bi bi-plus-lg me-1"></i> Add New Room
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card">
+            <div class="card-body">
+                <div class="stat-label">Total Rooms</div>
+                <div class="stat-number"><?= count($dormitories) ?></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card">
+            <div class="card-body">
+                <div class="stat-label">Available</div>
+                <div class="stat-number text-success">
+                    <?= count(array_filter($dormitories, fn($d) => $d['status'] === 'available')) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card">
+            <div class="card-body">
+                <div class="stat-label">Full</div>
+                <div class="stat-number text-warning">
+                    <?= count(array_filter($dormitories, fn($d) => $d['status'] === 'full')) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card stat-card">
+            <div class="card-body">
+                <div class="stat-label">Maintenance</div>
+                <div class="stat-number text-secondary">
+                    <?= count(array_filter($dormitories, fn($d) => $d['status'] === 'maintenance')) ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card dashboard-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Dormitory List</span>
+        <div class="input-group input-group-sm" style="width: 250px;">
+            <input type="text" class="form-control" placeholder="Search rooms..." id="searchInput">
+            <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover compact-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Room Name</th>
+                        <th>Location</th>
+                        <th class="text-center">Capacity</th>
+                        <th class="text-center">Occupied</th>
+                        <th class="text-center">Available</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($dormitories)): ?>
+                        <?php foreach ($dormitories as $index => $dorm): ?>
+                            <tr>
+                                <td><?= $index + 1 ?></td>
+                                <td>
+                                    <div class="fw-bold"><?= esc($dorm['room_name']) ?></div>
+                                    <?php if (!empty($dorm['facilities'])): ?>
+                                        <small class="text-muted">
+                                            <?= esc(implode(', ', array_slice($dorm['facilities'], 0, 3))) ?>
+                                            <?= count($dorm['facilities']) > 3 ? '...' : '' ?>
+                                        </small>
+                                    <?php endif ?>
+                                </td>
+                                <td>
+                                    <small><?= esc($dorm['location']) ?></small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark"><?= $dorm['room_capacity'] ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-danger"><?= $dorm['occupied_beds'] ?></span>
+                                </td>
+                                <td class="text-center">
+                                    <?php $available = $dorm['available_beds']; ?>
+                                    <span class="badge <?= $available > 0 ? 'bg-success' : 'bg-secondary' ?>">
+                                        <?= $available ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if ($dorm['status'] === 'available'): ?>
+                                        <span class="badge bg-success">Available</span>
+                                    <?php elseif ($dorm['status'] === 'full'): ?>
+                                        <span class="badge bg-warning text-dark">Full</span>
+                                    <?php elseif ($dorm['status'] === 'maintenance'): ?>
+                                        <span class="badge bg-secondary">Maintenance</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-dark">Inactive</span>
+                                    <?php endif ?>
+                                </td>
+                                <td class="text-center table-actions">
+                                    <a href="<?= base_url('dormitory/show/' . $dorm['id']) ?>" 
+                                       class="btn btn-sm btn-info text-white" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="<?= base_url('dormitory/edit/' . $dorm['id']) ?>" 
+                                       class="btn btn-sm btn-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="<?= base_url('dormitory/assignments/' . $dorm['id']) ?>" 
+                                       class="btn btn-sm btn-success" title="Manage Assignments">
+                                        <i class="bi bi-people"></i>
+                                    </a>
+                                    <form action="<?= base_url('dormitory/delete/' . $dorm['id']) ?>" 
+                                          method="post" class="d-inline" 
+                                          onsubmit="return confirm('Are you sure you want to delete this dormitory?')">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                No dormitories found. <a href="<?= base_url('dormitory/create') ?>">Add your first room</a>
+                            </td>
+                        </tr>
+                    <?php endif ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple search functionality
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const search = this.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+    });
+});
+</script>
+<?= $this->endSection() ?>
