@@ -410,7 +410,7 @@ class InvoiceModel extends Model
     }
 
     /**
-     * Get unpaid or partially_paid invoices for a student that can be extended
+     * Get unpaid, partially_paid, or expired invoices for a student that can be extended
      *
      * @param string $registrationNumber Student registration number
      * @return array
@@ -418,50 +418,125 @@ class InvoiceModel extends Model
     public function getExtendableInvoices(string $registrationNumber): array
     {
         return $this->where('registration_number', $registrationNumber)
-            ->whereIn('status', ['unpaid', 'partially_paid'])
+            ->whereIn('status', ['unpaid', 'partially_paid', 'expired'])
             ->orderBy('created_at', 'DESC')
             ->findAll();
     }
 
     /**
-     * Extend an existing invoice by adding new items (informational only, does not change the invoice amount)
+     * Extend an existing invoice by creating a new invoice with link to the original
+     * The original invoice status will be changed to 'extended'
      *
      * @param int $invoiceId Invoice ID to extend
-     * @param array $newItems New items to add (for informational purposes only)
-     * @param string|null $newDescription Optional new description
-     * @return bool
+     * @param array $newItems New items for the extending invoice
+     * @param string|null $newDueDate Optional new due date for the extending invoice
+     * @return int|false New invoice ID or false on failure
      */
-    public function extendInvoice(int $invoiceId, array $newItems, ?string $newDescription = null): bool
+    public function extendInvoice(int $invoiceId, array $newItems, ?string $newDueDate = null)
     {
         $invoice = $this->find($invoiceId);
 
         if (!$invoice) {
+            log_message('error', "Invoice not found: {$invoiceId}");
             return false;
         }
 
         // Check if invoice can be extended
-        if (!in_array($invoice['status'], ['unpaid', 'partially_paid'])) {
+        if (!in_array($invoice['status'], ['unpaid', 'partially_paid', 'expired'])) {
+            log_message('error', "Invoice cannot be extended, status: {$invoice['status']}");
             return false;
         }
 
-        // Get existing items
-        $existingItems = $this->decodeItems($invoice['items'] ?? null);
-
-        // Merge existing and new items (for tracking/informational purposes)
-        $allItems = array_merge($existingItems, $newItems);
-
-        // Prepare update data - NOTE: We do NOT update the amount
-        // The amount remains the same as the original invoice amount
-        $updateData = [
-            'items' => $this->encodeItems($allItems)
-        ];
-
-        // Update description if provided
-        if ($newDescription) {
-            $updateData['description'] = $newDescription;
+        // Calculate total amount for new invoice
+        $totalAmount = 0;
+        foreach ($newItems as $item) {
+            $totalAmount += (float) ($item['amount'] ?? 0);
         }
 
-        return $this->update($invoiceId, $updateData);
+        if ($totalAmount <= 0) {
+            log_message('error', 'Invoice extension requires items with valid amounts');
+            return false;
+        }
+
+        // Start database transaction
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            // Create new invoice (the extending invoice)
+            $newInvoiceData = [
+                'invoice_number' => $this->generateInvoiceNumber(),
+                'registration_number' => $invoice['registration_number'],
+                'contract_number' => $invoice['contract_number'] ?? null,
+                'installment_id' => $invoice['installment_id'] ?? null,
+                'description' => 'Extended from ' . $invoice['invoice_number'] . ' - ' . ($newItems[0]['description'] ?? 'Invoice Extension'),
+                'amount' => $totalAmount,
+                'due_date' => $newDueDate ?? $invoice['due_date'],
+                'invoice_type' => $invoice['invoice_type'],
+                'status' => 'unpaid',
+                'items' => $this->encodeItems($newItems),
+                'parent_invoice_id' => $invoiceId  // Link to original invoice
+            ];
+
+            $newInvoiceId = $this->insert($newInvoiceData);
+
+            if (!$newInvoiceId) {
+                throw new \Exception('Failed to create extending invoice: ' . implode(', ', $this->errors()));
+            }
+
+            // Update original invoice status to 'extended'
+            $updated = $this->update($invoiceId, [
+                'status' => 'extended'
+            ]);
+
+            if (!$updated) {
+                throw new \Exception('Failed to update original invoice status');
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                log_message('error', 'Transaction failed in extendInvoice');
+                return false;
+            }
+
+            log_message('info', "Invoice {$invoiceId} extended. New invoice ID: {$newInvoiceId}");
+            return (int) $newInvoiceId;
+
+        } catch (\Exception $e) {
+            $db->transRollback();
+            log_message('error', 'extendInvoice error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get the child invoice (extending invoice) for an extended invoice
+     *
+     * @param int $invoiceId Invoice ID (the original/parent invoice)
+     * @return array|null Child invoice data or null
+     */
+    public function getChildInvoice(int $invoiceId): ?array
+    {
+        return $this->where('parent_invoice_id', $invoiceId)
+            ->orderBy('created_at', 'DESC')
+            ->first();
+    }
+
+    /**
+     * Get the parent invoice (original invoice) for an extending invoice
+     *
+     * @param int $invoiceId Invoice ID (the extending/child invoice)
+     * @return array|null Parent invoice data or null
+     */
+    public function getParentInvoice(int $invoiceId): ?array
+    {
+        $invoice = $this->find($invoiceId);
+        if (!$invoice || empty($invoice['parent_invoice_id'])) {
+            return null;
+        }
+
+        return $this->find($invoice['parent_invoice_id']);
     }
 
     /**

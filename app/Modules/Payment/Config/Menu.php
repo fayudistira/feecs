@@ -34,11 +34,11 @@ return [
                 'url' => 'payment',
                 'icon' => 'list-ul'
             ],
-            [
-                'title' => 'Add Payment',
-                'url' => 'payment/create',
-                'icon' => 'plus-circle'
-            ]
+            // [
+            //     'title' => 'Add Payment',
+            //     'url' => 'payment/create',
+            //     'icon' => 'plus-circle'
+            // ]
         ]
     ],
     [
@@ -60,9 +60,9 @@ return [
                 'icon' => 'plus-circle'
             ],
             [
-                'title' => 'Overdue Invoices',
-                'url' => 'payment/reports/overdue',
-                'icon' => 'exclamation-triangle'
+                'title' => 'Extend Invoice',
+                'url' => 'invoice/extend',
+                'icon' => 'arrow-repeat'
             ]
         ]
     ],

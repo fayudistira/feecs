@@ -30,7 +30,10 @@
             </div>
             <div class="col-md-6 text-end">
                 <a href="<?= base_url('invoice/create') ?>" class="btn btn-light">
-                    <i class="bi bi-plus-circle"></i> Buat Faktur
+                    <i class="bi bi-plus-circle"></i> Buat Faktur Baru
+                </a>
+                <a href="<?= base_url('invoice/extend') ?>" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-repeat"></i> Perpanjang Faktur
                 </a>
             </div>
         </div>
@@ -58,6 +61,7 @@
                             <option value="unpaid" <?= ($status ?? '') === 'unpaid' ? 'selected' : '' ?>>Belum Dibayar</option>
                             <option value="paid" <?= ($status ?? '') === 'paid' ? 'selected' : '' ?>>Lunas</option>
                             <option value="partially_paid" <?= ($status ?? '') === 'partially_paid' ? 'selected' : '' ?>>Dibayar Sebagian</option>
+                            <option value="extended" <?= ($status ?? '') === 'extended' ? 'selected' : '' ?>>Diperpanjang</option>
                             <option value="cancelled" <?= ($status ?? '') === 'cancelled' ? 'selected' : '' ?>>Dibatalkan</option>
                             <option value="expired" <?= ($status ?? '') === 'expired' ? 'selected' : '' ?>>Kedaluwarsa</option>
                         </select>
@@ -118,6 +122,7 @@
                                                                 elseif ($invoice['status'] === 'partially_paid') echo 'info';
                                                                 elseif ($invoice['status'] === 'unpaid') echo 'warning';
                                                                 elseif ($invoice['status'] === 'expired') echo 'danger';
+                                                                elseif ($invoice['status'] === 'extended') echo 'primary';
                                                                 else echo 'secondary';
                                                                 ?>">
                                             <?= str_replace('_', ' ', ucfirst($invoice['status'])) ?>

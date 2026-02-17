@@ -16,11 +16,6 @@
         border: none;
     }
 
-    .btn-invoice:hover {
-        background: linear-gradient(to right, #6B0000, #8B0000);
-        color: white;
-    }
-
     .line-item-row {
         display: flex;
         gap: 10px;
@@ -91,29 +86,25 @@
     <?php endif; ?>
 
     <div class="invoice-header">
-        <div class="row">
-            <div class="col-md-6">
-                <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Buat Faktur Baru</h3>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="<?= base_url('invoice/extend') ?>" class="btn btn-outline-light">
-                    <i class="bi bi-arrow-repeat"></i> Perpanjang Faktur
-                </a>
-            </div>
-        </div>
+        <h3 class="mb-0"><i class="bi bi-arrow-repeat"></i> Perpanjang Faktur</h3>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> <strong>Catatan:</strong> Perpanjangan faktur akan membuat <strong>faktur baru</strong> dengan nomor baru. 
+        Faktur asli akan ditandai sebagai "Diperpanjang" dan terhubung ke faktur baru.
     </div>
 
     <div class="card">
         <div class="card-body">
             <form action="<?= base_url('invoice/store') ?>" method="post" id="invoiceForm">
                 <?= csrf_field() ?>
-                <input type="hidden" name="action" value="new">
+                <input type="hidden" name="action" value="extend">
 
                 <!-- Student Selection -->
                 <div class="mb-3">
                     <label class="form-label">Siswa *</label>
                     <select name="registration_number" class="form-select" id="studentSelect">
-                        <option value="">Pilih Siswa</option>
+                        <option value="">Pilih Siswa Terlebih Dahulu</option>
                         <?php foreach ($students as $student): ?>
                             <option value="<?= esc($student['registration_number']) ?>">
                                 <?= esc($student['full_name']) ?> (<?= esc($student['registration_number']) ?>)
@@ -122,27 +113,31 @@
                     </select>
                 </div>
 
-                <!-- Invoice Type -->
-                <div class="mb-3">
-                    <label class="form-label">Jenis Faktur *</label>
-                    <select name="invoice_type" class="form-select" id="invoiceType">
-                        <option value="">Pilih Jenis</option>
-                        <option value="registration_fee">Biaya Pendaftaran</option>
-                        <option value="tuition_fee">Biaya Kuliah</option>
-                        <option value="miscellaneous_fee">Biaya Lain-lain</option>
+                <!-- Invoice Selection -->
+                <div class="mb-3" id="invoiceSelectContainer" style="display: none;">
+                    <label class="form-label">Pilih Faktur untuk Diperpanjang *</label>
+                    <select name="invoice_id" class="form-select" id="invoiceSelect">
+                        <option value="">Pilih Faktur</option>
                     </select>
                 </div>
 
+                <input type="hidden" name="invoice_type" id="extendInvoiceType" value="">
+
                 <!-- Due Date -->
-                <div class="mb-3">
+                <div class="mb-3" id="dueDateContainer" style="display: none;">
                     <label class="form-label">Tanggal Jatuh Tempo *</label>
-                    <input type="date" name="due_date" class="form-control" id="dueDate">
+                    <input type="date" name="due_date" class="form-control" id="extendDueDate">
+                </div>
+
+                <!-- Selected Invoice Details -->
+                <div id="selectedInvoiceDetails" class="alert alert-info" style="display: none;">
+                    <!-- Invoice details will be loaded here -->
                 </div>
 
                 <!-- Line Items Section -->
                 <div class="card bg-light mb-3">
                     <div class="card-header">
-                        <h5 class="mb-0">Item Faktur</h5>
+                        <h5 class="mb-0">Item Faktur Baru</h5>
                     </div>
                     <div class="card-body">
                         <div id="lineItemsContainer">
@@ -168,7 +163,7 @@
                     </tbody>
                     <tfoot>
                         <tr class="total-row">
-                            <td style="text-align: right;">Total Jumlah:</td>
+                            <td style="text-align: right;">Jumlah Faktur Baru:</td>
                             <td style="text-align: right;">
                                 <span id="totalAmount">0.00</span>
                             </td>
@@ -178,7 +173,7 @@
 
                 <div class="d-flex justify-content-between mt-4">
                     <a href="<?= base_url('invoice') ?>" class="btn btn-secondary">Batal</a>
-                    <button type="submit" class="btn btn-invoice"><i class="bi bi-check-circle"></i> Buat Faktur</button>
+                    <button type="submit" class="btn btn-invoice"><i class="bi bi-arrow-repeat"></i> Perpanjang Faktur</button>
                 </div>
             </form>
         </div>
@@ -187,6 +182,134 @@
 
 <script>
     let lineItemCount = 0;
+
+    // Load student invoices when student is selected
+    document.getElementById('studentSelect').addEventListener('change', function() {
+        const registrationNumber = this.value;
+        const invoiceSelectContainer = document.getElementById('invoiceSelectContainer');
+        const dueDateContainer = document.getElementById('dueDateContainer');
+        const invoiceSelect = document.getElementById('invoiceSelect');
+        const detailsDiv = document.getElementById('selectedInvoiceDetails');
+
+        // Hide details
+        detailsDiv.style.display = 'none';
+
+        if (!registrationNumber) {
+            invoiceSelectContainer.style.display = 'none';
+            dueDateContainer.style.display = 'none';
+            return;
+        }
+
+        // Fetch invoices via AJAX
+        fetch(`/invoice/student-invoices?registration_number=${registrationNumber}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.invoices && data.invoices.length > 0) {
+                    invoiceSelect.innerHTML = '<option value="">Pilih Faktur</option>';
+                    data.invoices.forEach(invoice => {
+                        const items = JSON.parse(invoice.items || '[]');
+                        const itemDescriptions = items.map(i => i.description).join(', ');
+                        invoiceSelect.innerHTML += `
+                            <option value="${invoice.id}" data-invoice-type="${invoice.invoice_type}">
+                                ${invoice.invoice_number} - ${formatCurrency(invoice.amount)}
+                                (${invoice.status}) - ${itemDescriptions}
+                            </option>
+                        `;
+                    });
+                    invoiceSelectContainer.style.display = 'block';
+                    dueDateContainer.style.display = 'block';
+                } else {
+                    invoiceSelectContainer.style.display = 'none';
+                    dueDateContainer.style.display = 'none';
+                    alert('Tidak ditemukan faktur yang dapat diperpanjang untuk siswa ini.');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching invoices:', error);
+                alert('Gagal memuat faktur. Silakan coba lagi.');
+            });
+    });
+
+    // Show invoice details when invoice is selected
+    document.getElementById('invoiceSelect').addEventListener('change', function() {
+        const invoiceId = this.value;
+        const detailsDiv = document.getElementById('selectedInvoiceDetails');
+        const invoiceTypeInput = document.getElementById('extendInvoiceType');
+
+        if (!invoiceId) {
+            detailsDiv.style.display = 'none';
+            invoiceTypeInput.value = '';
+            return;
+        }
+
+        // Get selected option
+        const selectedOption = this.options[this.selectedIndex];
+        const invoiceType = selectedOption.getAttribute('data-invoice-type');
+
+        // Set the invoice type
+        invoiceTypeInput.value = invoiceType;
+
+        // Fetch invoice summary via AJAX
+        fetch(`/invoice/invoice-summary?invoice_id=${invoiceId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.summary) {
+                    const s = data.summary;
+                    detailsDiv.innerHTML = `
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Ringkasan Faktur Asli</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <strong>Nomor Faktur Asli:</strong> ${s.invoice_number}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Jumlah Faktur Asli:</strong> ${formatCurrency(s.current_invoice_amount)}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Status Faktur:</strong>
+                                    <span class="badge bg-${s.invoice_status === 'paid' ? 'success' : s.invoice_status === 'partially_paid' ? 'info' : s.invoice_status === 'expired' ? 'danger' : 'warning'}">
+                                        ${s.invoice_status.replace('_', ' ')}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2">
+                                    <strong>Total Kontrak:</strong> ${formatCurrency(s.total_initial_amount)}
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Total Dibayar:</strong> <span class="text-success">${formatCurrency(s.total_paid)}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Sisa Saldo:</strong>
+                                    <span class="badge ${s.outstanding_balance > 0 ? 'bg-warning' : 'bg-success'}">
+                                        ${formatCurrency(s.outstanding_balance)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    detailsDiv.className = 'alert alert-info';
+                    detailsDiv.style.display = 'block';
+                } else if (data.error) {
+                    detailsDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> ${data.error}
+                        </div>
+                    `;
+                    detailsDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching invoice summary:', error);
+                detailsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle"></i> Gagal memuat ringkasan faktur. Silakan coba lagi.
+                    </div>
+                `;
+                detailsDiv.style.display = 'block';
+            });
+    });
 
     function addLineItem() {
         lineItemCount++;
@@ -282,22 +405,22 @@
     document.getElementById('invoiceForm').addEventListener('submit', function(e) {
         e.preventDefault(); // Prevent default submission
 
-        // Validate new invoice fields
+        // Validate extend invoice fields
         const studentSelect = document.getElementById('studentSelect');
-        const invoiceType = document.getElementById('invoiceType');
-        const dueDate = document.getElementById('dueDate');
+        const invoiceSelect = document.getElementById('invoiceSelect');
+        const extendDueDate = document.getElementById('extendDueDate');
 
         if (!studentSelect.value) {
             alert('Silakan pilih siswa');
             return false;
         }
 
-        if (!invoiceType.value) {
-            alert('Silakan pilih jenis faktur');
+        if (!invoiceSelect.value) {
+            alert('Silakan pilih faktur untuk diperpanjang');
             return false;
         }
 
-        if (!dueDate.value) {
+        if (!extendDueDate.value) {
             alert('Silakan pilih tanggal jatuh tempo');
             return false;
         }

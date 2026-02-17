@@ -37,6 +37,7 @@ $routes->group('invoice', ['namespace' => 'Modules\Payment\Controllers', 'filter
     $routes->get('/', 'InvoiceController::index');
     $routes->get('view/(:segment)', 'InvoiceController::view/$1');
     $routes->get('create', 'InvoiceController::create');
+    $routes->get('extend', 'InvoiceController::extend');
     $routes->post('store', 'InvoiceController::store');
     $routes->get('edit/(:segment)', 'InvoiceController::edit/$1');
     $routes->post('update/(:segment)', 'InvoiceController::update/$1');

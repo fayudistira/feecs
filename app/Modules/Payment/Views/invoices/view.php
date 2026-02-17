@@ -63,6 +63,7 @@
                                                 elseif ($invoice['status'] === 'partially_paid') echo 'info';
                                                 elseif ($invoice['status'] === 'unpaid') echo 'warning';
                                                 elseif ($invoice['status'] === 'expired') echo 'danger';
+                                                elseif ($invoice['status'] === 'extended') echo 'primary';
                                                 else echo 'secondary';
                                                 ?>">
                             <?= str_replace('_', ' ', ucfirst($invoice['status'])) ?>
@@ -72,10 +73,36 @@
                         <span class="info-label">Deskripsi:</span><br>
                         <?= nl2br(esc((string)($invoice['description'] ?? ''))) ?>
                     </div>
-                    <?php if (!empty($invoice['parent_invoice_id'])): ?>
+                    
+                    <?php if (!empty($parentInvoice)): ?>
                         <div class="mt-3 pt-3 border-top">
-                            <span class="info-label"><i class="bi bi-info-circle"></i> Faktur Diperpanjang:</span>
-                            <small class="text-muted">Faktur ini dibuat dengan memperpanjang faktur #<?= esc($invoice['parent_invoice_id']) ?></small>
+                            <span class="info-label"><i class="bi bi-arrow-left-circle"></i> Faktur Asli (Diperpanjang):</span>
+                            <div class="mt-2">
+                                <a href="<?= base_url('invoice/view/' . $parentInvoice['id']) ?>" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-file-earmark"></i> <?= esc($parentInvoice['invoice_number']) ?>
+                                </a>
+                                <small class="text-muted ms-2">
+                                    Rp <?= number_format($parentInvoice['amount'], 0, ',', '.') ?> - 
+                                    <span class="badge bg-primary">Extended</span>
+                                </small>
+                            </div>
+                        </div>
+                    <?php endif ?>
+                    
+                    <?php if (!empty($childInvoice)): ?>
+                        <div class="mt-3 pt-3 border-top">
+                            <span class="info-label"><i class="bi bi-arrow-right-circle"></i> Faktur Perpanjangan:</span>
+                            <div class="mt-2">
+                                <a href="<?= base_url('invoice/view/' . $childInvoice['id']) ?>" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-file-earmark-plus"></i> <?= esc($childInvoice['invoice_number']) ?>
+                                </a>
+                                <small class="text-muted ms-2">
+                                    Rp <?= number_format($childInvoice['amount'], 0, ',', '.') ?> - 
+                                    <span class="badge bg-<?= $childInvoice['status'] === 'paid' ? 'success' : ($childInvoice['status'] === 'unpaid' ? 'warning' : 'info') ?>">
+                                        <?= ucfirst($childInvoice['status']) ?>
+                                    </span>
+                                </small>
+                            </div>
                         </div>
                     <?php endif ?>
                 </div>

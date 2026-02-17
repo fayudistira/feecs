@@ -106,9 +106,20 @@ class InvoiceController extends BaseController
 
         $invoice['student'] = $student;
 
+        // Get parent invoice (if this is an extending invoice)
+        $parentInvoice = null;
+        if (!empty($invoice['parent_invoice_id'])) {
+            $parentInvoice = $this->invoiceModel->find($invoice['parent_invoice_id']);
+        }
+
+        // Get child invoice (if this invoice was extended)
+        $childInvoice = $this->invoiceModel->getChildInvoice($id);
+
         return view('Modules\Payment\Views\invoices\view', [
             'title' => 'Invoice Details',
             'invoice' => $invoice,
+            'parentInvoice' => $parentInvoice,
+            'childInvoice' => $childInvoice,
             'menuItems' => $this->loadModuleMenus(),
             'user' => auth()->user()
         ]);
@@ -129,6 +140,27 @@ class InvoiceController extends BaseController
 
         return view('Modules\Payment\Views\invoices\create', [
             'title' => 'Create Invoice',
+            'students' => $students,
+            'menuItems' => $this->loadModuleMenus(),
+            'user' => auth()->user()
+        ]);
+    }
+
+    /**
+     * Show extend invoice form
+     */
+    public function extend()
+    {
+        // Get all approved admissions with student details for dropdown
+        $students = $this->admissionModel->getAllWithDetails();
+
+        // Filter only approved admissions
+        $students = array_filter($students, function ($student) {
+            return $student['status'] === 'approved';
+        });
+
+        return view('Modules\Payment\Views\invoices\extend', [
+            'title' => 'Extend Invoice',
             'students' => $students,
             'menuItems' => $this->loadModuleMenus(),
             'user' => auth()->user()
@@ -224,15 +256,18 @@ class InvoiceController extends BaseController
         if ($action === 'extend') {
             // EXTEND EXISTING INVOICE
             $invoiceId = $this->request->getPost('invoice_id');
+            $dueDate = $this->request->getPost('due_date');
 
             if (!$invoiceId) {
                 return redirect()->back()->withInput()->with('error', 'Silakan pilih faktur untuk diperpanjang.');
             }
 
-            // Extend the invoice (updates the existing record)
-            if ($this->invoiceModel->extendInvoice($invoiceId, $validItems)) {
-                return redirect()->to('/invoice/view/' . $invoiceId)
-                    ->with('success', 'Faktur berhasil diperpanjang.');
+            // Extend the invoice (creates a new invoice with link to original)
+            $newInvoiceId = $this->invoiceModel->extendInvoice($invoiceId, $validItems, $dueDate);
+
+            if ($newInvoiceId) {
+                return redirect()->to('/invoice/view/' . $newInvoiceId)
+                    ->with('success', 'Faktur berhasil diperpanjang. Faktur baru #' . $this->invoiceModel->find($newInvoiceId)['invoice_number'] . ' telah dibuat.');
             }
 
             return redirect()->back()->withInput()->with('error', 'Gagal memperpanjang faktur. Faktur mungkin tidak dapat diperpanjang.');
