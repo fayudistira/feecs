@@ -35,7 +35,7 @@ class PaymentModel extends Model
 
     protected $validationRules = [
         'registration_number' => 'required|max_length[20]',
-        'invoice_id' => 'required|is_natural_no_zero',
+        'invoice_id' => 'permit_empty|is_natural_no_zero',
         'amount' => 'required|decimal|greater_than[0]',
         'payment_method' => 'required|in_list[cash,bank_transfer,mobile_banking,credit_card]',
         'document_number' => 'required|max_length[100]',

@@ -271,7 +271,7 @@ class PaymentController extends BaseController
         $data = [
             'id' => $id,
             'registration_number' => $this->request->getPost('registration_number'),
-            'invoice_id' => $this->request->getPost('invoice_id') ?: null,
+            'invoice_id' => $this->request->getPost('invoice_id') ?: $payment['invoice_id'],
             'amount' => $this->request->getPost('amount'),
             'payment_method' => $this->request->getPost('payment_method'),
             'document_number' => $this->request->getPost('document_number'),
