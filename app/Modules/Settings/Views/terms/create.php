@@ -2,8 +2,75 @@
 
 <?= $this->section('content') ?>
 
-<!-- TinyMCE CDN -->
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- Custom WYSIWYG Editor CSS -->
+<style>
+.wysiwyg-editor {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    min-height: 400px;
+    padding: 1rem;
+    background: #fff;
+}
+
+.wysiwyg-editor:focus {
+    outline: none;
+    border-color: #8B0000;
+    box-shadow: 0 0 0 0.2rem rgba(139, 0, 0, 0.15);
+}
+
+.wysiwyg-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-bottom: none;
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.wysiwyg-toolbar button {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    background: #fff;
+    border-radius: 0.2rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+}
+
+.wysiwyg-toolbar button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.wysiwyg-toolbar button.active {
+    background: #8B0000;
+    color: #fff;
+    border-color: #8B0000;
+}
+
+.wysiwyg-toolbar .separator {
+    width: 1px;
+    background: #ced4da;
+    margin: 0 0.25rem;
+}
+
+.wysiwyg-editor ul, .wysiwyg-editor ol {
+    padding-left: 1.5rem;
+}
+
+.wysiwyg-editor a {
+    color: #8B0000;
+    text-decoration: underline;
+}
+
+.wysiwyg-editor h1, .wysiwyg-editor h2, .wysiwyg-editor h3 {
+    color: #333;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+</style>
 
 <!-- Page Header -->
 <div class="hero-section py-4" style="background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);">
@@ -73,8 +140,31 @@
 
                     <div class="mb-3">
                         <label class="form-label">Content <span class="text-danger">*</span></label>
-                        <textarea name="content" id="contentEditor" class="form-control" rows="20" required
-                                  placeholder="Enter terms and conditions content"><?= old('content') ?></textarea>
+                        
+                        <!-- Custom WYSIWYG Editor -->
+                        <div class="wysiwyg-toolbar">
+                            <button type="button" onclick="execCmd('bold')" title="Bold"><i class="bi bi-type-bold"></i></button>
+                            <button type="button" onclick="execCmd('italic')" title="Italic"><i class="bi bi-type-italic"></i></button>
+                            <button type="button" onclick="execCmd('underline')" title="Underline"><i class="bi bi-type-underline"></i></button>
+                            <button type="button" onclick="execCmd('strikeThrough')" title="Strikethrough"><i class="bi bi-type-strikethrough"></i></button>
+                            <div class="separator"></div>
+                            <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet List"><i class="bi bi-list-ul"></i></button>
+                            <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered List"><i class="bi bi-list-ol"></i></button>
+                            <div class="separator"></div>
+                            <button type="button" onclick="execCmd('formatBlock', 'h2')" title="Heading 2">H2</button>
+                            <button type="button" onclick="execCmd('formatBlock', 'h3')" title="Heading 3">H3</button>
+                            <button type="button" onclick="execCmd('formatBlock', 'p')" title="Paragraph">P</button>
+                            <div class="separator"></div>
+                            <button type="button" onclick="execCmd('justifyLeft')" title="Align Left"><i class="bi bi-text-left"></i></button>
+                            <button type="button" onclick="execCmd('justifyCenter')" title="Align Center"><i class="bi bi-text-center"></i></button>
+                            <button type="button" onclick="execCmd('justifyRight')" title="Align Right"><i class="bi bi-text-right"></i></button>
+                            <div class="separator"></div>
+                            <button type="button" onclick="insertLink()" title="Insert Link"><i class="bi bi-link-45deg"></i></button>
+                            <button type="button" onclick="execCmd('removeFormat')" title="Clear Formatting"><i class="bi bi-x-lg"></i></button>
+                        </div>
+                        <div id="contentEditor" class="wysiwyg-editor" contenteditable="true" data-placeholder="Enter terms and conditions content..."><?= old('content') ?></div>
+                        <input type="hidden" name="content" id="contentInput">
+                        <small class="text-muted">Use the toolbar above to format your content</small>
                     </div>
                 </div>
             </div>
@@ -116,26 +206,63 @@
 </div>
 
 <script>
-tinymce.init({
-    selector: '#contentEditor',
-    height: 500,
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-        'insertdatetime', 'media', 'table', 'help', 'wordcount'
-    ],
-    toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | removeformat | help',
-    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-    setup: function(editor) {
-        editor.on('change', function() {
-            tinymce.triggerSave();
-        });
+// WYSIWYG Editor Functions
+function execCmd(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById('contentEditor').focus();
+    updateToolbarState();
+}
+
+function insertLink() {
+    var url = prompt('Enter URL:');
+    if (url) {
+        document.execCommand('createLink', false, url);
+    }
+}
+
+function updateToolbarState() {
+    // Update button states based on current formatting
+    var buttons = document.querySelectorAll('.wysiwyg-toolbar button');
+    buttons.forEach(function(btn) {
+        var command = btn.getAttribute('onclick');
+        if (command && command.includes('execCmd')) {
+            var cmd = command.match(/execCmd\('(\w+)'/);
+            if (cmd && document.queryCommandState(cmd[1])) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+    });
+}
+
+// Listen for selection changes to update toolbar
+document.addEventListener('selectionchange', function() {
+    updateToolbarState();
+});
+
+// Sync content before form submission
+document.getElementById('termsForm').addEventListener('submit', function(e) {
+    var content = document.getElementById('contentEditor').innerHTML;
+    document.getElementById('contentInput').value = content;
+    
+    // Check if content is empty
+    if (content.trim() === '' || content === '<br>') {
+        e.preventDefault();
+        alert('Please enter content for the terms and conditions.');
+        return false;
     }
 });
 
-// Sync TinyMCE content before form submission
-document.getElementById('termsForm').addEventListener('submit', function() {
-    tinymce.triggerSave();
+// Add placeholder support for contenteditable
+document.getElementById('contentEditor').addEventListener('focus', function() {
+    this.removeAttribute('data-placeholder-active');
+});
+
+document.getElementById('contentEditor').addEventListener('blur', function() {
+    if (this.innerHTML.trim() === '') {
+        this.innerHTML = '';
+    }
 });
 </script>
 
