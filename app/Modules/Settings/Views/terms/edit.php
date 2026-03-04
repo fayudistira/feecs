@@ -1,4 +1,4 @@
-<?= $this->extend('Modules\Frontend\Views\layout') ?>
+<?= $this->extend('Modules\Dashboard\Views\layout') ?>
 
 <?= $this->section('content') ?>
 
@@ -75,34 +75,20 @@
 </style>
 
 <!-- Page Header -->
-<div class="hero-section py-4" style="background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4 class="fw-bold mb-1" style="color: white;">Edit Terms & Conditions</h4>
-                <p class="mb-0" style="color: rgba(255,255,255,0.8);">Update terms for <?= esc($term['language']) ?></p>
-            </div>
-            <div class="col-auto">
-                <a href="<?= base_url('settings/terms') ?>" class="btn btn-light">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Terms List
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container py-4">
 <div class="row mb-4">
     <div class="col">
-        <h4 class="fw-bold">Edit Terms & Conditions</h4>
+        <h4 class="fw-bold mb-1">Edit Terms & Conditions</h4>
         <p class="text-muted mb-0">Update terms and conditions for <?= esc($term['language']) ?></p>
     </div>
     <div class="col-auto">
-        <a href="<?= base_url('settings/terms') ?>" class="btn btn-outline-dark-red">
+        <a href="<?= base_url('settings/terms') ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to Terms List
         </a>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-md-8">
 
 <!-- Error Messages -->
 <?php if (session('errors')): ?>
@@ -153,8 +139,23 @@
                     <div class="mb-3">
                         <label class="form-label">Content <span class="text-danger">*</span></label>
                         
-                        <!-- Custom WYSIWYG Editor -->
-                        <div class="wysiwyg-toolbar">
+                        <!-- Editor Toggle -->
+                        <div class="d-flex justify-content-end mb-2">
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Editor mode">
+                                <input type="radio" class="btn-check" name="editorMode" id="modeVisual" value="visual" checked>
+                                <label class="btn btn-outline-secondary" for="modeVisual">
+                                    <i class="bi bi-eye me-1"></i>Visual
+                                </label>
+                                <input type="radio" class="btn-check" name="editorMode" id="modeCode" value="code">
+                                <label class="btn btn-outline-secondary" for="modeCode">
+                                    <i class="bi bi-code-slash me-1"></i>Code
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Visual Editor (WYSIWYG) -->
+                        <div id="visualEditorContainer">
+                            <div class="wysiwyg-toolbar">
                             <button type="button" onclick="execCmd('bold')" title="Bold"><i class="bi bi-type-bold"></i></button>
                             <button type="button" onclick="execCmd('italic')" title="Italic"><i class="bi bi-type-italic"></i></button>
                             <button type="button" onclick="execCmd('underline')" title="Underline"><i class="bi bi-type-underline"></i></button>
@@ -175,6 +176,12 @@
                             <button type="button" onclick="execCmd('removeFormat')" title="Clear Formatting"><i class="bi bi-x-lg"></i></button>
                         </div>
                         <div id="contentEditor" class="wysiwyg-editor" contenteditable="true" data-placeholder="Enter terms and conditions content..."><?= old('content', $term['content']) ?></div>
+                        
+                        <!-- Code Editor (HTML Source) -->
+                        <div id="codeEditorContainer" style="display: none;">
+                            <textarea id="codeEditor" class="form-control" rows="20" style="font-family: monospace; font-size: 13px;" placeholder="Enter HTML code..."><?= esc(old('content', $term['content'])) ?></textarea>
+                        </div>
+                        
                         <input type="hidden" name="content" id="contentInput" value="<?= esc(old('content', $term['content'])) ?>">
                         <small class="text-muted">Use the toolbar above to format your content</small>
                     </div>
@@ -216,7 +223,6 @@
         </div>
     </div>
 </form>
-</div>
 
 <script>
 // WYSIWYG Editor Functions
@@ -256,7 +262,15 @@ document.addEventListener('selectionchange', function() {
 
 // Sync content before form submission
 document.getElementById('termsForm').addEventListener('submit', function(e) {
-    var content = document.getElementById('contentEditor').innerHTML;
+    var mode = document.querySelector('input[name="editorMode"]:checked').value;
+    var content;
+    
+    if (mode === 'visual') {
+        content = document.getElementById('contentEditor').innerHTML;
+    } else {
+        content = document.getElementById('codeEditor').value;
+    }
+    
     document.getElementById('contentInput').value = content;
     
     // Check if content is empty
@@ -265,6 +279,26 @@ document.getElementById('termsForm').addEventListener('submit', function(e) {
         alert('Please enter content for the terms and conditions.');
         return false;
     }
+});
+
+// Editor mode toggle
+document.querySelectorAll('input[name="editorMode"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        var visualContainer = document.getElementById('visualEditorContainer');
+        var codeContainer = document.getElementById('codeEditorContainer');
+        
+        if (this.value === 'visual') {
+            // Switch to visual mode - copy code to visual editor
+            visualContainer.style.display = 'block';
+            codeContainer.style.display = 'none';
+            document.getElementById('contentEditor').innerHTML = document.getElementById('codeEditor').value;
+        } else {
+            // Switch to code mode - copy visual to code editor
+            visualContainer.style.display = 'none';
+            codeContainer.style.display = 'block';
+            document.getElementById('codeEditor').value = document.getElementById('contentEditor').innerHTML;
+        }
+    });
 });
 
 // Add placeholder support for contenteditable

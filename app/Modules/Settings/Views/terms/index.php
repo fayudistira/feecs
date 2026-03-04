@@ -1,28 +1,24 @@
-<?= $this->extend('Modules\Frontend\Views\layout') ?>
+<?= $this->extend('Modules\Dashboard\Views\layout') ?>
 
 <?= $this->section('content') ?>
 
-<!-- Page Header -->
-<div class="hero-section py-4" style="background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col">
-                <h4 class="fw-bold mb-1" style="color: white;">Terms & Conditions</h4>
-                <p class="mb-0" style="color: rgba(255,255,255,0.8);">Manage terms and conditions for different languages</p>
-            </div>
-            <div class="col-auto">
-                <a href="<?= base_url('settings/terms/create') ?>" class="btn btn-light">
-                    <i class="bi bi-plus-lg me-1"></i> Add New Terms
-                </a>
-                <a href="<?= base_url('settings') ?>" class="btn btn-outline-light">
-                    <i class="bi bi-arrow-left me-1"></i> Back
-                </a>
-            </div>
-        </div>
+<div class="row mb-4">
+    <div class="col">
+        <h4 class="fw-bold mb-1">Terms & Conditions</h4>
+        <p class="text-muted mb-0">Manage terms and conditions for different languages</p>
+    </div>
+    <div class="col-auto">
+        <a href="<?= base_url('settings/terms/create') ?>" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Add New Terms
+        </a>
+        <a href="<?= base_url('settings') ?>" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
     </div>
 </div>
 
-<div class="container py-4">
+<div class="row">
+    <div class="col-12">
 <!-- Success/Error Messages -->
 <?php if (session('success')): ?>
     <div class="alert alert-success alert-dismissible fade show">
@@ -115,21 +111,20 @@
             </table>
         </div>
     </div>
-</div>
-</div>
-
-<!-- Info Card -->
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-            <div class="card-body">
-                <h6><i class="bi bi-info-circle me-2"></i>How it works</h6>
-                <ul class="mb-0 text-muted">
-                    <li>Each language can have its own terms and conditions.</li>
-                    <li>The terms will be displayed based on the program's language selected by the applicant.</li>
-                    <li>Make sure the language matches the language field in your programs.</li>
-                    <li>Only active terms will be shown to applicants.</li>
-                </ul>
+    
+    <!-- Info Card -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <div class="card-body">
+                    <h6><i class="bi bi-info-circle me-2"></i>How it works</h6>
+                    <ul class="mb-0 text-muted">
+                        <li>Each language can have its own terms and conditions.</li>
+                        <li>The terms will be displayed based on the program's language selected by the applicant.</li>
+                        <li>Make sure the language matches the language field in your programs.</li>
+                        <li>Only active terms will be shown to applicants.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
