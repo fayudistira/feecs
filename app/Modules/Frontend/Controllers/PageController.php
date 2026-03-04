@@ -106,10 +106,25 @@ class PageController extends BaseController
     {
         $programModel = new ProgramModel();
         $programs = $programModel->where('status', 'active')->findAll();
+        
+        // Load terms and conditions for all languages
+        $termsModel = new \App\Models\TermsConditionModel();
+        $allTerms = $termsModel->getAllActive();
+        
+        // Create a map of language -> terms for easy lookup in JavaScript
+        $termsMap = [];
+        foreach ($allTerms as $term) {
+            $termsMap[$term['language']] = [
+                'id' => $term['id'],
+                'title' => $term['title'],
+                'content' => $term['content']
+            ];
+        }
 
         return view('Modules\Frontend\Views\apply', [
             'title' => 'Apply for Admission',
             'programs' => $programs,
+            'termsMap' => json_encode($termsMap),
             'user' => auth()->user()
         ]);
     }
@@ -127,11 +142,26 @@ class PageController extends BaseController
         }
 
         $programs = $programModel->where('status', 'active')->findAll();
+        
+        // Load terms and conditions for all languages
+        $termsModel = new \App\Models\TermsConditionModel();
+        $allTerms = $termsModel->getAllActive();
+        
+        // Create a map of language -> terms for easy lookup in JavaScript
+        $termsMap = [];
+        foreach ($allTerms as $term) {
+            $termsMap[$term['language']] = [
+                'id' => $term['id'],
+                'title' => $term['title'],
+                'content' => $term['content']
+            ];
+        }
 
         return view('Modules\Frontend\Views\apply', [
             'title' => 'Apply for ' . $program['title'],
             'programs' => $programs,
             'selectedProgram' => $program,
+            'termsMap' => json_encode($termsMap),
             'user' => auth()->user()
         ]);
     }

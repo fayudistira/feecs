@@ -1,8 +1,53 @@
 <?= $this->extend('Modules\Frontend\Views\layout') ?>
 
 <?= $this->section('content') ?>
+<!-- Terms Modal CSS -->
+<style>
+.terms-modal{display:none;position:fixed;z-index:9999;left:0;top:0;width:100%;height:100%;overflow:auto;background:rgba(0,0,0,.7);backdrop-filter:blur(5px)}
+.terms-modal.show{display:flex;align-items:center;justify-content:center}
+.terms-modal-content{background:#fff;border-radius:12px;width:90%;max-width:700px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.terms-modal-header{padding:20px 24px;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#8B0000,#a52a2a);border-radius:12px 12px 0 0;color:#fff}
+.terms-modal-header h2{margin:0;font-size:1.5rem;font-weight:600}
+.terms-modal-close{background:0;border:none;color:#fff;font-size:1.5rem;cursor:pointer;padding:5px;line-height:1;opacity:.8}
+.terms-modal-close:hover{opacity:1}
+.terms-modal-body{padding:24px;overflow-y:auto;flex:1}
+.terms-modal-body h3{color:#8B0000;font-size:1.1rem;margin:20px 0 12px}
+.terms-modal-body h3:first-child{margin-top:0}
+.terms-modal-body h4{color:#333;font-size:1rem;margin:15px 0 10px}
+.terms-modal-body p{color:#555;line-height:1.6;margin-bottom:12px}
+.terms-modal-body ul{padding-left:20px;color:#555;line-height:1.7}
+.terms-modal-body hr{border:0;border-top:1px solid #e0e0e0;margin:20px 0}
+.terms-modal-footer{padding:20px 24px;border-top:1px solid #e0e0e0;background:#f8f9fa;border-radius:0 0 12px 12px}
+.terms-modal-checkbox{display:flex;align-items:flex-start;gap:10px;margin-bottom:15px}
+.terms-modal-checkbox input{margin-top:3px;width:18px;height:18px}
+.terms-modal-checkbox label{color:#555;font-size:.95rem}
+.terms-modal-footer .btn-terms{width:100%;padding:12px;background:linear-gradient(135deg,#8B0000,#a52a2a);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer}
+.terms-modal-footer .btn-terms:disabled{background:#ccc;cursor:not-allowed}
+#applicationFormContent{display:none}
+#applicationFormContent.show{display:block;animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.no-terms-warning{padding:15px;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;color:#856404}
+</style>
+
+<!-- Terms Modal HTML -->
+<div class="terms-modal show" id="termsModal">
+<div class="terms-modal-content">
+<div class="terms-modal-header"><h2 id="termsModalTitle">Syarat dan Ketentuan</h2><button class="terms-modal-close" id="termsModalClose" type="button"><i class="fas fa-times"></i></button></div>
+<div class="terms-modal-body" id="termsModalBody"></div>
+<div class="terms-modal-footer">
+<div class="terms-modal-checkbox"><input type="checkbox" id="termsAgreeCheckbox" /><label for="termsAgreeCheckbox">Saya telah membaca dan menyetujui Syarat dan Ketentuan</label></div>
+<button class="btn-terms" id="acceptTermsBtn" disabled><i class="fas fa-check-circle"></i> Setuju & Lanjutkan</button>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){var t=document.getElementById('termsModal'),e=document.getElementById('termsAgreeCheckbox'),n=document.getElementById('acceptTermsBtn'),o=document.getElementById('termsModalClose'),r=document.getElementById('applicationFormContent'),s=document.getElementById('termsModalTitle'),a=document.getElementById('termsModalBody'),c=" . (isset($termsMap) ? $termsMap : '{}') . ";var l='';<?php if(isset($selectedProgram)&&$selectedProgram):?>l='<?=esc($selectedProgram['language']??'')?>';<?php endif;?>function i(e){if(c&&c[e]){s.textContent=c[e].title;a.innerHTML=c[e].content;return!0}s.textContent='Syarat dan Ketentuan';a.innerHTML='<div class="no-terms-warning"><i class="bi bi-exclamation-triangle"></i> Syarat dan ketentuan belum tersedia.</div>';return!1}l&&i(l);var d=document.getElementById('course');d&&d.value&&d.options[d.selectedIndex]&&(l=d.options[d.selectedIndex].dataset.language||'',l&&i(l));e.addEventListener('change',function(){n.disabled=!this.checked});n.addEventListener('click',function(){e.checked&&(t.classList.remove('show'),r.classList.add('show'))});o.addEventListener('click',function(){e.checked||alert('Anda harus menyetujui syarat dan ketentuan.')});t.addEventListener('click',function(e){e.target===t&&!e.checked&&alert('Anda harus menyetujui syarat dan ketentuan.')});if(d){d.addEventListener('change',function(){var e=this.options[this.selectedIndex].dataset.language||'';e&&e!==l&&(l=e,i(e),e.checked=!1,n.disabled=!0)})}});
+</div></div></div>
 <!-- Page Header -->
-<div class="hero-section py-5">
+<div class="applicationFormContent show">
+
+<div class="hero-section py-5">">
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-3">Daftar Sekarang</h1>
         <p class="lead">Mulai perjalanan belajar Anda bersama kami dengan mengisi formulir pendaftaran di bawah ini</p>
@@ -347,7 +392,7 @@
                         <select class="form-select" id="course" name="course" required>
                             <option value="">Pilih Program</option>
                             <?php foreach ($programs as $program): ?>
-                                <option value="<?= esc($program['id']) ?>" data-title="<?= esc($program['title']) ?>" data-category="<?= esc($program['category'] ?? '') ?>" <?= old('course') === $program['id'] ? 'selected' : '' ?>>
+                                <option value="<?= esc($program['id']) ?>" data-title="<?= esc($program['title']) ?>" data-category="<?= esc($program['category'] ?? '') ?>" data-language="<?= esc($program['language'] ?? '') ?>" <?= old('course') === $program['id'] ? 'selected' : '' ?>>
                                     <?= esc($program['title']) ?>
                                     <?php if ($program['discount'] > 0): ?>
                                         (<?= number_format($program['discount'], 0) ?>% OFF)
@@ -556,4 +601,5 @@
         }
     });
 </script>
+</div>
 <?= $this->endSection() ?>

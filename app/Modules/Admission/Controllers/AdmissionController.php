@@ -104,10 +104,25 @@ class AdmissionController extends BaseController
         // Load active programs for course selection
         $programModel = new ProgramModel();
         $programs = $programModel->where('status', 'active')->findAll();
+        
+        // Load terms and conditions for all languages
+        $termsModel = new \App\Models\TermsConditionModel();
+        $allTerms = $termsModel->getAllActive();
+        
+        // Create a map of language -> terms for easy lookup in JavaScript
+        $termsMap = [];
+        foreach ($allTerms as $term) {
+            $termsMap[$term['language']] = [
+                'id' => $term['id'],
+                'title' => $term['title'],
+                'content' => $term['content']
+            ];
+        }
 
         return view('Modules\Admission\Views\create', [
             'title' => 'Create Admission',
             'programs' => $programs,
+            'termsMap' => json_encode($termsMap),
             'menuItems' => $this->loadModuleMenus(),
             'user' => auth()->user()
         ]);
