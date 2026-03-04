@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- Page Header -->
 <div class="applicationFormContent show">
 
-<div class="hero-section py-5">">
+<div class="hero-section py-5">
     <div class="container text-center">
         <h1 class="display-4 fw-bold mb-3">Daftar Sekarang</h1>
         <p class="lead">Mulai perjalanan belajar Anda bersama kami dengan mengisi formulir pendaftaran di bawah ini</p>
