@@ -104,6 +104,12 @@ class AuthGroups extends ShieldAuthGroups
         'dormitory.view'      => 'Can view dormitories (read-only)',
         'dormitory.assign'    => 'Can assign students to dormitories',
         'tools.access'        => 'Can access tools module',
+        'blog.manage'        => 'Can manage blog (full access)',
+        'blog.create'        => 'Can create blog posts',
+        'blog.edit'          => 'Can edit blog posts',
+        'blog.delete'        => 'Can delete blog posts',
+        'blog.categories.manage' => 'Can manage blog categories',
+        'blog.tags.manage'   => 'Can manage blog tags',
     ];
 
     /**
@@ -128,6 +134,7 @@ class AuthGroups extends ShieldAuthGroups
             'dormitory.*',
             'student.manage',
             'tools.*',
+            'blog.*',
         ],
         'admin' => [
             'admin.access',
@@ -144,6 +151,20 @@ class AuthGroups extends ShieldAuthGroups
             'dormitory.manage',
             'dormitory.assign',
             'tools.access',
+            'blog.manage',
+            'blog.categories.manage',
+            'blog.tags.manage',
+        ],
+        'frontline' => [
+            'dashboard.access',
+            'admission.manage',
+            'program.manage',
+            'classroom.manage',
+            'dormitory.manage',
+            'dormitory.assign',
+            'tools.access',
+            'blog.create',
+            'blog.edit',
         ],
         'frontline' => [
             'dashboard.access',
