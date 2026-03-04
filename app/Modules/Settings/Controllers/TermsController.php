@@ -167,4 +167,37 @@ class TermsController extends Controller
         return redirect()->to('settings/terms')
             ->with('success', "Terms & Conditions {$status} successfully!");
     }
+
+    /**
+     * API: Get all active terms
+     */
+    public function apiIndex()
+    {
+        $terms = $this->termsModel->getAllActive();
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $terms
+        ]);
+    }
+
+    /**
+     * API: Get terms by language
+     */
+    public function apiShow($language)
+    {
+        $term = $this->termsModel->getActiveByLanguage($language);
+        
+        if (!$term) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Terms and conditions not found for this language'
+            ])->setStatusCode(404);
+        }
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $term
+        ]);
+    }
 }

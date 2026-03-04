@@ -42,8 +42,106 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded',function(){var t=document.getElementById('termsModal'),e=document.getElementById('termsAgreeCheckbox'),n=document.getElementById('acceptTermsBtn'),o=document.getElementById('termsModalClose'),r=document.getElementById('applicationFormContent'),s=document.getElementById('termsModalTitle'),a=document.getElementById('termsModalBody'),c=" . (isset($termsMap) ? $termsMap : '{}') . ";var l='';<?php if(isset($selectedProgram)&&$selectedProgram):?>l='<?=esc($selectedProgram['language']??'')?>';<?php endif;?>function i(e){if(c&&c[e]){s.textContent=c[e].title;a.innerHTML=c[e].content;return!0}s.textContent='Syarat dan Ketentuan';a.innerHTML='<div class="no-terms-warning"><i class="bi bi-exclamation-triangle"></i> Syarat dan ketentuan belum tersedia.</div>';return!1}l&&i(l);var d=document.getElementById('course');d&&d.value&&d.options[d.selectedIndex]&&(l=d.options[d.selectedIndex].dataset.language||'',l&&i(l));e.addEventListener('change',function(){n.disabled=!this.checked});n.addEventListener('click',function(){e.checked&&(t.classList.remove('show'),r.classList.add('show'))});o.addEventListener('click',function(){e.checked||alert('Anda harus menyetujui syarat dan ketentuan.')});t.addEventListener('click',function(e){e.target===t&&!e.checked&&alert('Anda harus menyetujui syarat dan ketentuan.')});if(d){d.addEventListener('change',function(){var e=this.options[this.selectedIndex].dataset.language||'';e&&e!==l&&(l=e,i(e),e.checked=!1,n.disabled=!0)})}});
-</div></div></div>
+document.addEventListener('DOMContentLoaded',function(){
+    var t=document.getElementById('termsModal'),
+        e=document.getElementById('termsAgreeCheckbox'),
+        n=document.getElementById('acceptTermsBtn'),
+        o=document.getElementById('termsModalClose'),
+        r=document.getElementById('applicationFormContent'),
+        s=document.getElementById('termsModalTitle'),
+        a=document.getElementById('termsModalBody'),
+        c={};
+    
+    var l='';
+    <?php if(isset($selectedProgram)&&$selectedProgram):?>
+    l='<?=esc($selectedProgram['language']??'')?>';
+    <?php endif;?>
+    
+    // Fetch terms from API
+    fetch('<?= base_url('settings/api/terms') ?>')
+        .then(function(response){return response.json();})
+        .then(function(data){
+            if(data.success && data.data){
+                data.data.forEach(function(term){
+                    c[term.language]={
+                        id:term.id,
+                        title:term.title,
+                        content:term.content
+                    };
+                });
+            }
+            // Initialize with default or selected program language
+            if(l&&c[l]){
+                s.textContent=c[l].title;
+                a.innerHTML=c[l].content;
+            }else if(Object.keys(c).length > 0){
+                // Use first available language
+                var firstLang=Object.keys(c)[0];
+                s.textContent=c[firstLang].title;
+                a.innerHTML=c[firstLang].content;
+            }else{
+                s.textContent='Syarat dan Ketentuan';
+                a.innerHTML='<div class="no-terms-warning"><i class="bi bi-exclamation-triangle"></i> Syarat dan ketentuan belum tersedia.</div>';
+            }
+        })
+        .catch(function(){
+            s.textContent='Syarat dan Ketentuan';
+            a.innerHTML='<div class="no-terms-warning"><i class="bi bi-exclamation-triangle"></i> Gagal memuat syarat dan ketentuan.</div>';
+        });
+    
+    function i(e){
+        if(c&&c[e]){
+            s.textContent=c[e].title;
+            a.innerHTML=c[e].content;
+            return true;
+        }
+        s.textContent='Syarat dan Ketentuan';
+        a.innerHTML='<div class="no-terms-warning"><i class="bi bi-exclamation-triangle"></i> Syarat dan ketentuan belum tersedia.</div>';
+        return false;
+    }
+    
+    var d=document.getElementById('course');
+    if(d&&d.value&&d.options[d.selectedIndex]){
+        l=d.options[d.selectedIndex].dataset.language||'';
+        l&&i(l);
+    }
+    
+    e.addEventListener('change',function(){
+        n.disabled=!this.checked;
+    });
+    
+    n.addEventListener('click',function(){
+        if(e.checked){
+            t.classList.remove('show');
+            r.classList.add('show');
+        }
+    });
+    
+    o.addEventListener('click',function(){
+        if(!e.checked){
+            alert('Anda harus menyetujui syarat dan ketentuan.');
+        }
+    });
+    
+    t.addEventListener('click',function(e){
+        if(e.target===t&&!e.checked){
+            alert('Anda harus menyetujui syarat dan ketentuan.');
+        }
+    });
+    
+    if(d){
+        d.addEventListener('change',function(){
+            var lang=this.options[this.selectedIndex].dataset.language||'';
+            if(lang&&lang!==l){
+                l=lang;
+                i(l);
+                e.checked=false;
+                n.disabled=true;
+            }
+        });
+    }
+});
+</script>
 <!-- Page Header -->
 <div class="applicationFormContent show">
 

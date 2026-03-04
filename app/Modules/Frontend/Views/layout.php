@@ -379,9 +379,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="<?= base_url('about') ?>">Tentang SOS</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= base_url('apply') ?>">Pendaftaran</a>
-                    </li>
                     <li class="nav-item ms-2">
                         <?php if (auth()->loggedIn()): ?>
                             <a class="nav-link btn-login" href="<?= base_url('dashboard') ?>">

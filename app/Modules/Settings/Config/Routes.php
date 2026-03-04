@@ -19,4 +19,8 @@ $routes->group('settings', ['namespace' => 'Modules\Settings\Controllers'], func
     $routes->post('terms/update/(:num)', 'TermsController::update/$1');
     $routes->post('terms/delete/(:num)', 'TermsController::delete/$1');
     $routes->post('terms/toggle/(:num)', 'TermsController::toggle/$1');
+    
+    // Terms API for frontend
+    $routes->get('api/terms', 'TermsController::apiIndex');
+    $routes->get('api/terms/(:segment)', 'TermsController::apiShow/$1');
 });
