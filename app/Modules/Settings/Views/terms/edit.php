@@ -2,6 +2,9 @@
 
 <?= $this->section('content') ?>
 
+<!-- TinyMCE CDN -->
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
 <!-- Page Header -->
 <div class="hero-section py-4" style="background: linear-gradient(135deg, #8B0000 0%, #a52a2a 100%);">
     <div class="container">
@@ -47,7 +50,7 @@
 <?php endif; ?>
 
 <!-- Edit Form -->
-<form action="<?= base_url('settings/terms/update/' . $term['id']) ?>" method="post">
+<form action="<?= base_url('settings/terms/update/' . $term['id']) ?>" method="post" id="termsForm">
     <?= csrf_field() ?>
 
     <div class="row">
@@ -80,9 +83,8 @@
 
                     <div class="mb-3">
                         <label class="form-label">Content <span class="text-danger">*</span></label>
-                        <textarea name="content" class="form-control form-control-sm" rows="20" required
-                                  placeholder="Enter terms and conditions content (HTML allowed)"><?= old('content', $term['content']) ?></textarea>
-                        <small class="text-muted">You can use HTML tags for formatting</small>
+                        <textarea name="content" id="contentEditor" class="form-control" rows="20" required
+                                  placeholder="Enter terms and conditions content"><?= old('content', $term['content']) ?></textarea>
                     </div>
                 </div>
             </div>
@@ -119,18 +121,33 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Info Card -->
-            <div class="card border-0 shadow-sm mt-3">
-                <div class="card-body">
-                    <h6><i class="bi bi-info-circle me-2"></i>Info</h6>
-                    <small class="text-muted">
-                        <strong>Created:</strong> <?= date('M d, Y H:i', strtotime($term['created_at'])) ?><br>
-                        <strong>Updated:</strong> <?= date('M d, Y H:i', strtotime($term['updated_at'])) ?>
-                    </small>
-                </div>
-            </div>
         </div>
     </div>
 </form>
+</div>
+
+<script>
+tinymce.init({
+    selector: '#contentEditor',
+    height: 500,
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    toolbar: 'undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | removeformat | help',
+    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+    setup: function(editor) {
+        editor.on('change', function() {
+            tinymce.triggerSave();
+        });
+    }
+});
+
+// Sync TinyMCE content before form submission
+document.getElementById('termsForm').addEventListener('submit', function() {
+    tinymce.triggerSave();
+});
+</script>
+
 <?= $this->endSection() ?>
