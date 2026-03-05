@@ -463,7 +463,7 @@
     </div>
 </div>
 
-<!-- Blog/Articles Section -->
+<!-- Blog/Articles Carousel Section -->
 <?php if (!empty($featuredPosts) || !empty($recentPosts)): ?>
 <div class="bg-light py-5">
     <div class="container">
@@ -472,89 +472,82 @@
             <p class="lead text-muted">Baca artikel terbaru tentang tips belajar bahasa asing</p>
         </div>
         
-        <?php if (!empty($featuredPosts)): ?>
-        <div class="mb-5">
-            <h3 class="h4 fw-bold mb-4">Featured Articles</h3>
-            <div class="row g-4">
-                <?php foreach ($featuredPosts as $post): ?>
-                <div class="col-md-4">
-                    <article class="card h-100 border-0 shadow-sm">
-                        <?php if (!empty($post['featured_image'])): ?>
-                        <img src="<?= esc($post['featured_image']) ?>" class="card-img-top" alt="<?= esc($post['title']) ?>" style="height: 200px; object-fit: cover;">
-                        <?php endif; ?>
-                        <div class="card-body">
-                            <div class="mb-2">
-                                <?php if (!empty($post['category_name'])): ?>
-                                <span class="badge bg-danger"><?= esc($post['category_name']) ?></span>
-                                <?php endif; ?>
+        <?php $allPosts = array_merge($featuredPosts ?? [], $recentPosts ?? []); ?>
+        <?php if (!empty($allPosts)): ?>
+        <div id="blogCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <?php for ($i = 0; $i < count($allPosts); $i++): ?>
+                <button type="button" data-bs-target="#blogCarousel" data-bs-slide-to="<?= $i ?>" class="<?= $i === 0 ? 'active' : '' ?>" aria-current="<?= $i === 0 ? 'true' : 'false' ?>" aria-label="Slide <?= $i + 1 ?>"></button>
+                <?php endfor; ?>
+            </div>
+            <div class="carousel-inner">
+                <?php foreach ($allPosts as $index => $post): ?>
+                <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>" data-bs-interval="5000">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="card border-0 shadow-lg overflow-hidden">
+                                <div class="row g-0">
+                                    <?php if (!empty($post['featured_image'])): ?>
+                                    <div class="col-md-5">
+                                        <img src="<?= esc($post['featured_image']) ?>" class="img-fluid h-100 w-100" alt="<?= esc($post['title']) ?>" style="object-fit: cover; min-height: 300px;">
+                                    </div>
+                                    <div class="col-md-7">
+                                    <?php else: ?>
+                                    <div class="col-12">
+                                    <?php endif; ?>
+                                        <div class="card-body p-4 p-lg-5">
+                                            <div class="mb-3">
+                                                <?php if (!empty($post['category_name'])): ?>
+                                                <span class="badge bg-danger me-2"><?= esc($post['category_name']) ?></span>
+                                                <?php endif; ?>
+                                                <?php if (!empty($post['reading_time'])): ?>
+                                                <span class="badge bg-secondary"><i class="bi bi-clock me-1"></i><?= $post['reading_time'] ?> min read</span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <h3 class="card-title fw-bold mb-3">
+                                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="text-decoration-none text-dark">
+                                                    <?= esc($post['title']) ?>
+                                                </a>
+                                            </h3>
+                                            <p class="card-text text-muted mb-4">
+                                                <?= esc($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 150)) ?>...
+                                            </p>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    <?= date('F d, Y', strtotime($post['published_at'])) ?>
+                                                </small>
+                                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="btn btn-dark-red">
+                                                    Read More <i class="bi bi-arrow-right ms-1"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    <?php if (!empty($post['featured_image'])): ?>
+                                    </div>
+                                    <?php else: ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
-                            <h5 class="card-title fw-bold">
-                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="text-decoration-none text-dark">
-                                    <?= esc($post['title']) ?>
-                                </a>
-                            </h5>
-                            <p class="card-text text-muted small">
-                                <?= esc($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 100)) ?>...
-                            </p>
                         </div>
-                        <div class="card-footer bg-white border-0 pt-0">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>
-                                <?= date('M d, Y', strtotime($post['published_at'])) ?>
-                                <?php if (!empty($post['reading_time'])): ?>
-                                <span class="ms-2"><i class="bi bi-clock me-1"></i><?= $post['reading_time'] ?> min read</span>
-                                <?php endif; ?>
-                            </small>
-                        </div>
-                    </article>
+                    </div>
                 </div>
                 <?php endforeach; ?>
             </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#blogCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-dark rounded-circle" aria-hidden="true" style="padding: 1.5rem;"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#blogCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-dark rounded-circle" aria-hidden="true" style="padding: 1.5rem;"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
-        <?php endif; ?>
         
-        <?php if (!empty($recentPosts)): ?>
-        <div>
-            <h3 class="h4 fw-bold mb-4">Latest Articles</h3>
-            <div class="row g-4">
-                <?php foreach ($recentPosts as $post): ?>
-                <div class="col-md-6 col-lg-4">
-                    <article class="card h-100 border-0 shadow-sm">
-                        <?php if (!empty($post['featured_image'])): ?>
-                        <img src="<?= esc($post['featured_image']) ?>" class="card-img-top" alt="<?= esc($post['title']) ?>" style="height: 180px; object-fit: cover;">
-                        <?php endif; ?>
-                        <div class="card-body">
-                            <?php if (!empty($post['category_name'])): ?>
-                            <span class="badge bg-secondary mb-2"><?= esc($post['category_name']) ?></span>
-                            <?php endif; ?>
-                            <h6 class="card-title fw-bold">
-                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="text-decoration-none text-dark">
-                                    <?= esc($post['title']) ?>
-                                </a>
-                            </h6>
-                            <p class="card-text small text-muted">
-                                <?= esc($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 80)) ?>
-                            </p>
-                        </div>
-                        <div class="card-footer bg-white border-0 pt-0">
-                            <small class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>
-                                <?= date('M d, Y', strtotime($post['published_at'])) ?>
-                            </small>
-                            <a href="<?= base_url('blog/' . $post['slug']) ?>" class="btn btn-sm btn-outline-danger float-end">Read More</a>
-                        </div>
-                    </article>
-                </div>
-                <?php endforeach; ?>
-            </div>
-            
-            <?php if (!empty($recentPosts) || !empty($featuredPosts)): ?>
-            <div class="text-center mt-5">
-                <a href="<?= base_url('blog') ?>" class="btn btn-dark-red btn-lg">
-                    View All Articles <i class="bi bi-arrow-right ms-2"></i>
-                </a>
-            </div>
-            <?php endif; ?>
+        <div class="text-center mt-5">
+            <a href="<?= base_url('blog') ?>" class="btn btn-outline-dark btn-lg">
+                View All Articles <i class="bi bi-arrow-right ms-2"></i>
+            </a>
         </div>
         <?php endif; ?>
     </div>
