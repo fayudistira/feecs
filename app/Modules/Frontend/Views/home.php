@@ -463,6 +463,104 @@
     </div>
 </div>
 
+<!-- Blog/Articles Section -->
+<?php if (!empty($featuredPosts) || !empty($recentPosts)): ?>
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold" style="color: var(--dark-red);">Artikel & Berita</h2>
+            <p class="lead text-muted">Baca artikel terbaru tentang tips belajar bahasa asing</p>
+        </div>
+        
+        <?php if (!empty($featuredPosts)): ?>
+        <div class="mb-5">
+            <h3 class="h4 fw-bold mb-4">Featured Articles</h3>
+            <div class="row g-4">
+                <?php foreach ($featuredPosts as $post): ?>
+                <div class="col-md-4">
+                    <article class="card h-100 border-0 shadow-sm">
+                        <?php if (!empty($post['featured_image'])): ?>
+                        <img src="<?= esc($post['featured_image']) ?>" class="card-img-top" alt="<?= esc($post['title']) ?>" style="height: 200px; object-fit: cover;">
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <?php if (!empty($post['category_name'])): ?>
+                                <span class="badge bg-danger"><?= esc($post['category_name']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <h5 class="card-title fw-bold">
+                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="text-decoration-none text-dark">
+                                    <?= esc($post['title']) ?>
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted small">
+                                <?= esc($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 100)) ?>...
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>
+                                <?= date('M d, Y', strtotime($post['published_at'])) ?>
+                                <?php if (!empty($post['reading_time'])): ?>
+                                <span class="ms-2"><i class="bi bi-clock me-1"></i><?= $post['reading_time'] ?> min read</span>
+                                <?php endif; ?>
+                            </small>
+                        </div>
+                    </article>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($recentPosts)): ?>
+        <div>
+            <h3 class="h4 fw-bold mb-4">Latest Articles</h3>
+            <div class="row g-4">
+                <?php foreach ($recentPosts as $post): ?>
+                <div class="col-md-6 col-lg-4">
+                    <article class="card h-100 border-0 shadow-sm">
+                        <?php if (!empty($post['featured_image'])): ?>
+                        <img src="<?= esc($post['featured_image']) ?>" class="card-img-top" alt="<?= esc($post['title']) ?>" style="height: 180px; object-fit: cover;">
+                        <?php endif; ?>
+                        <div class="card-body">
+                            <?php if (!empty($post['category_name'])): ?>
+                            <span class="badge bg-secondary mb-2"><?= esc($post['category_name']) ?></span>
+                            <?php endif; ?>
+                            <h6 class="card-title fw-bold">
+                                <a href="<?= base_url('blog/' . $post['slug']) ?>" class="text-decoration-none text-dark">
+                                    <?= esc($post['title']) ?>
+                                </a>
+                            </h6>
+                            <p class="card-text small text-muted">
+                                <?= esc($post['excerpt'] ?? substr(strip_tags($post['content'] ?? ''), 0, 80)) ?>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-white border-0 pt-0">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar me-1"></i>
+                                <?= date('M d, Y', strtotime($post['published_at'])) ?>
+                            </small>
+                            <a href="<?= base_url('blog/' . $post['slug']) ?>" class="btn btn-sm btn-outline-danger float-end">Read More</a>
+                        </div>
+                    </article>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <?php if (!empty($recentPosts) || !empty($featuredPosts)): ?>
+            <div class="text-center mt-5">
+                <a href="<?= base_url('blog') ?>" class="btn btn-dark-red btn-lg">
+                    View All Articles <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- Why Choose Us Section -->
 <div class="container py-5">
     <div class="row align-items-center g-5 py-5">

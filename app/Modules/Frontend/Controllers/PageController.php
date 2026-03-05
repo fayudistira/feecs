@@ -7,6 +7,9 @@ use Modules\Account\Models\ProfileModel;
 use Modules\Admission\Models\AdmissionModel;
 use Modules\Program\Models\ProgramModel;
 use Modules\Payment\Models\InvoiceModel;
+use Modules\Blog\Models\BlogPostModel;
+use Modules\Blog\Models\BlogCategoryModel;
+use Modules\Blog\Models\BlogTagModel;
 
 class PageController extends BaseController
 {
@@ -47,11 +50,27 @@ class PageController extends BaseController
                 }
             }
         }
+        
+        // Get blog posts for home page
+        $blogPostModel = new BlogPostModel();
+        $recentPosts = $blogPostModel->getRecentPosts(6);
+        $featuredPosts = $blogPostModel->getFeaturedPosts(3);
+        $blogCategories = [];
+        try {
+            $blogCategoryModel = new BlogCategoryModel();
+            $blogCategories = $blogCategoryModel->getCategoriesWithPostCount();
+        } catch (\Exception $e) {
+            // Blog categories might not exist yet
+            log_message('debug', 'Error loading blog categories: ' . $e->getMessage());
+        }
 
         return view('Modules\Frontend\Views\home', [
             'title' => 'Welcome',
             'programs' => $programs,
-            'programsByLanguage' => $programsByLanguage
+            'programsByLanguage' => $programsByLanguage,
+            'recentPosts' => $recentPosts ?? [],
+            'featuredPosts' => $featuredPosts ?? [],
+            'blogCategories' => $blogCategories ?? []
         ]);
     }
 
