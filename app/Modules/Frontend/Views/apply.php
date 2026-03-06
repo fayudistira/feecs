@@ -544,8 +544,10 @@ document.addEventListener('DOMContentLoaded',function(){
                         $tenthDay = mktime(0, 0, 0, $month, 10, $year);
                         $dayOfWeek = date('N', $tenthDay);
                         
-                        // If 10th is Friday (5), Saturday (6), or Sunday (7), move to next Monday
-                        if ($dayOfWeek >= 5) {
+                        // If 10th is Saturday (6) or Sunday (7), move to next Monday
+                        // If 10th is Friday (5), keep the 10th as start date
+                        // If 10th is Monday (1) to Thursday (4), keep the 10th as start date
+                        if ($dayOfWeek >= 6) {
                             $daysUntilMonday = 8 - $dayOfWeek; // Days until next Monday
                             $tenthDay = strtotime("+{$daysUntilMonday} days", $tenthDay);
                         }
