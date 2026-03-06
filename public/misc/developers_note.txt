@@ -1,6 +1,6 @@
 
 ssh -p 65002 u712925965@147.93.78.27
-cd domains/kursusbahasa.org/public_html/lexicore
+cd domains/kursusbahasa.org/public_html
 
 
 ssh -p 65002 u623281586@185.232.14.158

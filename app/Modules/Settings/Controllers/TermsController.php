@@ -2,10 +2,10 @@
 
 namespace Modules\Settings\Controllers;
 
+use App\Controllers\BaseController;
 use App\Models\TermsConditionModel;
-use CodeIgniter\Controller;
 
-class TermsController extends Controller
+class TermsController extends BaseController
 {
     protected $termsModel;
 
@@ -19,8 +19,13 @@ class TermsController extends Controller
      */
     public function index()
     {
-        $data['terms'] = $this->termsModel->getAllTerms();
-        $data['availableLanguages'] = TermsConditionModel::getAvailableProgramLanguages();
+        $data = [
+            'title' => 'Terms & Conditions',
+            'menuItems' => $this->loadModuleMenus(),
+            'user' => auth()->user(),
+            'terms' => $this->termsModel->getAllTerms(),
+            'availableLanguages' => TermsConditionModel::getAvailableProgramLanguages(),
+        ];
 
         return view('Modules\Settings\Views\terms\index', $data);
     }
@@ -30,8 +35,13 @@ class TermsController extends Controller
      */
     public function create()
     {
-        $data['availableLanguages'] = TermsConditionModel::getAvailableProgramLanguages();
-        $data['existingLanguages'] = array_column($this->termsModel->getAvailableLanguages(), 'language');
+        $data = [
+            'title' => 'Create Terms',
+            'menuItems' => $this->loadModuleMenus(),
+            'user' => auth()->user(),
+            'availableLanguages' => TermsConditionModel::getAvailableProgramLanguages(),
+            'existingLanguages' => array_column($this->termsModel->getAvailableLanguages(), 'language'),
+        ];
 
         return view('Modules\Settings\Views\terms\create', $data);
     }
@@ -79,8 +89,13 @@ class TermsController extends Controller
                 ->with('error', 'Terms & Conditions not found!');
         }
 
-        $data['term'] = $term;
-        $data['availableLanguages'] = TermsConditionModel::getAvailableProgramLanguages();
+        $data = [
+            'title' => 'Edit Terms',
+            'menuItems' => $this->loadModuleMenus(),
+            'user' => auth()->user(),
+            'term' => $term,
+            'availableLanguages' => TermsConditionModel::getAvailableProgramLanguages(),
+        ];
 
         return view('Modules\Settings\Views\terms\edit', $data);
     }
