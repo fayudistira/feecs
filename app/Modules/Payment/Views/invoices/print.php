@@ -341,44 +341,51 @@
             <p><strong>Invoice URL:</strong> <a href="<?= base_url('invoice/view/' . $invoice['id']) ?>"><?= base_url('invoice/view/' . $invoice['id']) ?></a></p>
         </div>
 
+        <!-- QR Code for verification -->
+        <div class="no-print" style="margin-top: 20px; text-align: center;">
+            <img src="<?= base_url('invoice/qr/' . $invoice['id']) ?>" alt="QR Code" width="100" height="100">
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">Scan untuk verifikasi invoice</p>
+        </div>
+
         <!-- WhatsApp Confirmation -->
         <div class="no-print" style="margin-top: 30px; text-align: center; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-            <h5 style="color: #25D366; margin-bottom: 15px;"><i class="bi bi-whatsapp"></i> Confirm Payment via WhatsApp</h5>
-            <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Click the button below to notify our admission team about your payment.</p>
-            
-            <a href="<?= $waUrl ?? '#' ?>" target="_blank" id="wa-confirm-btn" class="btn" style="background-color: #25D366; color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block;">
-                <i class="bi bi-whatsapp me-2"></i>Confirm via WhatsApp
-            </a>
-            
-            <div id="wa-countdown" style="margin-top: 15px; font-size: 12px; color: #666;">
-                <span id="countdown-text">Auto-confirming in 3 seconds...</span>
-            </div>
+            <p style="font-size: 14px; margin-bottom: 15px;">
+                <a href="<?= $waUrl ?? '#' ?>" id="wa-confirm-btn" style="background-color: #25D366; color: white; padding: 10px 25px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+                    <i class="bi bi-whatsapp"></i> Konfirmasi via WhatsApp
+                </a>
+            </p>
+            <span id="countdown-text" style="font-size: 12px; color: #666;">Mengalihkan dalam 3 detik...</span>
         </div>
     </div>
 </body>
 
 <script>
-// Auto-redirect to WhatsApp after 3 seconds
+// Auto-redirect ke WhatsApp setelah 3 detik
 document.addEventListener('DOMContentLoaded', function() {
     const waBtn = document.getElementById('wa-confirm-btn');
     const countdownText = document.getElementById('countdown-text');
     
-    if (waBtn && countdownText && waBtn.href && waBtn.href !== '#') {
-        let secondsLeft = 3;
-        
-        // Update countdown every second
-        const countdownInterval = setInterval(function() {
-            secondsLeft--;
-            if (secondsLeft > 0) {
-                countdownText.textContent = 'Auto-confirming in ' + secondsLeft + ' seconds...';
-            } else {
-                clearInterval(countdownInterval);
-                countdownText.innerHTML = '<span style="color: #25D366;"><i class="bi bi-check-circle"></i> Redirecting to WhatsApp...</span>';
-                
-                // Open WhatsApp in new tab
-                waBtn.click();
-            }
-        }, 1000);
+    // Get WhatsApp URL from session (passed via controller)
+    const waUrl = '<?= session('waUrl') ?? '' ?>';
+    
+    if (waUrl && waUrl !== '') {
+        if (waBtn && countdownText) {
+            let secondsLeft = 3;
+            
+            // Update countdown setiap detik
+            const countdownInterval = setInterval(function() {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    countdownText.textContent = 'Mengalihkan dalam ' + secondsLeft + ' detik...';
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownText.textContent = 'Mengalihkan...';
+                    
+                    // Buka WhatsApp di tab baru
+                    window.open(waUrl, '_blank');
+                }
+            }, 1000);
+        }
     }
 });
 </script>

@@ -231,30 +231,54 @@
                                 <p class="small text-muted mb-4">Click below to notify our admission team via WhatsApp.</p>
 
                                 <?php
-                                $waNumber = '6289509778659';
-                                $message = "Hello Admin, I have filled the application form.\n\n";
-
-                                if (isset($admission)) {
-                                    $message .= "Registration No: " . $admission['registration_number'] . "\n";
-                                    $message .= "Name: " . $admission['full_name'] . "\n";
-                                    $message .= "Program: " . $admission['program_title'] . "\n";
-
-                                    if (!empty($invoices)) {
-                                        $totalFee = 0;
-                                        foreach ($invoices as $inv) {
-                                            $totalFee += $inv['amount'];
-                                        }
-                                        $message .= "Total Fees: Rp " . number_format($totalFee, 0, ',', '.') . "\n";
+                                // Get WhatsApp URL from session or use default
+                                $waUrl = session('waUrl') ?? '';
+                                
+                                if (!$waUrl && isset($admission)) {
+                                    // Fallback: determine WhatsApp number based on program language
+                                    $language = strtolower($admission['language'] ?? '');
+                                    switch ($language) {
+                                        case 'mandarin':
+                                            $waNumber = '6282240781299';
+                                            break;
+                                        case 'japanese':
+                                            $waNumber = '6285607454939';
+                                            break;
+                                        default:
+                                            $waNumber = '6285810310950';
                                     }
-
-                                    $message .= "Phone: " . $admission['phone'] . "\n";
-                                    $message .= "Email: " . $admission['email'] . "\n\n";
-                                } else {
-                                    $message .= "Registration No: " . ($registrationNumber ?? '-') . "\n\n";
+                                    
+                                    $message = "Halo Admin, saya telah mengisi formulir pendaftaran.\n\n";
+                                    $message .= "=== DATA PENDAFTARAN ===\n";
+                                    $message .= "No. Registrasi: " . ($admission['registration_number'] ?? '-') . "\n";
+                                    $message .= "Program: " . ($admission['program_title'] ?? '-') . "\n\n";
+                                    $message .= "=== DATA PRIBADI ===\n";
+                                    $message .= "Nama Lengkap: " . ($admission['full_name'] ?? '-') . "\n";
+                                    $message .= "Nama Panggilan: " . ($admission['nickname'] ?? '-') . "\n";
+                                    $message .= "Jenis Kelamin: " . ($admission['gender'] ?? '-') . "\n";
+                                    $message .= "Tempat Lahir: " . ($admission['place_of_birth'] ?? '-') . "\n";
+                                    $message .= "Tanggal Lahir: " . ($admission['date_of_birth'] ?? '-') . "\n";
+                                    $message .= "Agama: " . ($admission['religion'] ?? '-') . "\n";
+                                    $message .= "KTP: " . ($admission['citizen_id'] ?? '-') . "\n\n";
+                                    $message .= "=== KONTAK ===\n";
+                                    $message .= "HP: " . ($admission['phone'] ?? '-') . "\n";
+                                    $message .= "Email: " . ($admission['email'] ?? '-') . "\n\n";
+                                    $message .= "=== ALAMAT ===\n";
+                                    $message .= "Jalan: " . ($admission['street_address'] ?? '-') . "\n";
+                                    $message .= "Kecamatan: " . ($admission['district'] ?? '-') . "\n";
+                                    $message .= "Kab/Kota: " . ($admission['regency'] ?? '-') . "\n";
+                                    $message .= "Provinsi: " . ($admission['province'] ?? '-') . "\n";
+                                    $message .= "Kode Pos: " . ($admission['postal_code'] ?? '-') . "\n\n";
+                                    $message .= "=== KONTAK DARURAT ===\n";
+                                    $message .= "Nama: " . ($admission['emergency_contact_name'] ?? '-') . "\n";
+                                    $message .= "HP: " . ($admission['emergency_contact_phone'] ?? '-') . "\n";
+                                    $message .= "Hubungan: " . ($admission['emergency_contact_relation'] ?? '-') . "\n\n";
+                                    $message .= "=== DATA KELUARGA ===\n";
+                                    $message .= "Nama Ayah: " . ($admission['father_name'] ?? '-') . "\n";
+                                    $message .= "Nama Ibu: " . ($admission['mother_name'] ?? '-') . "\n\n";
+                                    $message .= "Mohon bantuannya untuk memproses pendaftaran saya. Terima kasih!";
+                                    $waUrl = "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
                                 }
-
-                                $message .= "Please help me to process my application. Thank you!";
-                                $waUrl = "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
                                 ?>
 
                                 <a href="<?= $waUrl ?>" target="_blank" id="wa-confirm-btn" class="btn btn-whatsapp btn-lg w-100 py-3 rounded-pill fw-bold">
@@ -263,7 +287,7 @@
 
                                 <!-- Auto-redirect countdown -->
                                 <div id="wa-countdown" class="mt-3 small text-muted">
-                                    <span id="countdown-text">Auto-confirming in 3 seconds...</span>
+                                    <span id="countdown-text">Mengalihkan ke WhatsApp dalam 3 detik...</span>
                                 </div>
                             </div>
                         </div>
@@ -303,27 +327,32 @@
 </div>
 
 <script>
-// Auto-redirect to WhatsApp after 3 seconds
+// Auto-redirect ke WhatsApp setelah 3 detik
 document.addEventListener('DOMContentLoaded', function() {
     const waBtn = document.getElementById('wa-confirm-btn');
     const countdownText = document.getElementById('countdown-text');
     
-    if (waBtn && countdownText) {
-        let secondsLeft = 3;
-        
-        // Update countdown every second
-        const countdownInterval = setInterval(function() {
-            secondsLeft--;
-            if (secondsLeft > 0) {
-                countdownText.textContent = 'Auto-confirming in ' + secondsLeft + ' seconds...';
-            } else {
-                clearInterval(countdownInterval);
-                countdownText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>Redirecting to WhatsApp...';
-                
-                // Open WhatsApp in new tab
-                waBtn.click();
-            }
-        }, 1000);
+    // Get WhatsApp URL from session
+    const waUrl = '<?= session('waUrl') ?? '' ?>';
+    
+    if (waUrl && waUrl !== '') {
+        if (waBtn && countdownText) {
+            let secondsLeft = 3;
+            
+            // Update countdown setiap detik
+            const countdownInterval = setInterval(function() {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    countdownText.textContent = 'Mengalihkan ke WhatsApp dalam ' + secondsLeft + ' detik...';
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownText.textContent = 'Mengalihkan...';
+                    
+                    // Buka WhatsApp di tab baru
+                    window.open(waUrl, '_blank');
+                }
+            }, 1000);
+        }
     }
 });
 </script>

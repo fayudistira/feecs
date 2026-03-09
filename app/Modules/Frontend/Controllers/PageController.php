@@ -338,6 +338,25 @@ class PageController extends BaseController
                 'application_date' => date('Y-m-d'),
                 'applicant_notes' => $this->request->getPost('notes'),
                 'start_date' => $this->request->getPost('start_date'),
+                'full_name' => $profileData['full_name'],
+                'nickname' => $profileData['nickname'],
+                'gender' => $profileData['gender'],
+                'place_of_birth' => $profileData['place_of_birth'],
+                'date_of_birth' => $profileData['date_of_birth'],
+                'religion' => $profileData['religion'],
+                'citizen_id' => $profileData['citizen_id'],
+                'phone' => $profileData['phone'],
+                'email' => $profileData['email'],
+                'street_address' => $profileData['street_address'],
+                'district' => $profileData['district'],
+                'regency' => $profileData['regency'],
+                'province' => $profileData['province'],
+                'postal_code' => $profileData['postal_code'],
+                'emergency_contact_name' => $profileData['emergency_contact_name'],
+                'emergency_contact_phone' => $profileData['emergency_contact_phone'],
+                'emergency_contact_relation' => $profileData['emergency_contact_relation'],
+                'father_name' => $profileData['father_name'],
+                'mother_name' => $profileData['mother_name'],
             ];
 
             $admissionId = $admissionModel->insert($admissionData);
@@ -474,10 +493,30 @@ class PageController extends BaseController
 
             // Success - redirect to public invoice if it exists, otherwise success page
             if (!empty($invoiceId)) {
+                // Determine WhatsApp number based on program language
+                $waNumber = $this->getWhatsAppNumberByLanguage($program['language'] ?? '');
+                
+                // Create WhatsApp URL with complete message
+                $message = $this->createWhatsAppMessage($admissionData, $program, $invoiceId);
+                $waUrl = "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
+                
+                // Store WhatsApp URL in session for the view
+                session()->set('waUrl', $waUrl);
+                
                 return redirect()->to('invoice/public/' . $invoiceId)
                     ->with('success', 'Your application has been submitted successfully!')
                     ->with('registration_number', $admissionData['registration_number']);
             }
+
+            // Determine WhatsApp number based on program language
+            $waNumber = $this->getWhatsAppNumberByLanguage($program['language'] ?? '');
+            
+            // Create WhatsApp URL with complete message
+            $message = $this->createWhatsAppMessage($admissionData, $program, null);
+            $waUrl = "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
+            
+            // Store WhatsApp URL in session for the view
+            session()->set('waUrl', $waUrl);
 
             return redirect()->to('/apply/success')
                 ->with('success', 'Your application has been submitted successfully!')
@@ -500,11 +539,95 @@ class PageController extends BaseController
     public function applySuccess(): string
     {
         $registrationNumber = session('registration_number');
+        
+        // Get admission and profile data
+        $admissionData = null;
+        $profileData = null;
+        
+        if ($registrationNumber) {
+            $admissionModel = new \Modules\Admission\Models\AdmissionModel();
+            $profileModel = new \Modules\Account\Models\ProfileModel();
+            
+            $admissionData = $admissionModel
+                ->select('admissions.*, profiles.*, programs.title as program_title')
+                ->join('profiles', 'profiles.id = admissions.profile_id')
+                ->join('programs', 'programs.id = admissions.program_id')
+                ->where('admissions.registration_number', $registrationNumber)
+                ->first();
+        }
 
         return view('Modules\Frontend\Views\apply_success', [
             'title' => 'Application Submitted',
-            'registrationNumber' => $registrationNumber
+            'registrationNumber' => $registrationNumber,
+            'admission' => $admissionData
         ]);
+    }
+
+    /**
+     * Get WhatsApp number based on program language
+     */
+    protected function getWhatsAppNumberByLanguage(string $language): string
+    {
+        // Mandarin -> 0822-4078-1299
+        // Japanese -> 0856-0745-4939
+        // Other (Korean, German, English) -> 0858-1031-0950
+        $language = strtolower(trim($language));
+        
+        switch ($language) {
+            case 'mandarin':
+                return '6282240781299'; // 0822-4078-1299
+            case 'japanese':
+                return '6285607454939'; // 0856-0745-4939
+            default:
+                return '6285810310950'; // 0858-1031-0950 (Korean, German, English, etc)
+        }
+    }
+
+    /**
+     * Create WhatsApp message for admission
+     */
+    protected function createWhatsAppMessage($admissionData, $program, $invoiceId): string
+    {
+        $message = "Halo Admin, saya telah mengisi formulir pendaftaran.\n\n";
+
+        $message .= "=== DATA PENDAFTARAN ===\n";
+        $message .= "No. Registrasi: " . ($admissionData['registration_number'] ?? '-') . "\n";
+        $message .= "Program: " . ($program['title'] ?? '-') . "\n";
+        $message .= "Periode (Mulai): " . ($admissionData['start_date'] ?? '-') . "\n";
+        $message .= "Bahasa: " . ($program['language'] ?? '-') . "\n\n";
+        
+        $message .= "=== DATA PRIBADI ===\n";
+        $message .= "Nama Lengkap: " . ($admissionData['full_name'] ?? '-') . "\n";
+        $message .= "Nama Panggilan: " . ($admissionData['nickname'] ?? '-') . "\n";
+        $message .= "Jenis Kelamin: " . ($admissionData['gender'] ?? '-') . "\n";
+        $message .= "Tempat Lahir: " . ($admissionData['place_of_birth'] ?? '-') . "\n";
+        $message .= "Tanggal Lahir: " . ($admissionData['date_of_birth'] ?? '-') . "\n";
+        $message .= "Agama: " . ($admissionData['religion'] ?? '-') . "\n";
+        $message .= "KTP: " . ($admissionData['citizen_id'] ?? '-') . "\n\n";
+        
+        $message .= "=== KONTAK ===\n";
+        $message .= "HP: " . ($admissionData['phone'] ?? '-') . "\n";
+        $message .= "Email: " . ($admissionData['email'] ?? '-') . "\n\n";
+        
+        $message .= "=== ALAMAT ===\n";
+        $message .= "Jalan: " . ($admissionData['street_address'] ?? '-') . "\n";
+        $message .= "Kecamatan: " . ($admissionData['district'] ?? '-') . "\n";
+        $message .= "Kab/Kota: " . ($admissionData['regency'] ?? '-') . "\n";
+        $message .= "Provinsi: " . ($admissionData['province'] ?? '-') . "\n";
+        $message .= "Kode Pos: " . ($admissionData['postal_code'] ?? '-') . "\n\n";
+        
+        $message .= "=== KONTAK DARURAT ===\n";
+        $message .= "Nama: " . ($admissionData['emergency_contact_name'] ?? '-') . "\n";
+        $message .= "HP: " . ($admissionData['emergency_contact_phone'] ?? '-') . "\n";
+        $message .= "Hubungan: " . ($admissionData['emergency_contact_relation'] ?? '-') . "\n\n";
+        
+        $message .= "=== DATA KELUARGA ===\n";
+        $message .= "Nama Ayah: " . ($admissionData['father_name'] ?? '-') . "\n";
+        $message .= "Nama Ibu: " . ($admissionData['mother_name'] ?? '-') . "\n\n";
+
+        $message .= "Mohon bantuannya untuk memproses pendaftaran saya. Terima kasih!";
+        
+        return $message;
     }
 
     /**

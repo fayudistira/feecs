@@ -24,21 +24,51 @@ class InvoiceController extends BaseController
     protected function generateWhatsAppUrl($invoice, $student)
     {
         $waNumber = '6289509778659';
-        $message = "Hello Admin, I have completed my registration payment.\n\n";
+        $message = "Halo Admin, saya telah menyelesaikan pembayaran registrasi.\n\n";
         
         if ($student) {
-            $message .= "Registration No: " . ($student['registration_number'] ?? '-') . "\n";
-            $message .= "Name: " . ($student['full_name'] ?? '-') . "\n";
+            $message .= "=== DATA PENDAFTARAN ===\n";
+            $message .= "No. Registrasi: " . ($student['registration_number'] ?? '-') . "\n";
             $message .= "Program: " . ($student['program_title'] ?? '-') . "\n";
-            $message .= "Invoice No: " . ($invoice['invoice_number'] ?? '-') . "\n";
-            $message .= "Amount: Rp " . number_format($invoice['amount'] ?? 0, 0, ',', '.') . "\n";
-            $message .= "Phone: " . ($student['phone'] ?? '-') . "\n";
+            $message .= "Bahasa: " . ($student['language'] ?? '-') . "\n\n";
+            
+            $message .= "=== DATA PRIBADI ===\n";
+            $message .= "Nama Lengkap: " . ($student['full_name'] ?? '-') . "\n";
+            $message .= "Nama Panggilan: " . ($student['nickname'] ?? '-') . "\n";
+            $message .= "Jenis Kelamin: " . ($student['gender'] ?? '-') . "\n";
+            $message .= "Tempat Lahir: " . ($student['place_of_birth'] ?? '-') . "\n";
+            $message .= "Tanggal Lahir: " . ($student['date_of_birth'] ?? '-') . "\n";
+            $message .= "Agama: " . ($student['religion'] ?? '-') . "\n";
+            $message .= "KTP: " . ($student['citizen_id'] ?? '-') . "\n\n";
+            
+            $message .= "=== KONTAK ===\n";
+            $message .= "HP: " . ($student['phone'] ?? '-') . "\n";
             $message .= "Email: " . ($student['email'] ?? '-') . "\n\n";
+            
+            $message .= "=== ALAMAT ===\n";
+            $message .= "Jalan: " . ($student['street_address'] ?? '-') . "\n";
+            $message .= "Kecamatan: " . ($student['district'] ?? '-') . "\n";
+            $message .= "Kab/Kota: " . ($student['regency'] ?? '-') . "\n";
+            $message .= "Provinsi: " . ($student['province'] ?? '-') . "\n";
+            $message .= "Kode Pos: " . ($student['postal_code'] ?? '-') . "\n\n";
+            
+            $message .= "=== KONTAK DARURAT ===\n";
+            $message .= "Nama: " . ($student['emergency_contact_name'] ?? '-') . "\n";
+            $message .= "HP: " . ($student['emergency_contact_phone'] ?? '-') . "\n";
+            $message .= "Hubungan: " . ($student['emergency_contact_relation'] ?? '-') . "\n\n";
+            
+            $message .= "=== DATA KELUARGA ===\n";
+            $message .= "Nama Ayah: " . ($student['father_name'] ?? '-') . "\n";
+            $message .= "Nama Ibu: " . ($student['mother_name'] ?? '-') . "\n\n";
+            
+            $message .= "=== PEMBAYARAN ===\n";
+            $message .= "Invoice: " . ($invoice['invoice_number'] ?? '-') . "\n";
+            $message .= "Jumlah: Rp " . number_format($invoice['amount'] ?? 0, 0, ',', '.') . "\n";
         } else {
-            $message .= "Registration No: " . ($invoice['registration_number'] ?? '-') . "\n\n";
+            $message .= "No. Registrasi: " . ($invoice['registration_number'] ?? '-') . "\n\n";
         }
         
-        $message .= "Please help me to confirm my payment. Thank you!";
+        $message .= "Mohon bantuannya untuk konfirmasi pembayaran. Terima kasih!";
         
         return "https://wa.me/" . $waNumber . "?text=" . urlencode($message);
     }
@@ -508,8 +538,24 @@ class InvoiceController extends BaseController
                 admissions.registration_number,
                 admissions.program_id,
                 profiles.full_name,
-                profiles.email,
+                profiles.nickname,
+                profiles.gender,
+                profiles.place_of_birth,
+                profiles.date_of_birth,
+                profiles.religion,
+                profiles.citizen_id,
                 profiles.phone,
+                profiles.email,
+                profiles.street_address,
+                profiles.district,
+                profiles.regency,
+                profiles.province,
+                profiles.postal_code,
+                profiles.emergency_contact_name,
+                profiles.emergency_contact_phone,
+                profiles.emergency_contact_relation,
+                profiles.father_name,
+                profiles.mother_name,
                 programs.title as program_title,
                 programs.category,
                 programs.language,
@@ -552,7 +598,7 @@ class InvoiceController extends BaseController
             'installment' => $installment,
             'invoiceHistory' => $invoiceHistory,
             'totalPaid' => $totalPaid,
-            'waUrl' => $this->generateWhatsAppUrl($invoice, $student)
+            'waUrl' => session('waUrl') ?? $this->generateWhatsAppUrl($invoice, $student)
         ]);
     }
 
