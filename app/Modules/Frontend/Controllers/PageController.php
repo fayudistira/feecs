@@ -588,44 +588,52 @@ class PageController extends BaseController
      */
     protected function createWhatsAppMessage($admissionData, $program, $invoiceId): string
     {
-        $message = "Halo Admin, saya telah mengisi formulir pendaftaran.\n\n";
+        $message = "Halo Admin, saya ingin mendaftar kursus dengan data berikut:\n\n";
 
-        $message .= "=== DATA PENDAFTARAN ===\n";
-        $message .= "No. Registrasi: " . ($admissionData['registration_number'] ?? '-') . "\n";
-        $message .= "Program: " . ($program['title'] ?? '-') . "\n";
-        $message .= "Periode (Mulai): " . ($admissionData['start_date'] ?? '-') . "\n";
-        $message .= "Bahasa: " . ($program['language'] ?? '-') . "\n\n";
-        
-        $message .= "=== DATA PRIBADI ===\n";
+        $message .= "DATA PRIBADI\n";
         $message .= "Nama Lengkap: " . ($admissionData['full_name'] ?? '-') . "\n";
-        $message .= "Nama Panggilan: " . ($admissionData['nickname'] ?? '-') . "\n";
-        $message .= "Jenis Kelamin: " . ($admissionData['gender'] ?? '-') . "\n";
-        $message .= "Tempat Lahir: " . ($admissionData['place_of_birth'] ?? '-') . "\n";
-        $message .= "Tanggal Lahir: " . ($admissionData['date_of_birth'] ?? '-') . "\n";
+        $message .= "Nomor KTP: " . ($admissionData['citizen_id'] ?? '-') . "\n";
+        $gender = ($admissionData['gender'] ?? '-') == 'Male' ? 'Laki-Laki' : (($admissionData['gender'] ?? '-') == 'Female' ? 'Perempuan' : '-');
+        $message .= "Jenis Kelamin: " . $gender . "\n";
         $message .= "Agama: " . ($admissionData['religion'] ?? '-') . "\n";
-        $message .= "KTP: " . ($admissionData['citizen_id'] ?? '-') . "\n\n";
+        $dob = trim(($admissionData['place_of_birth'] ?? '') . ", " . ($admissionData['date_of_birth'] ?? ''), ", ");
+        $message .= "Tempat, Tanggal Lahir: " . ($dob != ", " ? $dob : '-') . "\n";
         
-        $message .= "=== KONTAK ===\n";
-        $message .= "HP: " . ($admissionData['phone'] ?? '-') . "\n";
+        $address = ($admissionData['street_address'] ?? '-');
+        if (!empty($admissionData['district'])) $address .= ", " . $admissionData['district'];
+        if (!empty($admissionData['regency'])) $address .= ", " . $admissionData['regency'];
+        if (!empty($admissionData['province'])) $address .= ", " . $admissionData['province'];
+        $message .= "Alamat: " . $address . "\n";
+        $message .= "No. Telp: " . ($admissionData['phone'] ?? '-') . "\n";
         $message .= "Email: " . ($admissionData['email'] ?? '-') . "\n\n";
-        
-        $message .= "=== ALAMAT ===\n";
-        $message .= "Jalan: " . ($admissionData['street_address'] ?? '-') . "\n";
-        $message .= "Kecamatan: " . ($admissionData['district'] ?? '-') . "\n";
-        $message .= "Kab/Kota: " . ($admissionData['regency'] ?? '-') . "\n";
-        $message .= "Provinsi: " . ($admissionData['province'] ?? '-') . "\n";
-        $message .= "Kode Pos: " . ($admissionData['postal_code'] ?? '-') . "\n\n";
-        
-        $message .= "=== KONTAK DARURAT ===\n";
-        $message .= "Nama: " . ($admissionData['emergency_contact_name'] ?? '-') . "\n";
-        $message .= "HP: " . ($admissionData['emergency_contact_phone'] ?? '-') . "\n";
-        $message .= "Hubungan: " . ($admissionData['emergency_contact_relation'] ?? '-') . "\n\n";
-        
-        $message .= "=== DATA KELUARGA ===\n";
-        $message .= "Nama Ayah: " . ($admissionData['father_name'] ?? '-') . "\n";
-        $message .= "Nama Ibu: " . ($admissionData['mother_name'] ?? '-') . "\n\n";
 
-        $message .= "Mohon bantuannya untuk memproses pendaftaran saya. Terima kasih!";
+        $message .= "KONTAK DARURAT\n";
+        $emergencyContact = $admissionData['emergency_contact_name'] ?? '-';
+        if (!empty($admissionData['emergency_contact_phone'])) {
+            $emergencyContact .= " (" . $admissionData['emergency_contact_phone'] . ")";
+        }
+        if (!empty($admissionData['emergency_contact_relation'])) {
+            $emergencyContact .= " - " . $admissionData['emergency_contact_relation'];
+        }
+        $message .= $emergencyContact . "\n\n";
+
+        $message .= "DATA DAPODIK\n";
+        $message .= "Ayah: " . ($admissionData['father_name'] ?? '-') . "\n";
+        $message .= "Ibu: " . ($admissionData['mother_name'] ?? '-') . "\n\n";
+
+        $message .= "PROGRAM KURSUS\n";
+        $message .= "Program: " . ($program['title'] ?? '-') . "\n";
+        $detail = trim(($program['category'] ?? '') . " " . ($program['sub_category'] ?? ''));
+        $message .= "Detail: " . (!empty($detail) ? $detail : '-') . "\n";
+        $message .= "Mulai Kursus: " . ($admissionData['start_date'] ?? date('Y-m-d')) . "\n\n";
+
+        $message .= "INFORMASI HARGA\n";
+        $totalFee = (float)($program['tuition_fee'] ?? 0) + (float)($program['registration_fee'] ?? 0);
+        $message .= "Harga Program: Rp " . number_format($totalFee, 0, ',', '.') . ",-\n\n";
+
+        $message .= "CATATAN: Biaya registrasi Rp " . number_format($program['registration_fee'] ?? 500000, 0, ',', '.') . " dibayarkan setelah mengisi formulir ini.\n\n";
+
+        $message .= "Terima kasih.";
         
         return $message;
     }
