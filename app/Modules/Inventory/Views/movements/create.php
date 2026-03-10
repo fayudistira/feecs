@@ -10,7 +10,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="post" action="/inventory/movements/store">
+                <form method="post" action="/inventory/movements/store" onsubmit="return validateForm(this)">
                     <?= csrf_field() ?>
                     <div class="row">
                         <div class="col-md-6">
@@ -141,6 +141,34 @@
         </div>
 
         <script>
+            function validateForm(form) {
+                const itemId = form.item_id.value;
+                const movementType = form.movement_type.value;
+                const quantity = form.quantity_regular ? form.quantity_regular.value : (form.quantity_transfer ? form.quantity_transfer.value : '');
+                
+                if (!itemId) {
+                    alert('Pilih barang terlebih dahulu');
+                    return false;
+                }
+                
+                if (!movementType) {
+                    alert('Pilih tipe mutasi');
+                    return false;
+                }
+                
+                if (!quantity || quantity <= 0) {
+                    alert('Masukkan jumlah yang valid');
+                    return false;
+                }
+                
+                // Show loading
+                const btn = form.querySelector('input[type="submit"]');
+                btn.disabled = true;
+                btn.value = 'Menyimpan...';
+                
+                return true;
+            }
+            
             function toggleLocationFields() {
                 const movementType = document.getElementById('movementType').value;
                 const transferFields = document.getElementById('transferFields');

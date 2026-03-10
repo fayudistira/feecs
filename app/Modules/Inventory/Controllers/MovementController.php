@@ -195,10 +195,10 @@ class MovementController extends BaseController
                 'current_stock' => $data['quantity_after']
             ]);
 
-            return redirect()->to('/inventory/movements')->with('success', 'Movement recorded successfully');
+            return redirect()->to('/inventory/movements')->with('success', 'Mutasi berhasil disimpan');
         }
 
-        return redirect()->back()->withInput()->with('error', 'Failed to record movement: ' . implode(', ', $this->movementModel->errors()));
+        return redirect()->back()->withInput()->with('error', 'Gagal menyimpan mutasi. Silakan coba lagi.');
     }
 
     /**
