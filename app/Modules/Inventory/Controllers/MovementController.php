@@ -122,6 +122,13 @@ class MovementController extends BaseController
     {
         $data = $this->request->getPost();
         
+        // Handle different quantity field names from the form
+        if (isset($data['quantity_regular']) && !empty($data['quantity_regular'])) {
+            $data['quantity'] = $data['quantity_regular'];
+        } elseif (isset($data['quantity_transfer']) && !empty($data['quantity_transfer'])) {
+            $data['quantity'] = $data['quantity_transfer'];
+        }
+        
         // Generate ID if not provided
         if (empty($data['id'])) {
             $data['id'] = uuid_v4();

@@ -87,7 +87,7 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label class="form-label">Jumlah</label>
-                                    <input type="number" name="quantity" id="quantityInput" class="form-control" required min="1">
+                                    <input type="number" name="quantity_regular" id="quantityInput" class="form-control" required min="1">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -105,7 +105,7 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label class="form-label">Jumlah yang Ditransfer</label>
-                                    <input type="number" name="quantity" id="transferQuantity" class="form-control" min="1">
+                                    <input type="number" name="quantity_transfer" id="transferQuantity" class="form-control" required min="1">
                                 </div>
                             </div>
                             <div class="col-md-4">
