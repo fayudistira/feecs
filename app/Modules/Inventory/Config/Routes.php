@@ -51,6 +51,7 @@ $routes->group('inventory', ['namespace' => 'Modules\Inventory\Controllers', 'fi
     $routes->get('stock-opname/create', 'StockOpnameController::create');
     $routes->post('stock-opname/store', 'StockOpnameController::store');
     $routes->get('stock-opname/detail/(:segment)', 'StockOpnameController::detail/$1');
+    $routes->post('stock-opname/start/(:segment)', 'StockOpnameController::start/$1');
     $routes->post('stock-opname/update-detail/(:segment)', 'StockOpnameController::updateDetail/$1');
     $routes->post('stock-opname/complete/(:segment)', 'StockOpnameController::complete/$1');
     $routes->post('stock-opname/cancel/(:segment)', 'StockOpnameController::cancel/$1');

@@ -185,6 +185,28 @@ class StockOpnameController extends BaseController
     }
 
     /**
+     * Start stock opname
+     */
+    public function start($id)
+    {
+        $opname = $this->stockOpnameModel->find($id);
+        
+        if (!$opname) {
+            return redirect()->to('/inventory/stock-opname')->with('error', 'Stock opname not found');
+        }
+
+        if ($opname['status'] !== 'draft') {
+            return redirect()->to('/inventory/stock-opname')->with('error', 'Stock opname has already started');
+        }
+
+        if ($this->stockOpnameModel->update($id, ['status' => 'in_progress'])) {
+            return redirect()->to('/inventory/stock-opname/detail/' . $id)->with('success', 'Stock opname started');
+        }
+
+        return redirect()->back()->with('error', 'Failed to start stock opname');
+    }
+
+    /**
      * Complete stock opname
      */
     public function complete($id)
