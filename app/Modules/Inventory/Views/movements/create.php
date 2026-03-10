@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Record Stock Movement</h4>
+            <h4 class="mb-0"><i class="bi bi-arrow-left-right me-2"></i>Catat Mutasi Stok</h4>
             <a href="/inventory/movements" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Back
             </a>
@@ -15,9 +15,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Item</label>
+                                <label class="form-label">Barang</label>
                                 <select name="item_id" id="itemSelect" class="form-select" required onchange="updateCurrentStock()">
-                                    <option value="">Select Item</option>
+                                    <option value="">Pilih Barang</option>
                                     <?php foreach($items as $item): ?>
                                     <option value="<?= $item['id'] ?>" data-stock="<?= $item['current_stock'] ?>"><?= $item['item_code'] ?> - <?= $item['name'] ?> (Stock: <?= $item['current_stock'] ?>)</option>
                                     <?php endforeach; ?>

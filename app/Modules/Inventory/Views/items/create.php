@@ -2,9 +2,9 @@
 
 <?= $this->section('content') ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Add New Item</h4>
+            <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Tambah Barang Baru</h4>
             <a href="/inventory/items" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Back
+                <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
         </div>
 
@@ -15,34 +15,34 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Item Code</label>
+                                <label class="form-label">Kode Barang</label>
                                 <input type="text" name="item_code" class="form-control" value="<?= $itemCode ?? '' ?>" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Barcode</label>
-                                <input type="text" name="barcode" class="form-control" placeholder="Auto-generate if empty">
+                                <input type="text" name="barcode" class="form-control" placeholder="Otomatis dibuat jika kosong">
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Item Name</label>
+                        <label class="form-label">Nama Barang</label>
                         <input type="text" name="name" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
+                        <label class="form-label">Deskripsi</label>
                         <textarea name="description" class="form-control" rows="3"></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label">Category</label>
+                                <label class="form-label">Kategori</label>
                                 <select name="category_id" class="form-select">
-                                    <option value="">Select Category</option>
+                                    <option value="">Pilih Kategori</option>
                                     <?php foreach($categories as $cat): ?>
                                     <option value="<?= $cat['id'] ?>"><?= $cat['name'] ?></option>
                                     <?php endforeach; ?>
@@ -51,9 +51,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label">Location</label>
+                                <label class="form-label">Lokasi</label>
                                 <select name="location_id" class="form-select">
-                                    <option value="">Select Location</option>
+                                    <option value="">Pilih Lokasi</option>
                                     <?php foreach($locations as $loc): ?>
                                     <option value="<?= $loc['id'] ?>"><?= $loc['name'] ?></option>
                                     <?php endforeach; ?>
@@ -62,9 +62,9 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label">Linked Program</label>
+                                <label class="form-label">Program Terintegrasi</label>
                                 <select name="program_id" class="form-select">
-                                    <option value="">No Program</option>
+                                    <option value="">Tanpa Program</option>
                                     <?php foreach($programs as $prog): ?>
                                     <option value="<?= $prog['id'] ?>"><?= $prog['title'] ?></option>
                                     <?php endforeach; ?>
@@ -76,7 +76,7 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="mb-3">
-                                <label class="form-label">Unit</label>
+                                <label class="form-label">Satuan</label>
                                 <select name="unit" class="form-select">
                                     <?php foreach($units as $key => $val): ?>
                                     <option value="<?= $key ?>"><?= $val ?></option>
@@ -86,19 +86,19 @@
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
-                                <label class="form-label">Current Stock</label>
+                                <label class="form-label">Stok Saat Ini</label>
                                 <input type="number" name="current_stock" class="form-control" value="0" min="0">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
-                                <label class="form-label">Minimum Stock</label>
+                                <label class="form-label">Stok Minimum</label>
                                 <input type="number" name="minimum_stock" class="form-control" value="0" min="0">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
-                                <label class="form-label">Maximum Stock</label>
+                                <label class="form-label">Stok Maksimum</label>
                                 <input type="number" name="maximum_stock" class="form-control" value="0" min="0">
                             </div>
                         </div>
@@ -107,13 +107,13 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label">Purchase Price</label>
+                                <label class="form-label">Harga Beli</label>
                                 <input type="number" name="purchase_price" class="form-control" step="0.01" value="0">
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label class="form-label">Selling Price</label>
+                                <label class="form-label">Harga Jual</label>
                                 <input type="number" name="selling_price" class="form-control" step="0.01" value="0">
                             </div>
                         </div>
@@ -121,9 +121,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="discontinued">Discontinued</option>
+                                    <option value="active">Aktif</option>
+                                    <option value="inactive">Tidak Aktif</option>
+                                    <option value="discontinued">Discontinue</option>
                                 </select>
                             </div>
                         </div>
@@ -132,22 +132,22 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Supplier ID</label>
+                                <label class="form-label">ID Supplier</label>
                                 <input type="text" name="supplier_id" class="form-control">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Supplier Name</label>
+                                <label class="form-label">Nama Supplier</label>
                                 <input type="text" name="supplier_name" class="form-control">
                             </div>
                         </div>
                     </div>
 
                     <div class="text-end">
-                        <a href="/inventory/items" class="btn btn-secondary me-2">Cancel</a>
+                        <a href="/inventory/items" class="btn btn-secondary me-2">Batal</a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-1"></i> Save Item
+                            <i class="bi bi-check-circle me-1"></i> Simpan Barang
                         </button>
                     </div>
                 </form>

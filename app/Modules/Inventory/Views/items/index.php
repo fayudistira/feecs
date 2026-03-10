@@ -2,9 +2,9 @@
 
 <?= $this->section('content') ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i>Inventory Items</h4>
+            <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i>Barang Inventaris</h4>
             <a href="/inventory/items/create" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i> Add Item
+                <i class="bi bi-plus-circle me-1"></i> Tambah Barang
             </a>
         </div>
 
@@ -13,11 +13,11 @@
             <div class="card-body">
                 <form method="get" class="row g-3">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Search items..." value="<?= $search ?? '' ?>">
+                        <input type="text" name="search" class="form-control" placeholder="Cari barang..." value="<?= $search ?? '' ?>">
                     </div>
                     <div class="col-md-2">
                         <select name="category" class="form-select">
-                            <option value="">All Categories</option>
+                            <option value="">Semua Kategori</option>
                             <?php foreach($categories as $cat): ?>
                             <option value="<?= $cat['id'] ?>" <?= ($selectedCategory ?? '') == $cat['id'] ? 'selected' : '' ?>><?= $cat['name'] ?></option>
                             <?php endforeach; ?>
@@ -25,7 +25,7 @@
                     </div>
                     <div class="col-md-2">
                         <select name="location" class="form-select">
-                            <option value="">All Locations</option>
+                            <option value="">Semua Lokasi</option>
                             <?php foreach($locations as $loc): ?>
                             <option value="<?= $loc['id'] ?>" <?= ($selectedLocation ?? '') == $loc['id'] ? 'selected' : '' ?>><?= $loc['name'] ?></option>
                             <?php endforeach; ?>
@@ -33,10 +33,10 @@
                     </div>
                     <div class="col-md-2">
                         <select name="status" class="form-select">
-                            <option value="">All Status</option>
-                            <option value="active" <?= ($selectedStatus ?? '') == 'active' ? 'selected' : '' ?>>Active</option>
-                            <option value="inactive" <?= ($selectedStatus ?? '') == 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                            <option value="discontinued" <?= ($selectedStatus ?? '') == 'discontinued' ? 'selected' : '' ?>>Discontinued</option>
+                            <option value="">Semua Status</option>
+                            <option value="active" <?= ($selectedStatus ?? '') == 'active' ? 'selected' : '' ?>>Aktif</option>
+                            <option value="inactive" <?= ($selectedStatus ?? '') == 'inactive' ? 'selected' : '' ?>>Tidak Aktif</option>
+                            <option value="discontinued" <?= ($selectedStatus ?? '') == 'discontinued' ? 'selected' : '' ?>>Discontinue</option>
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -53,21 +53,21 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Location</th>
-                                <th class="text-end">Stock</th>
-                                <th class="text-end">Min Stock</th>
-                                <th class="text-end">Price</th>
+                                <th>Kode</th>
+                                <th>Nama</th>
+                                <th>Kategori</th>
+                                <th>Lokasi</th>
+                                <th class="text-end">Stok</th>
+                                <th class="text-end">Min Stok</th>
+                                <th class="text-end">Harga</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-end">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if(empty($items)): ?>
                             <tr>
-                                <td colspan="9" class="text-center py-4 text-muted">No items found</td>
+                                <td colspan="9" class="text-center py-4 text-muted">Tidak ada barang ditemukan</td>
                             </tr>
                             <?php else: ?>
                             <?php foreach($items as $item): ?>
@@ -87,11 +87,11 @@
                                 <td class="text-end"><?= number_format($item['selling_price'], 2) ?></td>
                                 <td>
                                     <?php if($item['status'] == 'active'): ?>
-                                    <span class="badge bg-success">Active</span>
+                                    <span class="badge bg-success">Aktif</span>
                                     <?php elseif($item['status'] == 'inactive'): ?>
-                                    <span class="badge bg-secondary">Inactive</span>
+                                    <span class="badge bg-secondary">Tidak Aktif</span>
                                     <?php else: ?>
-                                    <span class="badge bg-danger">Discontinued</span>
+                                    <span class="badge bg-danger">Discontinue</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end">

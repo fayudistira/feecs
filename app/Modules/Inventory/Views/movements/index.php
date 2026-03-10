@@ -1,17 +1,17 @@
 <?= $this->extend('Modules\Inventory\Views\layouts\main') ?>
 
 <?= $this->section('content') ?>
-<h4><i class="bi bi-arrow-left-right me-2"></i>Stock Movements</h4>
-<a href="/inventory/movements/create" class="btn btn-primary mb-3">Record Movement</a>
+<h4><i class="bi bi-arrow-left-right me-2"></i>Mutasi Stok</h4>
+<a href="/inventory/movements/create" class="btn btn-primary mb-3">Catat Mutasi</a>
 
 <!-- Filter Form -->
 <div class="card mb-3">
     <div class="card-body">
         <form method="get" action="/inventory/movements" class="row g-3">
             <div class="col-md-3">
-                <label class="form-label">Item</label>
+                <label class="form-label">Barang</label>
                 <select name="item" class="form-select">
-                    <option value="">All Items</option>
+                    <option value="">Semua Barang</option>
                     <?php foreach ($allItems as $item): ?>
                         <option value="<?= $item['id'] ?>" <?= $selectedItem == $item['id'] ? 'selected' : '' ?>>
                             <?= esc($item['name']) ?>
@@ -20,9 +20,9 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Type</label>
+                <label class="form-label">Tipe</label>
                 <select name="type" class="form-select">
-                    <option value="">All Types</option>
+                    <option value="">Semua Tipe</option>
                     <?php foreach ($types as $typeKey => $typeLabel): ?>
                         <option value="<?= $typeKey ?>" <?= $selectedType == $typeKey ? 'selected' : '' ?>>
                             <?= esc($typeLabel) ?>
@@ -31,11 +31,11 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Start Date</label>
+                <label class="form-label">Tanggal Mulai</label>
                 <input type="date" name="start_date" class="form-control" value="<?= $startDate ?>">
             </div>
             <div class="col-md-2">
-                <label class="form-label">End Date</label>
+                <label class="form-label">Tanggal Akhir</label>
                 <input type="date" name="end_date" class="form-control" value="<?= $endDate ?>">
             </div>
             <div class="col-md-2 d-flex align-items-end">
@@ -56,17 +56,17 @@
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Item</th>
-                            <th>Type</th>
-                            <th>Quantity</th>
-                            <th>Before</th>
-                            <th>After</th>
-                            <th>Location</th>
-                            <th>Transfer Details</th>
-                            <th>Reference</th>
-                            <th>Performed By</th>
-                            <th>Notes</th>
+                            <th>Tanggal</th>
+                            <th>Barang</th>
+                            <th>Tipe</th>
+                            <th>Jumlah</th>
+                            <th>Sebelum</th>
+                            <th>Sesudah</th>
+                            <th>Lokasi</th>
+                            <th>Detail Transfer</th>
+                            <th>Referensi</th>
+                            <th>Dilakukan Oleh</th>
+                            <th>Catatan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,7 +124,7 @@
                 </div>
             <?php endif; ?>
         <?php else: ?>
-            <p class="text-muted">Stock movements will appear here</p>
+            <p class="text-muted">Mutasi stok akan muncul di sini</p>
         <?php endif; ?>
     </div>
 </div>
