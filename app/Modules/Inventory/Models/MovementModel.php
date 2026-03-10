@@ -11,6 +11,7 @@ class MovementModel extends Model
     protected $useAutoIncrement = false;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
+    protected $useValidation = false;
 
     protected $allowedFields = [
         'id',
@@ -30,13 +31,7 @@ class MovementModel extends Model
     protected $useTimestamps = false;
     protected $createdField = 'created_at';
 
-    protected $validationRules = [
-        'item_id' => 'required',
-        'movement_type' => 'required|in_list[purchase,return,sale,distributed,adjustment,transfer,damage,expired,initial]',
-        'quantity' => 'required|integer',
-        'quantity_before' => 'permit_empty|integer',
-        'quantity_after' => 'permit_empty|integer'
-    ];
+    protected $validationRules = [];
 
     /**
      * Get movements by item
