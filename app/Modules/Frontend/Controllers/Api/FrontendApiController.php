@@ -4,6 +4,7 @@ namespace Modules\Frontend\Controllers\Api;
 
 use CodeIgniter\RESTful\ResourceController;
 use Modules\Admission\Models\AdmissionModel;
+use Modules\Test\Models\TestRegistrationModel;
 
 class FrontendApiController extends ResourceController
 {
@@ -84,6 +85,86 @@ class FrontendApiController extends ResourceController
             return $days . ' hari yang lalu';
         } else {
             return date('d M Y', $timestamp);
+        }
+    }
+
+    /**
+     * Register for HSK Simulation Test
+     * 
+     * POST /frontend/api/test-registration
+     * 
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    public function registerTest()
+    {
+        $model = new TestRegistrationModel();
+
+        // Get JSON input
+        $json = $this->request->getJSON();
+
+        if (!$json) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Data tidak valid'
+            ], 400);
+        }
+
+        // Prepare data
+        $data = [
+            'hsk_level'      => $json->hsk_level ?? '',
+            'full_name'     => $json->full_name ?? '',
+            'email'         => $json->email ?? '',
+            'phone'         => $json->phone ?? '',
+            'birth_date'   => $json->birth_date ?? null,
+            'address'       => $json->address ?? null,
+            'education'     => $json->education ?? null,
+            'occupation'   => $json->occupation ?? null,
+            'mandarin_level'=> $json->mandarin_level ?? null,
+            'notes'         => $json->notes ?? null,
+            'status'        => 'pending',
+        ];
+
+        // Validate
+        if (empty($data['hsk_level']) || empty($data['full_name']) || empty($data['email']) || empty($data['phone'])) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Mohon lengkapi semua field wajib'
+            ], 400);
+        }
+
+        // Check if already registered
+        if ($model->isEmailRegistered($data['email'], $data['hsk_level'])) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Email ini sudah terdaftar untuk tingkat HSK yang sama'
+            ], 400);
+        }
+
+        // Save
+        try {
+            $insertId = $model->insert($data);
+
+            if ($insertId) {
+                return $this->respond([
+                    'success' => true,
+                    'message' => 'Pendaftaran berhasil! Tim kami akan menghubungi Anda segera.',
+                    'data' => [
+                        'id' => $insertId,
+                        'hsk_level' => $data['hsk_level'],
+                        'full_name' => $data['full_name']
+                    ]
+                ], 201);
+            } else {
+                return $this->respond([
+                    'success' => false,
+                    'message' => 'Gagal menyimpan pendaftaran'
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return $this->respond([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

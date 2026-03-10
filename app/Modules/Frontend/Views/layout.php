@@ -377,6 +377,16 @@
                             <li><a class="dropdown-item" href="<?= base_url('german') ?>">German</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="testDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Test
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="testDropdown">
+                            <li><a class="dropdown-item" href="<?= base_url('test/hsk') ?>">
+                                <i class="bi bi-translate me-2"></i>HSK Simulation
+                            </a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="<?= base_url('about') ?>">Tentang SOS</a>
                     </li>

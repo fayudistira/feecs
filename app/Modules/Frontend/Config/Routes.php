@@ -20,6 +20,9 @@ $routes->group('', ['namespace' => 'Modules\Frontend\Controllers'], function ($r
     $routes->get('german', 'PageController::german');
     $routes->get('english', 'PageController::english');
 
+    // Test/HSK Simulation pages
+    $routes->get('test/hsk', 'PageController::hsk');
+
     // Apply routes - IMPORTANT: Specific routes must come before wildcard routes
     $routes->get('apply', 'PageController::apply');
     $routes->post('apply/submit', 'PageController::submitApplication');
@@ -30,4 +33,5 @@ $routes->group('', ['namespace' => 'Modules\Frontend\Controllers'], function ($r
 // Frontend API routes (for popup notifications, etc.)
 $routes->group('frontend/api', ['namespace' => 'Modules\Frontend\Controllers\Api'], function ($routes) {
     $routes->get('recent-admissions', 'FrontendApiController::recentAdmissions');
+    $routes->post('test-registration', 'FrontendApiController::registerTest');
 });

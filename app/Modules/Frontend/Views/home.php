@@ -53,7 +53,8 @@
                     <!-- Center Logo dengan efek mengapung -->
                     <div class="animation-logo-container">
                         <img
-                            src="https://kursusbahasa.org/assets/img/logo-sos.webp"
+                        
+                            src="<?= base_url();?>assets/images/logo-sos.webp"
                             alt="Logo KursusBahasa.org - Kursus Bahasa Asing di Kampung Inggris Pare"
                             class="animation-logo"
                             width="200"

@@ -116,6 +116,9 @@ class AuthGroups extends ShieldAuthGroups
         'inventory.movement.manage' => 'Can manage stock movements',
         'inventory.alert.manage' => 'Can manage alerts',
         'inventory.report.view' => 'Can view inventory reports',
+        'test.manage'        => 'Can manage test registrations (full CRUD)',
+        'test.view'          => 'Can view test registrations (read-only)',
+        'test.delete'        => 'Can delete test registrations',
     ];
 
     /**
@@ -142,6 +145,7 @@ class AuthGroups extends ShieldAuthGroups
             'tools.*',
             'blog.*',
             'inventory.*',
+            'test.*',
         ],
         'admin' => [
             'admin.access',
@@ -161,6 +165,8 @@ class AuthGroups extends ShieldAuthGroups
             'blog.manage',
             'blog.categories.manage',
             'blog.tags.manage',
+            'test.manage',
+            'test.view',
         ],
         'frontline' => [
             'dashboard.access',

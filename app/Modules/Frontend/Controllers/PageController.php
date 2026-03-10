@@ -828,6 +828,16 @@ class PageController extends BaseController
     }
 
     /**
+     * HSK Simulation Test landing page
+     */
+    public function hsk(): string
+    {
+        return view('Modules\Frontend\Views\landings\hsk', [
+            'title' => 'HSK Simulation Test - SOS Course and Training'
+        ]);
+    }
+
+    /**
      * Japanese landing page
      */
     public function japanese(): string
