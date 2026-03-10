@@ -24,6 +24,8 @@ class MovementModel extends Model
         'description',
         'performed_by',
         'location_id',
+        'source_location_id',
+        'to_location_id',
         'movement_date',
         'created_at'
     ];

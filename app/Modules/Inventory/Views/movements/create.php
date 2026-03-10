@@ -10,6 +10,12 @@
 
         <div class="card">
             <div class="card-body">
+                <?php if (empty($items)): ?>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Tidak ada barang!</strong> Silakan tambah barang terlebih dahulu di menu <a href="/inventory/items/create">Tambah Barang</a>.
+                </div>
+                <?php else: ?>
                 <form method="post" action="/inventory/movements/store" onsubmit="return validateForm(this)">
                     <?= csrf_field() ?>
                     <div class="row">
@@ -137,14 +143,27 @@
                         <input type="submit" class="btn btn-primary" value="Catat Mutasi">
                     </div>
                 </form>
+                <?php endif; ?>
             </div>
         </div>
 
         <script>
             function validateForm(form) {
-                const itemId = form.item_id.value;
-                const movementType = form.movement_type.value;
-                const quantity = form.quantity_regular ? form.quantity_regular.value : (form.quantity_transfer ? form.quantity_transfer.value : '');
+                // Use getElementById for more reliable element access
+                const itemSelect = document.getElementById('itemSelect');
+                const movementType = document.getElementById('movementType').value;
+                const quantityInput = document.getElementById('quantityInput');
+                const transferQuantity = document.getElementById('transferQuantity');
+                
+                const itemId = itemSelect ? itemSelect.value : '';
+                
+                // Get quantity based on movement type
+                let quantity = '';
+                if (movementType === 'transfer') {
+                    quantity = transferQuantity ? transferQuantity.value : '';
+                } else {
+                    quantity = quantityInput ? quantityInput.value : '';
+                }
                 
                 if (!itemId) {
                     alert('Pilih barang terlebih dahulu');
@@ -163,11 +182,18 @@
                 
                 // Show loading
                 const btn = form.querySelector('input[type="submit"]');
-                btn.disabled = true;
-                btn.value = 'Menyimpan...';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.value = 'Menyimpan...';
+                }
                 
                 return true;
             }
+            
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleLocationFields();
+            });
             
             function toggleLocationFields() {
                 const movementType = document.getElementById('movementType').value;
@@ -178,21 +204,21 @@
                 const transferQuantity = document.getElementById('transferQuantity');
                 
                 if (movementType === 'transfer') {
-                    transferFields.style.display = 'block';
-                    singleLocationField.style.display = 'none';
-                    transferQuantityField.style.display = 'block';
+                    if (transferFields) transferFields.style.display = 'block';
+                    if (singleLocationField) singleLocationField.style.display = 'none';
+                    if (transferQuantityField) transferQuantityField.style.display = 'block';
                     
                     // Make transfer quantity required, regular quantity not
-                    quantityInput.removeAttribute('required');
-                    transferQuantity.setAttribute('required', 'required');
+                    if (quantityInput) quantityInput.removeAttribute('required');
+                    if (transferQuantity) transferQuantity.setAttribute('required', 'required');
                 } else {
-                    transferFields.style.display = 'none';
-                    singleLocationField.style.display = 'block';
-                    transferQuantityField.style.display = 'none';
+                    if (transferFields) transferFields.style.display = 'none';
+                    if (singleLocationField) singleLocationField.style.display = 'block';
+                    if (transferQuantityField) transferQuantityField.style.display = 'none';
                     
                     // Make regular quantity required, transfer quantity not
-                    quantityInput.setAttribute('required', 'required');
-                    transferQuantity.removeAttribute('required');
+                    if (quantityInput) quantityInput.setAttribute('required', 'required');
+                    if (transferQuantity) transferQuantity.removeAttribute('required');
                 }
             }
         </script>

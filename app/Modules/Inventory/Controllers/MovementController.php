@@ -106,9 +106,12 @@ class MovementController extends BaseController
      */
     public function create()
     {
+        $items = $this->itemModel->where('status', 'active')->findAll();
+        $locations = $this->locationModel->findAll();
+        
         $data = [
-            'items' => $this->itemModel->where('status', 'active')->findAll(),
-            'locations' => $this->locationModel->findAll(),
+            'items' => $items,
+            'locations' => $locations,
             'types' => $this->movementModel->getTypes()
         ];
 
