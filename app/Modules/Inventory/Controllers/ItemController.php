@@ -105,6 +105,11 @@ class ItemController extends BaseController
             $data['item_code'] = $this->itemModel->generateItemCode();
         }
 
+        // Handle barcode - remove if empty to avoid unique constraint errors
+        if (empty($data['barcode'])) {
+            unset($data['barcode']);
+        }
+
         // Handle specifications JSON
         if (isset($data['specifications']) && is_array($data['specifications'])) {
             $data['specifications'] = json_encode($data['specifications']);
@@ -150,6 +155,11 @@ class ItemController extends BaseController
     public function update($id)
     {
         $data = $this->request->getPost();
+
+        // Handle barcode - remove if empty to avoid unique constraint errors
+        if (isset($data['barcode']) && empty($data['barcode'])) {
+            unset($data['barcode']);
+        }
 
         // Handle specifications JSON
         if (isset($data['specifications']) && is_array($data['specifications'])) {

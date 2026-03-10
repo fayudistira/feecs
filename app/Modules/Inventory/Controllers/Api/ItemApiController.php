@@ -90,6 +90,11 @@ class ItemApiController extends ResourceController
             $data['item_code'] = $this->itemModel->generateItemCode();
         }
 
+        // Handle barcode - remove if empty to avoid unique constraint errors
+        if (empty($data['barcode'])) {
+            unset($data['barcode']);
+        }
+
         // Handle specifications JSON
         if (isset($data['specifications']) && is_array($data['specifications'])) {
             $data['specifications'] = json_encode($data['specifications']);
@@ -126,6 +131,11 @@ class ItemApiController extends ResourceController
         }
 
         $data = $this->request->getRawInput();
+
+        // Handle barcode - remove if empty to avoid unique constraint errors
+        if (isset($data['barcode']) && empty($data['barcode'])) {
+            unset($data['barcode']);
+        }
 
         // Handle specifications JSON
         if (isset($data['specifications']) && is_array($data['specifications'])) {
