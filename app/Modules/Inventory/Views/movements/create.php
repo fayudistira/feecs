@@ -16,7 +16,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Barang</label>
-                                <select name="item_id" id="itemSelect" class="form-select" required onchange="updateCurrentStock()">
+                                <select name="item_id" id="itemSelect" class="form-select" required>
                                     <option value="">Pilih Barang</option>
                                     <?php foreach($items as $item): ?>
                                     <option value="<?= $item['id'] ?>" data-stock="<?= $item['current_stock'] ?>"><?= $item['item_code'] ?> - <?= $item['name'] ?> (Stock: <?= $item['current_stock'] ?>)</option>
@@ -122,11 +122,19 @@
                         <textarea name="description" class="form-control" rows="2"></textarea>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Tanggal Mutasi</label>
+                                <input type="datetime-local" name="movement_date" class="form-control">
+                                <small class="text-muted">Kosongkan untuk menggunakan tanggal saat ini</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="text-end">
                         <a href="/inventory/movements" class="btn btn-secondary me-2">Batal</a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-1"></i> Catat Mutasi
-                        </button>
+                        <input type="submit" class="btn btn-primary" value="Catat Mutasi">
                     </div>
                 </form>
             </div>
@@ -158,15 +166,6 @@
                     quantityInput.setAttribute('required', 'required');
                     transferQuantity.removeAttribute('required');
                 }
-            }
-            
-            // Dummy function - can be expanded to show current stock
-            function updateCurrentStock() {
-                const itemSelect = document.getElementById('itemSelect');
-                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-                const stock = selectedOption.getAttribute('data-stock');
-                // Could display stock somewhere if needed
-                console.log('Selected item stock:', stock);
             }
         </script>
     <?= $this->endSection() ?>

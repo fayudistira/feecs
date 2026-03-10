@@ -175,7 +175,13 @@ class MovementController extends BaseController
             $data['quantity'] = -abs($quantity); // Store as negative for out types
         }
         
-        $data['movement_date'] = date('Y-m-d H:i:s');
+        // Handle movement date - use submitted date or default to now
+        if (!empty($data['movement_date'])) {
+            // Convert datetime-local format to MySQL datetime
+            $data['movement_date'] = str_replace('T', ' ', $data['movement_date']);
+        } else {
+            $data['movement_date'] = date('Y-m-d H:i:s');
+        }
 
         // Get current user
         if (auth()->loggedIn()) {
