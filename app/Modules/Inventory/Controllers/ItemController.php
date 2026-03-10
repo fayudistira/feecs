@@ -155,6 +155,9 @@ class ItemController extends BaseController
     public function update($id)
     {
         $data = $this->request->getPost();
+        
+        // Include ID for validation context
+        $data['id'] = $id;
 
         // Handle barcode - remove if empty to avoid unique constraint errors
         if (isset($data['barcode']) && empty($data['barcode'])) {

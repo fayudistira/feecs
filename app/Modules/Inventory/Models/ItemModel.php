@@ -44,6 +44,8 @@ class ItemModel extends Model
     protected $updatedField = 'updated_at';
     protected $deletedField = 'deleted_at';
 
+    protected $validate = true;
+
     protected $validationRules = [
         'id' => 'permit_empty|max_length[36]',
         'item_code' => 'required|max_length[50]|is_unique[inventory_items.item_code,id,{id}]',

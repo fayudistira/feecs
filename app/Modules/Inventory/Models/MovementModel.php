@@ -11,7 +11,7 @@ class MovementModel extends Model
     protected $useAutoIncrement = false;
     protected $returnType = 'array';
     protected $useSoftDeletes = false;
-    protected $useValidation = false;
+    protected $validate = true;
 
     protected $allowedFields = [
         'id',
