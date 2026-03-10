@@ -45,7 +45,7 @@ class CategoryModel extends Model
     /**
      * Build tree structure from flat array
      */
-    protected function buildTree(array $elements, string $parentId = null): array
+    protected function buildTree(array $elements, ?string $parentId = null): array
     {
         $branch = [];
         foreach ($elements as $element) {

@@ -87,7 +87,7 @@ class MovementModel extends Model
     /**
      * Get movement summary
      */
-    public function getSummary(string $startDate = null, string $endDate = null): array
+    public function getSummary(?string $startDate = null, ?string $endDate = null): array
     {
         $this->select('movement_type, SUM(quantity) as total_quantity, COUNT(*) as total_movements');
         

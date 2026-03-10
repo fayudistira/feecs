@@ -74,7 +74,7 @@ class AlertModel extends Model
     /**
      * Resolve alert
      */
-    public function resolve(string $alertId, string $notes = null): bool
+    public function resolve(string $alertId, ?string $notes = null): bool
     {
         $data = [
             'status' => 'resolved',
