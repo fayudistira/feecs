@@ -4,6 +4,9 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i>Detail Barang</h4>
             <div>
+                <a href="/inventory/items/barcode/<?= $item['id'] ?>" class="btn btn-info me-2" target="_blank">
+                    <i class="bi bi-qr-code me-1"></i> QR Code
+                </a>
                 <a href="/inventory/items/edit/<?= $item['id'] ?>" class="btn btn-warning me-2">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>

@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="bi bi-upc me-2"></i>Barcode Barang</h4>
+            <h4 class="mb-0"><i class="bi bi-qr-code me-2"></i>QR Code Barang</h4>
             <a href="/inventory/items/view/<?= $item['id'] ?>" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
@@ -14,18 +14,12 @@
                 <p class="text-muted"><?= $item['item_code'] ?></p>
                 
                 <div class="my-4">
-                    <!-- Simple barcode representation using Code 128 format -->
-                    <svg class="barcode"
-                        jsbarcode-value="<?= $item['barcode'] ?? $item['item_code'] ?>"
-                        jsbarcode-format="CODE128"
-                        jsbarcode-width="2"
-                        jsbarcode-height="60"
-                        jsbarcode-displayvalue="true">
-                    </svg>
+                    <!-- QR Code -->
+                    <div id="qrcode"></div>
                 </div>
 
                 <div class="text-muted small">
-                    <p>Scan barcode ini untuk melihat detail barang</p>
+                    <p>Scan QR code ini untuk melihat detail barang</p>
                 </div>
 
                 <div class="mt-4">
@@ -39,10 +33,20 @@
             </div>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                JsBarcode('.barcode').initialize();
+                // Create QR code with item details URL
+                const itemUrl = window.location.origin + '/inventory/items/view/<?= $item['id'] ?>';
+                
+                new QRCode(document.getElementById('qrcode'), {
+                    text: itemUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark : '#000000',
+                    colorLight : '#ffffff',
+                    correctLevel : QRCode.CorrectLevel.H
+                });
             });
         </script>
     <?= $this->endSection() ?>
