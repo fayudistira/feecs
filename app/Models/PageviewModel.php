@@ -25,12 +25,15 @@ class PageviewModel extends Model
      * @param string|null $visitorIp Visitor's IP address
      * @param string|null $country Visitor's country
      * @param string|null $city Visitor's city
-     * @return int The current view count
+     * @return array View count and unique visitor count
      */
-    public function recordPageView(string $pageUrl, ?string $pageName = null, ?string $visitorIp = null, ?string $country = null, ?string $city = null): int
+    public function recordPageView(string $pageUrl, ?string $pageName = null, ?string $visitorIp = null, ?string $country = null, ?string $city = null): array
     {
         // Normalize the URL
         $normalizedUrl = strtolower(trim($pageUrl));
+        
+        // Track unique visitor
+        $isUnique = $this->trackUniqueVisitor($normalizedUrl, $visitorIp);
 
         // Check if record exists
         $existing = $this->where('page_url', $normalizedUrl)->first();
@@ -38,41 +41,95 @@ class PageviewModel extends Model
         if ($existing) {
             // Increment view count
             $newCount = $existing['view_count'] + 1;
+            
+            // Increment unique count if new visitor
+            $uniqueCount = ($existing['unique_visitor_count'] ?? 0) + ($isUnique ? 1 : 0);
+            
             $this->update($existing['id'], [
-                'view_count'      => $newCount,
-                'last_viewed_at'  => date('Y-m-d H:i:s'),
-                'updated_at'      => date('Y-m-d H:i:s'),
+                'view_count'       => $newCount,
+                'unique_visitor_count' => $uniqueCount,
+                'last_viewed_at'   => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
             ]);
-            return $newCount;
+            return ['views' => $newCount, 'unique' => $uniqueCount];
         } else {
             // Create new record
             $this->insert([
-                'page_url'         => $normalizedUrl,
-                'page_name'        => $pageName ?? basename($pageUrl),
-                'view_count'       => 1,
-                'visitor_ip'       => $visitorIp,
-                'visitor_country'  => $country,
-                'visitor_city'     => $city,
-                'last_viewed_at'   => date('Y-m-d H:i:s'),
-                'created_at'       => date('Y-m-d H:i:s'),
-                'updated_at'       => date('Y-m-d H:i:s'),
+                'page_url'          => $normalizedUrl,
+                'page_name'         => $pageName ?? basename($pageUrl),
+                'view_count'        => 1,
+                'unique_visitor_count' => $isUnique ? 1 : 0,
+                'visitor_ip'        => $visitorIp,
+                'visitor_country'   => $country,
+                'visitor_city'      => $city,
+                'last_viewed_at'    => date('Y-m-d H:i:s'),
+                'created_at'        => date('Y-m-d H:i:s'),
+                'updated_at'        => date('Y-m-d H:i:s'),
             ]);
-            return 1;
+            return ['views' => 1, 'unique' => $isUnique ? 1 : 0];
         }
+    }
+    
+    /**
+     * Track unique visitor by IP for a specific page
+     * 
+     * @param string $pageUrl The normalized URL
+     * @param string|null $visitorIp Visitor's IP
+     * @return bool True if this is a new unique visitor
+     */
+    protected function trackUniqueVisitor(string $pageUrl, ?string $visitorIp): bool
+    {
+        if (empty($visitorIp)) {
+            return false;
+        }
+        
+        $db = \Config\Database::connect();
+        
+        // Check if this IP already visited this page today
+        $today = date('Y-m-d');
+        $builder = $db->table('pageview_visitors');
+        $existing = $builder->where('page_url', $pageUrl)
+                           ->where('visitor_ip', $visitorIp)
+                           ->where('DATE(visited_at)', $today)
+                           ->get()
+                           ->getRow();
+        
+        if ($existing) {
+            // Update visited time
+            $builder->where('id', $existing->id)
+                   ->update(['visited_at' => date('Y-m-d H:i:s')]);
+            return false; // Not a new unique visitor
+        }
+        
+        // Insert new unique visitor
+        $builder->insert([
+            'page_url'   => $pageUrl,
+            'visitor_ip' => $visitorIp,
+            'visited_at' => date('Y-m-d H:i:s'),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        
+        return true; // New unique visitor
     }
 
     /**
-     * Get view count for a specific page
+     * Get view count and unique visitor count for a specific page
      *
      * @param string $pageUrl The URL of the page
-     * @return int The view count (0 if not found)
+     * @return array View count and unique visitor count
      */
-    public function getPageViewCount(string $pageUrl): int
+    public function getPageViewCount(string $pageUrl): array
     {
         $normalizedUrl = strtolower(trim($pageUrl));
         $page = $this->where('page_url', $normalizedUrl)->first();
 
-        return $page ? (int) $page['view_count'] : 0;
+        if ($page) {
+            return [
+                'views' => (int) $page['view_count'],
+                'unique' => (int) ($page['unique_visitor_count'] ?? 0)
+            ];
+        }
+        return ['views' => 0, 'unique' => 0];
     }
 
     /**

@@ -60,7 +60,9 @@
     // Record page view for this page
     $pageviewModel = new PageviewModel();
     $currentUrl = current_url();
-    $pageviewCount = $pageviewModel->recordPageView($currentUrl, $title ?? 'Unknown', $visitorIp, $location['country'], $location['city']);
+    $pageviewData = $pageviewModel->recordPageView($currentUrl, $title ?? 'Unknown', $visitorIp, $location['country'], $location['city']);
+    $pageviewCount = $pageviewData['views'];
+    $uniqueVisitorCount = $pageviewData['unique'];
     
     // Check if user is admin
     $isAdmin = false;
@@ -486,8 +488,13 @@
         <div class="container d-flex align-items-center justify-content-between">
             <div>
                 <i class="bi bi-eye-fill text-primary me-2"></i>
-                <strong>Pageview:</strong> 
+                <strong>Views:</strong> 
                 <span class="badge bg-primary"><?= number_format($pageviewCount) ?></span>
+                <span class="text-muted small mx-2">|</span>
+                <i class="bi bi-people-fill text-success me-2"></i>
+                <strong>Unique:</strong>
+                <span class="badge bg-success"><?= number_format($uniqueVisitorCount) ?></span>
+                <span class="text-muted small mx-2">|</span>
                 <span class="text-muted small">(<?= esc($title ?? 'Current Page') ?>)</span>
                 <span class="text-muted small mx-2">|</span>
                 <i class="bi bi-geo-alt text-danger me-1"></i>
