@@ -93,6 +93,38 @@
     margin-top: 1rem;
     margin-bottom: 0.5rem;
 }
+
+/* Tag Selector Styles */
+.tag-selector {
+    position: relative;
+}
+
+.tag-suggestions {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+}
+
+.tag-suggestions .list-group-item {
+    cursor: pointer;
+}
+
+.tag-suggestions .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+#selectedTags .badge {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+#selectedTags .btn-close {
+    font-size: 0.5rem;
+    padding: 0.25rem;
+}
 </style>
 
 <div class="row mb-4">
@@ -248,17 +280,37 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="tags" class="form-label">Tags</label>
-                        <select class="form-select" id="tags" name="tags[]" multiple>
-                            <?php if (!empty($tags)): ?>
-                                <?php foreach ($tags as $tag): ?>
-                                    <option value="<?= $tag['id'] ?>" <?= in_array($tag['id'], old('tags', $postTags ?? [])) ? 'selected' : '' ?>>
-                                        <?= esc($tag['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </select>
-                        <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                        <label class="form-label">Tags</label>
+                        <div class="tag-selector">
+                            <!-- Selected Tags (Chips) -->
+                            <div id="selectedTags" class="d-flex flex-wrap gap-2 mb-2">
+                            </div>
+                            
+                            <!-- Tag Search/Add Input -->
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="tagSearch" 
+                                       placeholder="Search or create tags..." autocomplete="off">
+                                <button class="btn btn-outline-secondary" type="button" id="addNewTagBtn">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Tag Suggestions Dropdown -->
+                            <div id="tagSuggestions" class="tag-suggestions list-group position-absolute" style="z-index: 1000; display: none;">
+                            </div>
+                            
+                            <!-- Hidden select to store tag IDs for form submission -->
+                            <select class="form-select d-none" id="tags" name="tags[]" multiple>
+                                <?php if (!empty($tags)): ?>
+                                    <?php foreach ($tags as $tag): ?>
+                                        <option value="<?= $tag['id'] ?>" <?= in_array($tag['id'], old('tags', $postTags ?? [])) ? 'selected' : '' ?>>
+                                            <?= esc($tag['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="form-text">Select existing tags or create new ones</div>
                     </div>
 
                     <div class="mb-3">
@@ -525,6 +577,172 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Tag Selector Functionality
+    const tagSearch = document.getElementById('tagSearch');
+    const tagSuggestions = document.getElementById('tagSuggestions');
+    const selectedTagsContainer = document.getElementById('selectedTags');
+    const tagsSelect = document.getElementById('tags');
+    const addNewTagBtn = document.getElementById('addNewTagBtn');
+    let selectedTagIds = [];
+
+    // Get all available tags from the select options
+    function getAvailableTags() {
+        const options = tagsSelect.querySelectorAll('option');
+        const tags = [];
+        options.forEach(opt => {
+            if (!selectedTagIds.includes(parseInt(opt.value))) {
+                tags.push({ id: parseInt(opt.value), name: opt.textContent });
+            }
+        });
+        return tags;
+    }
+
+    // Render selected tags as chips
+    function renderSelectedTags() {
+        selectedTagsContainer.innerHTML = '';
+        selectedTagIds.forEach(tagId => {
+            const option = tagsSelect.querySelector(`option[value="${tagId}"]`);
+            if (option) {
+                const chip = document.createElement('span');
+                chip.className = 'badge bg-primary fs-6';
+                chip.innerHTML = `
+                    ${option.textContent}
+                    <button type="button" class="btn-close btn-close-white ms-2" onclick="removeTag(${tagId})"></button>
+                `;
+                selectedTagsContainer.appendChild(chip);
+            }
+        });
+        
+        // Update the hidden select
+        tagsSelect.querySelectorAll('option').forEach(opt => {
+            opt.selected = selectedTagIds.includes(parseInt(opt.value));
+        });
+    }
+
+    // Remove a tag
+    window.removeTag = function(tagId) {
+        selectedTagIds = selectedTagIds.filter(id => id !== tagId);
+        renderSelectedTags();
+    };
+
+    // Add a tag by ID
+    function addTag(tagId, tagName) {
+        if (!selectedTagIds.includes(tagId)) {
+            selectedTagIds.push(tagId);
+            renderSelectedTags();
+            tagSearch.value = '';
+            tagSuggestions.style.display = 'none';
+        }
+    }
+
+    // Search/filter tags
+    tagSearch.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        const availableTags = getAvailableTags();
+        
+        if (query.length === 0) {
+            tagSuggestions.style.display = 'none';
+            return;
+        }
+
+        const filteredTags = availableTags.filter(tag => 
+            tag.name.toLowerCase().includes(query)
+        );
+
+        if (filteredTags.length > 0) {
+            tagSuggestions.innerHTML = '';
+            filteredTags.forEach(tag => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = tag.name;
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    addTag(tag.id, tag.name);
+                });
+                tagSuggestions.appendChild(item);
+            });
+            tagSuggestions.style.display = 'block';
+        } else {
+            // Show "create new" option if no matches
+            tagSuggestions.innerHTML = `
+                <a href="#" class="list-group-item list-group-item-action text-primary" id="createNewTagOption">
+                    <i class="bi bi-plus-lg me-1"></i> Create "${tagSearch.value}"
+                </a>
+            `;
+            document.getElementById('createNewTagOption').addEventListener('click', function(e) {
+                e.preventDefault();
+                createNewTag(tagSearch.value);
+            });
+            tagSuggestions.style.display = 'block';
+        }
+    });
+
+    // Add new tag via AJAX
+    function createNewTag(tagName) {
+        fetch('<?= base_url('admin/blog/tags/store') ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRF-Token': '<?= csrf_hash() ?>'
+            },
+            body: 'name=' + encodeURIComponent(tagName)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add new option to select
+                const newOption = document.createElement('option');
+                newOption.value = data.tag_id;
+                newOption.textContent = data.tag_name;
+                newOption.selected = true;
+                tagsSelect.appendChild(newOption);
+                
+                addTag(data.tag_id, data.tag_name);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error creating tag');
+        });
+    }
+
+    // Add new tag button
+    addNewTagBtn.addEventListener('click', function() {
+        const tagName = tagSearch.value.trim();
+        if (tagName) {
+            // Check if tag already exists
+            const availableTags = getAvailableTags();
+            const existingTag = availableTags.find(t => t.name.toLowerCase() === tagName.toLowerCase());
+            if (existingTag) {
+                addTag(existingTag.id, existingTag.name);
+            } else {
+                createNewTag(tagName);
+            }
+        }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!tagSearch.contains(e.target) && !tagSuggestions.contains(e.target)) {
+            tagSuggestions.style.display = 'none';
+        }
+    });
+
+    // Initialize with pre-selected tags from the post
+    const existingPostTags = <?= json_encode(old('tags', $postTags ?? [])) ?>;
+    if (existingPostTags.length > 0) {
+        selectedTagIds = existingPostTags.map(id => parseInt(id));
+    } else {
+        // Also check the select for already selected options
+        const selectedOptions = tagsSelect.querySelectorAll('option:checked');
+        selectedOptions.forEach(opt => {
+            selectedTagIds.push(parseInt(opt.value));
+        });
+    }
+    renderSelectedTags();
 });
 </script>
 
