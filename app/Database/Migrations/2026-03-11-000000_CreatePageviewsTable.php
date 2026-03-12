@@ -28,6 +28,21 @@ class CreatePageviewsTable extends Migration
                 'constraint' => 20,
                 'default'    => 1,
             ],
+            'visitor_ip' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 45,
+                'null'       => true,
+            ],
+            'visitor_country' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => true,
+            ],
+            'visitor_city' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => true,
+            ],
             'last_viewed_at' => [
                 'type' => 'DATETIME',
                 'null' => true,

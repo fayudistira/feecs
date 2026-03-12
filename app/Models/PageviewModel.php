@@ -11,19 +11,23 @@ class PageviewModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['page_url', 'page_name', 'view_count', 'last_viewed_at', 'created_at', 'updated_at'];
+    protected $allowedFields    = ['page_url', 'page_name', 'view_count', 'visitor_ip', 'visitor_country', 'visitor_city', 'last_viewed_at', 'created_at', 'updated_at'];
     protected $useTimestamps      = true;
     protected $createdField     = 'created_at';
     protected $updatedField     = 'updated_at';
 
     /**
      * Record a page view - increments the view count or creates new record
+     * Also records visitor IP and location
      *
      * @param string $pageUrl The URL of the page
      * @param string|null $pageName Optional human-readable name for the page
+     * @param string|null $visitorIp Visitor's IP address
+     * @param string|null $country Visitor's country
+     * @param string|null $city Visitor's city
      * @return int The current view count
      */
-    public function recordPageView(string $pageUrl, ?string $pageName = null): int
+    public function recordPageView(string $pageUrl, ?string $pageName = null, ?string $visitorIp = null, ?string $country = null, ?string $city = null): int
     {
         // Normalize the URL
         $normalizedUrl = strtolower(trim($pageUrl));
@@ -43,12 +47,15 @@ class PageviewModel extends Model
         } else {
             // Create new record
             $this->insert([
-                'page_url'        => $normalizedUrl,
-                'page_name'       => $pageName ?? basename($pageUrl),
-                'view_count'      => 1,
-                'last_viewed_at'  => date('Y-m-d H:i:s'),
-                'created_at'      => date('Y-m-d H:i:s'),
-                'updated_at'      => date('Y-m-d H:i:s'),
+                'page_url'         => $normalizedUrl,
+                'page_name'        => $pageName ?? basename($pageUrl),
+                'view_count'       => 1,
+                'visitor_ip'       => $visitorIp,
+                'visitor_country'  => $country,
+                'visitor_city'     => $city,
+                'last_viewed_at'   => date('Y-m-d H:i:s'),
+                'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
             ]);
             return 1;
         }

@@ -5,6 +5,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- === Pageview Tracking === -->
+    <?php
+    use App\Models\PageviewModel;
+    
+    // Get visitor IP address
+    function getVisitorIP() {
+        $ip = '';
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        }
+        // Handle multiple IPs in X-Forwarded-For
+        if (strpos($ip, ',') !== false) {
+            $ip = trim(explode(',', $ip)[0]);
+        }
+        return $ip;
+    }
+    
+    // Get visitor location from IP using free API
+    function getVisitorLocation($ip) {
+        $country = null;
+        $city = null;
+        
+        // Skip localhost/private IPs
+        if (in_array($ip, ['127.0.0.1', '::1', 'localhost']) || strpos($ip, '192.168.') === 0 || strpos($ip, '10.') === 0) {
+            return ['country' => 'Local', 'city' => 'Local'];
+        }
+        
+        try {
+            // Using ip-api.com free API (100 requests/minute limit)
+            $response = @file_get_contents('http://ip-api.com/json/' . $ip . '?fields=status,country,city');
+            if ($response) {
+                $data = json_decode($response, true);
+                if ($data && $data['status'] === 'success') {
+                    $country = $data['country'] ?? null;
+                    $city = $data['city'] ?? null;
+                }
+            }
+        } catch (\Exception $e) {
+            // Silently fail if API is unavailable
+        }
+        
+        return ['country' => $country, 'city' => $city];
+    }
+    
+    // Get IP and location
+    $visitorIp = getVisitorIP();
+    $location = getVisitorLocation($visitorIp);
+    
+    // Record page view for this page
+    $pageviewModel = new PageviewModel();
+    $currentUrl = current_url();
+    $pageviewCount = $pageviewModel->recordPageView($currentUrl, $title ?? 'Unknown', $visitorIp, $location['country'], $location['city']);
+    
+    // Check if user is admin
+    $isAdmin = false;
+    if (auth()->loggedIn()) {
+        $user = auth()->user();
+        if ($user) {
+            $isAdmin = $user->inGroup('superadmin', 'admin');
+        }
+    }
+    ?>
+    
     <!-- === SEO Meta Tags === -->
     <?php
     // Default values
@@ -410,6 +477,27 @@
     <main>
         <?= $this->renderSection('content') ?>
     </main>
+
+    <!-- Pageview Counter (Admin Only) - Footer -->
+    <?php if ($isAdmin): ?>
+    <div class="bg-light py-2 border-bottom">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div>
+                <i class="bi bi-eye-fill text-primary me-2"></i>
+                <strong>Pageview:</strong> 
+                <span class="badge bg-primary"><?= number_format($pageviewCount) ?></span>
+                <span class="text-muted small">(<?= esc($title ?? 'Current Page') ?>)</span>
+                <span class="text-muted small mx-2">|</span>
+                <i class="bi bi-geo-alt text-danger me-1"></i>
+                <span class="text-muted small"><?= esc($location['city'] ?? 'N/A') ?>, <?= esc($location['country'] ?? 'N/A') ?></span>
+                <span class="text-muted small mx-2">|</span>
+                <i class="bi bi-router text-secondary me-1"></i>
+                <span class="text-muted small"><?= esc($visitorIp) ?></span>
+            </div>
+            <small class="text-muted">Admin view</small>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Footer -->
          <!-- Footer -->
