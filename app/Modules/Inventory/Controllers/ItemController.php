@@ -34,6 +34,17 @@ class ItemController extends BaseController
         $category = $this->request->getGet('category');
         $location = $this->request->getGet('location');
         $status = $this->request->getGet('status');
+        $sort = $this->request->getGet('sort') ?? 'created_at';
+        $order = $this->request->getGet('order') ?? 'desc';
+
+        // Validate sort column
+        $allowedSorts = ['name', 'item_code', 'current_stock', 'created_at', 'updated_at', 'selling_price'];
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'created_at';
+        }
+        if (!in_array($order, ['asc', 'desc'])) {
+            $order = 'desc';
+        }
 
         $builder = $this->itemModel->builder();
         
@@ -57,6 +68,9 @@ class ItemController extends BaseController
             $builder->where('status', 'active');
         }
 
+        // Apply sorting
+        $builder->orderBy($sort, $order);
+
         $data = [
             'items' => $this->itemModel->paginate($perPage, 'default', $page),
             'pager' => $this->itemModel->pager,
@@ -66,7 +80,9 @@ class ItemController extends BaseController
             'search' => $search,
             'selectedCategory' => $category,
             'selectedLocation' => $location,
-            'selectedStatus' => $status
+            'selectedStatus' => $status,
+            'sort' => $sort,
+            'order' => $order
         ];
 
         // Index categories and locations by ID for easy lookup in view

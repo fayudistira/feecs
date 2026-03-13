@@ -58,13 +58,18 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Kode</th>
-                                <th>Nama</th>
+                                <?php
+                                $currentSort = $sort ?? 'created_at';
+                                $currentOrder = $order ?? 'desc';
+                                $newOrder = ($currentSort === 'item_code' && $currentOrder === 'asc') ? 'desc' : 'asc';
+                                ?>
+                                <th><a href="?sort=item_code&order=<?= $currentSort === 'item_code' ? $newOrder : 'asc' ?>&search=<?= $search ?? '' ?>&category=<?= $selectedCategory ?? '' ?>&location=<?= $selectedLocation ?? '' ?>&status=<?= $selectedStatus ?? '' ?>" class="text-decoration-none <?= $currentSort === 'item_code' ? 'text-primary' : 'text-muted' ?>">Kode <?= $currentSort === 'item_code' ? ($currentOrder === 'asc' ? '↑' : '↓') : '' ?></a></th>
+                                <th><a href="?sort=name&order=<?= $currentSort === 'name' ? $newOrder : 'asc' ?>&search=<?= $search ?? '' ?>&category=<?= $selectedCategory ?? '' ?>&location=<?= $selectedLocation ?? '' ?>&status=<?= $selectedStatus ?? '' ?>" class="text-decoration-none <?= $currentSort === 'name' ? 'text-primary' : 'text-muted' ?>">Nama <?= $currentSort === 'name' ? ($currentOrder === 'asc' ? '↑' : '↓') : '' ?></a></th>
                                 <th>Kategori</th>
                                 <th>Lokasi</th>
-                                <th class="text-end">Stok</th>
+                                <th class="text-end"><a href="?sort=current_stock&order=<?= $currentSort === 'current_stock' ? $newOrder : 'asc' ?>&search=<?= $search ?? '' ?>&category=<?= $selectedCategory ?? '' ?>&location=<?= $selectedLocation ?? '' ?>&status=<?= $selectedStatus ?? '' ?>" class="text-decoration-none <?= $currentSort === 'current_stock' ? 'text-primary' : 'text-muted' ?>">Stok <?= $currentSort === 'current_stock' ? ($currentOrder === 'asc' ? '↑' : '↓') : '' ?></a></th>
                                 <th class="text-end">Min Stok</th>
-                                <th class="text-end">Harga</th>
+                                <th class="text-end"><a href="?sort=selling_price&order=<?= $currentSort === 'selling_price' ? $newOrder : 'asc' ?>&search=<?= $search ?? '' ?>&category=<?= $selectedCategory ?? '' ?>&location=<?= $selectedLocation ?? '' ?>&status=<?= $selectedStatus ?? '' ?>" class="text-decoration-none <?= $currentSort === 'selling_price' ? 'text-primary' : 'text-muted' ?>">Harga <?= $currentSort === 'selling_price' ? ($currentOrder === 'asc' ? '↑' : '↓') : '' ?></a></th>
                                 <th>Status</th>
                                 <th class="text-end">Aksi</th>
                             </tr>
