@@ -274,4 +274,253 @@ class ItemController extends BaseController
         
         return json_encode($items);
     }
+
+    /**
+     * Show bulk upload form
+     */
+    public function upload()
+    {
+        return view('Modules\Inventory\Views\items\upload');
+    }
+
+    /**
+     * Download Excel template
+     */
+    public function template()
+    {
+        \PhpOffice\PhpSpreadsheet\Spreadsheet::create();
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $headers = [
+            'A1' => 'item_code',
+            'B1' => 'barcode',
+            'C1' => 'name',
+            'D1' => 'description',
+            'E1' => 'category_name',
+            'F1' => 'location_name',
+            'G1' => 'unit',
+            'H1' => 'purchase_price',
+            'I1' => 'selling_price',
+            'J1' => 'current_stock',
+            'K1' => 'minimum_stock',
+            'L1' => 'maximum_stock',
+            'M1' => 'supplier_id',
+            'N1' => 'supplier_name',
+            'O1' => 'status'
+        ];
+
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+        }
+
+        // Add sample data
+        $sampleData = [
+            ['INV001', '1234567890123', 'Buku Tulis 100 Hlm', 'Buku tulis berkualitas tinggi', 'Alat Tulis', 'Gudang Utama', 'piece', '5000', '7500', '100', '10', '500', 'SUP001', 'Toko ABC', 'active'],
+            ['INV002', '', 'Pena Biru', 'Pena biru standar', 'Alat Tulis', 'Gudang Utama', 'piece', '2000', '3500', '50', '5', '200', 'SUP001', 'Toko ABC', 'active'],
+        ];
+
+        $row = 2;
+        foreach ($sampleData as $data) {
+            $col = 'A';
+            foreach ($data as $value) {
+                $sheet->setCellValue($col . $row, $value);
+                $col++;
+            }
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'O') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set header row bold
+        $sheet->getStyle('A1:O1')->getFont()->setBold(true);
+
+        // Download file
+        $filename = 'inventory_template.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Process bulk upload
+     */
+    public function processUpload()
+    {
+        $file = $this->request->getFile('excel_file');
+
+        if (!$file->isValid()) {
+            return redirect()->back()->with('error', 'File tidak valid');
+        }
+
+        $extension = $file->getClientExtension();
+        if (!in_array($extension, ['xlsx', 'xls'])) {
+            return redirect()->back()->with('error', 'Format file harus Excel (.xlsx atau .xls)');
+        }
+
+        $updateExisting = $this->request->getPost('update_existing') === '1';
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            if (empty($rows)) {
+                return redirect()->back()->with('error', 'File Excel kosong');
+            }
+
+            // Get headers from first row
+            $headers = array_map('strtolower', array_map('trim', $rows[0]));
+            array_shift($rows); // Remove header row
+
+            // Get existing categories and locations for mapping
+            $categories = $this->categoryModel->findAll();
+            $locations = $this->locationModel->findAll();
+            $categoryMap = array_column($categories, 'id', 'name');
+            $locationMap = array_column($locations, 'id', 'name');
+
+            $results = [
+                'success' => 0,
+                'skipped' => 0,
+                'errors' => 0,
+                'error_details' => []
+            ];
+
+            $db = \Config\Database::connect();
+            $db->transStart();
+
+            foreach ($rows as $index => $row) {
+                if (empty(array_filter($row))) {
+                    continue; // Skip empty rows
+                }
+
+                $rowNum = $index + 2; // Excel row number (1-based + header)
+                $data = array_combine($headers, $row);
+
+                // Validate required field
+                if (empty($data['name'])) {
+                    $results['errors']++;
+                    $results['error_details'][] = [
+                        'row' => $rowNum,
+                        'name' => '-',
+                        'message' => 'Nama item wajib diisi'
+                    ];
+                    continue;
+                }
+
+                // Check if item exists
+                $itemCode = $data['item_code'] ?? '';
+                $existingItem = null;
+
+                if (!empty($itemCode)) {
+                    $existingItem = $this->itemModel->where('item_code', $itemCode)->first();
+                }
+
+                if ($existingItem) {
+                    if ($updateExisting) {
+                        // Update existing item
+                        $updateData = $this->prepareItemData($data, $categoryMap, $locationMap);
+                        unset($updateData['item_code']); // Don't update item_code
+                        $this->itemModel->update($existingItem['id'], $updateData);
+                        $results['success']++;
+                    } else {
+                        // Skip existing item
+                        $results['skipped']++;
+                    }
+                    continue;
+                }
+
+                // Create new item
+                $itemData = $this->prepareItemData($data, $categoryMap, $locationMap);
+                
+                // Generate item code if not provided
+                if (empty($itemData['item_code'])) {
+                    $itemData['item_code'] = $this->itemModel->generateItemCode();
+                }
+
+                // Generate UUID
+                $itemData['id'] = uuid_v4();
+
+                try {
+                    $this->itemModel->insert($itemData);
+                    $results['success']++;
+                } catch (\Exception $e) {
+                    $results['errors']++;
+                    $results['error_details'][] = [
+                        'row' => $rowNum,
+                        'name' => $data['name'],
+                        'message' => $e->getMessage()
+                    ];
+                }
+            }
+
+            $db->transComplete();
+
+            return view('Modules\Inventory\Views\items\upload', [
+                'results' => $results
+            ]);
+
+        } catch (\Exception $e) {
+            log_message('error', 'Excel Upload Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memproses file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Prepare item data from Excel row
+     */
+    private function prepareItemData(array $data, array $categoryMap, array $locationMap): array
+    {
+        $itemData = [];
+
+        // Map fields
+        $fieldMap = [
+            'item_code' => 'item_code',
+            'barcode' => 'barcode',
+            'name' => 'name',
+            'description' => 'description',
+            'unit' => 'unit',
+            'purchase_price' => 'purchase_price',
+            'selling_price' => 'selling_price',
+            'current_stock' => 'current_stock',
+            'minimum_stock' => 'minimum_stock',
+            'maximum_stock' => 'maximum_stock',
+            'supplier_id' => 'supplier_id',
+            'supplier_name' => 'supplier_name',
+            'status' => 'status'
+        ];
+
+        foreach ($fieldMap as $excelField => $dbField) {
+            if (isset($data[$excelField]) && $data[$excelField] !== '') {
+                $itemData[$dbField] = $data[$excelField];
+            }
+        }
+
+        // Map category by name
+        if (!empty($data['category_name']) && isset($categoryMap[$data['category_name']])) {
+            $itemData['category_id'] = $categoryMap[$data['category_name']];
+        }
+
+        // Map location by name
+        if (!empty($data['location_name']) && isset($locationMap[$data['location_name']])) {
+            $itemData['location_id'] = $locationMap[$data['location_name']];
+        }
+
+        // Set default values
+        $itemData['status'] = $itemData['status'] ?? 'active';
+        $itemData['unit'] = $itemData['unit'] ?? 'piece';
+        $itemData['current_stock'] = (int) ($itemData['current_stock'] ?? 0);
+        $itemData['minimum_stock'] = (int) ($itemData['minimum_stock'] ?? 0);
+        $itemData['maximum_stock'] = (int) ($itemData['maximum_stock'] ?? 0);
+
+        return $itemData;
+    }
 }

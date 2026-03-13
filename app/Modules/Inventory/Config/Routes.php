@@ -22,6 +22,9 @@ $routes->group('inventory', ['namespace' => 'Modules\Inventory\Controllers', 'fi
     $routes->get('items/barcode/(:segment)', 'ItemController::barcode/$1');
     $routes->post('items/delete/(:segment)', 'ItemController::delete/$1');
     $routes->get('items/search', 'ItemController::search');
+    $routes->get('items/upload', 'ItemController::upload');
+    $routes->post('items/process-upload', 'ItemController::processUpload');
+    $routes->get('items/template', 'ItemController::template');
     
     // Categories
     $routes->get('categories', 'CategoryController::index');
