@@ -102,12 +102,17 @@ class PageviewModel extends Model
         }
         
         // Insert new unique visitor
-        $builder->insert([
-            'page_url'   => $pageUrl,
-            'visitor_ip' => $visitorIp,
-            'visited_at' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        try {
+            $builder->insert([
+                'page_url'   => $pageUrl,
+                'visitor_ip' => $visitorIp,
+                'visited_at' => date('Y-m-d H:i:s'),
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            // If insert fails (duplicate key), just return false
+            return false;
+        }
         
         return true; // New unique visitor
     }
